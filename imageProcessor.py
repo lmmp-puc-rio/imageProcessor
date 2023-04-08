@@ -42,7 +42,7 @@ class FullScreenApp(tk.Tk):
         self.header_frame.pack(side='top', fill='x')
 
         # Add a logo to the header with hyperlink to google homepage
-        self.logo_image = tk.PhotoImage(file='logo.png')
+        self.logo_image = tk.PhotoImage(file='src\images\logo.png')
         self.logo_label = tk.Label(self.header_frame, image=self.logo_image, bg=self.background_header_color)
         self.logo_label.pack(side='left', padx=10, pady=5)
         self.logo_label.bind("<Button-1>", lambda e: webbrowser.open_new("https://www.google.com"))
@@ -84,7 +84,7 @@ class FullScreenApp(tk.Tk):
         self.bottom_frame.pack(side='bottom', fill='x')
 
         # Create a Scale widget to adjust the contrast
-        self.contrast_scale = tk.Scale(self.bottom_frame, from_=0.1, to=3.0, resolution=0.1, bg=self.background_header_button_color, label="Contrast", orient=tk.HORIZONTAL, command=self.update_contrast, font=('Arial', 12), width=15)
+        self.contrast_scale = tk.Scale(self.bottom_frame, from_=0.1, to=5.0, resolution=0.1, bg=self.background_header_button_color, label="Contrast", orient=tk.HORIZONTAL, command=self.update_contrast, font=('Arial', 12), width=15)
         self.contrast_scale.pack(anchor = "s", side='left', padx=100, pady=15)#( side = "bottom")#(anchor = "sw")#
 
         # Create a button to apply Otsu's threshold to the image
