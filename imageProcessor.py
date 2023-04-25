@@ -31,6 +31,7 @@ class FullScreenApp(tk.Tk):
         self.background_header_button_color = 'white'
         self.background_header_button_font_color = 'black'
         self.background_important_button_color = 'red'
+        self.background_window = '#F3F3F3'
 
         # Set the app title in the title bar
         self.title('Image Processor')
@@ -48,7 +49,7 @@ class FullScreenApp(tk.Tk):
         self.header_frame.pack(side='top', fill='x')
 
         # Add a logo to the header with hyperlink to google homepage
-        self.logo_image = tk.PhotoImage(file='logo_grey.png')
+        self.logo_image = tk.PhotoImage(file='src\images\logo_grey.png')
         self.logo_label = tk.Label(self.header_frame, image=self.logo_image, bg=self.background_header_color)
         self.logo_label.pack(side='left', padx=10, pady=5)
         self.logo_label.bind("<Button-1>", lambda e: webbrowser.open_new("http://lmmp.mec.puc-rio.br/lmmp/"))
@@ -77,19 +78,17 @@ class FullScreenApp(tk.Tk):
         self.upload_button.pack(side='left', padx=5, pady=5)
 
         # # Create a frame for the content
-        self.content_frame = tk.Frame(self, bg='white', height=500)
+        self.content_frame = tk.Frame(self, bg=self.background_window, height=500)
         # self.content_frame.pack(side='top', fill='both', expand=True)
 
         # Create the espace for the loaded image
-        self.image_canvas = tk.Canvas(self.content_frame, width=250, height=250)
-        
-        # self.image_canvas = tk.Label(self.master)
-        # self.image_canvas.pack(side="left", padx=10, pady=10)
-        # self.image_canvas.grid(row=0, column=1, rowspan=4, padx=10, pady=10)
+        self.image_canvas = tk.Canvas(self.content_frame, bg=self.background_window, width=250, height=250)
+
         self.f_hist = plt.Figure(figsize=(5, 4))
         self.histogram_canvas = FigureCanvasTkAgg(self.f_hist, master=self)
         # self.histogram_canvas.get_tk_widget().pack(side=tk.RIGHT)#, anchor='s')
         self.histogram_canvas.get_tk_widget().pack(padx=200, pady=100)
+        self.f_hist.patch.set_facecolor(self.background_window)
         
 
 
@@ -179,6 +178,7 @@ class FullScreenApp(tk.Tk):
             self.hist.set_title('Pixel Histogram', fontsize = 12)
             
             self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+            self.f_hist.patch.set_facecolor('white')
             # p.yaxis.set_label('Percentual')
             # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
             self.histogram_canvas.draw()
@@ -206,6 +206,7 @@ class FullScreenApp(tk.Tk):
         self.hist.set_title('Pixel Histogram', fontsize = 12)
             
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+        self.f_hist.patch.set_facecolor('white')
         # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
         self.histogram_canvas.draw()
         # print('passei aqui 1')
@@ -243,6 +244,7 @@ class FullScreenApp(tk.Tk):
         self.hist.set_title('Pixel Histogram', fontsize = 12)
             
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+        self.f_hist.patch.set_facecolor('white')
         # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
         self.histogram_canvas.draw()
 
@@ -296,6 +298,7 @@ class FullScreenApp(tk.Tk):
         self.hist.set_xlabel('Pixel Value', fontsize = 12)
         self.hist.set_title('Pixel Histogram', fontsize = 12)
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+        self.f_hist.patch.set_facecolor('white')
         # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
 
         self.histogram_canvas.draw()
