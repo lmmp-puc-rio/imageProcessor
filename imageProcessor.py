@@ -48,7 +48,7 @@ class FullScreenApp(tk.Tk):
         self.header_frame.pack(side='top', fill='x')
 
         # Add a logo to the header with hyperlink to google homepage
-        self.logo_image = tk.PhotoImage(file='logo_grey.png')
+        self.logo_image = tk.PhotoImage(file='src\images\logo_grey.png')
         self.logo_label = tk.Label(self.header_frame, image=self.logo_image, bg=self.background_header_color)
         self.logo_label.pack(side='left', padx=10, pady=5)
         self.logo_label.bind("<Button-1>", lambda e: webbrowser.open_new("http://lmmp.mec.puc-rio.br/lmmp/"))
