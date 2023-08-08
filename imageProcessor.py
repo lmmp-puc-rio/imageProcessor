@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter as ttk
 import webbrowser
 from tkinter import filedialog, simpledialog
 from PIL import Image, ImageTk, ImageEnhance
@@ -32,6 +33,13 @@ class FullScreenApp(tk.Tk):
         self.background_header_button_font_color = 'black'
         self.background_important_button_color = 'red'
 
+        #Fonts used in app
+        self.fz_mn = 8
+        self.fz_md = 10
+        self.fz_xmd = 12
+        self.fz_lg = 14
+        self.fz_xlg = 16
+
         # Set the app title in the title bar
         self.title('Image Processor')
 
@@ -50,22 +58,23 @@ class FullScreenApp(tk.Tk):
         # Add a logo to the header with hyperlink to google homepage
         self.logo_image = tk.PhotoImage(file='src\images\logo_grey.png')
         self.logo_label = tk.Label(self.header_frame, image=self.logo_image, bg=self.background_header_color)
-        self.logo_label.pack(side='left', padx=10, pady=5)
+        self.logo_label.pack(side='left', padx=16, pady=10) 
         self.logo_label.bind("<Button-1>", lambda e: webbrowser.open_new("http://lmmp.mec.puc-rio.br/lmmp/"))
 
         # # Add minimize and close buttons to the window
-        self.minimize_button = tk.Button(self.header_frame, text='-', font=('Arial', 10), bg=self.background_header_color, fg='white', command=self.minimize_window)
-        self.minimize_button.pack(side='right', padx=5, pady=5)
 
-        self.close_button = tk.Button(self.header_frame, text='x', font=('Arial', 10), bg=self.background_header_color, fg='white', command=self.close_window)
-        self.close_button.pack(side='right', padx=5, pady=5)
+        self.close_button = tk.Button(self.header_frame, text='x', font=('Arial', self.fz_md), bg=self.background_header_color, fg='white', command=self.close_window, height= 1, width=2)
+        self.close_button.pack(side='right', padx=(0,5), pady=5)
+
+        self.minimize_button = tk.Button(self.header_frame, text='-', font=('Arial', self.fz_md), bg=self.background_header_color, fg='white', command=self.minimize_window, height= 1, width=2)
+        self.minimize_button.pack(side='right', padx=(5,0), pady=5)
 
         # Add a button to the header with hyperlink to LMMP homepage
-        self.google_button = tk.Button(self.header_frame, text='Homepage', font=('Arial', 12), bg=self.background_header_button_color, fg=self.background_header_button_font_color, command=self.open_homepage)
+        self.google_button = tk.Button(self.header_frame, text='Homepage', font=('Arial', self.fz_xmd), bg=self.background_header_button_color, fg=self.background_header_button_font_color, command=self.open_homepage)
         self.google_button.pack(side='right', padx=10, pady=5)
 
         # Add a button to the header with hyperlink to Help homepage
-        self.google_button = tk.Button(self.header_frame, text='Help', font=('Arial', 12), bg=self.background_header_button_color, fg=self.background_header_button_font_color, command=self.open_helpPage)
+        self.google_button = tk.Button(self.header_frame, text='Help', font=('Arial', self.fz_xmd), bg=self.background_header_button_color, fg=self.background_header_button_font_color, command=self.open_helpPage)
         self.google_button.pack(side='right', padx=10, pady=5)
 
         # Create a frame for the buttons
@@ -73,7 +82,7 @@ class FullScreenApp(tk.Tk):
         self.button_frame.pack(side='right', padx=10, pady=5)
 
         # Add an upload button to the button frame
-        self.upload_button = tk.Button(self.button_frame, text='Upload Image', font=('Arial', 12), bg=self.background_header_button_color, fg=self.background_header_button_font_color, command=self.upload_image)
+        self.upload_button = tk.Button(self.button_frame, text='Upload Image', font=('Arial', self.fz_xmd), bg=self.background_header_button_color, fg=self.background_header_button_font_color, command=self.upload_image)
         self.upload_button.pack(side='left', padx=5, pady=5)
 
         # # Create a frame for the content
@@ -98,23 +107,23 @@ class FullScreenApp(tk.Tk):
         self.bottom_frame.pack(side='bottom', fill='x')
 
         # Create a Scale widget to adjust the contrast
-        self.contrast_scale = tk.Scale(self.bottom_frame, from_=0.1, to=5.0, resolution=0.1, bg=self.background_header_button_color, label="Contrast", orient=tk.HORIZONTAL, command=self.update_contrast, font=('Arial', 12), width=15)
+        self.contrast_scale = tk.Scale(self.bottom_frame, from_=0.1, to=5.0, resolution=0.1, bg=self.background_header_button_color, label="Contrast", orient=tk.HORIZONTAL, command=self.update_contrast, font=('Arial', self.fz_xmd), width=15)
         self.contrast_scale.pack(anchor = "s", side='left', padx=100, pady=15)#( side = "bottom")#(anchor = "sw")#
 
         # Create a button to apply Otsu's threshold to the image
-        self.otsu_button = tk.Button(self.bottom_frame, bg=self.background_header_button_color, text="Otsu Threshold", font=('Arial', 12), width=20, command=self.otsu_threshold)
+        self.otsu_button = tk.Button(self.bottom_frame, bg=self.background_header_button_color, text="Otsu Threshold", font=('Arial', self.fz_xmd), width=20, command=self.otsu_threshold)
         self.otsu_button.pack(anchor = "s", side='left', padx=50, pady=25)#( side = "bottom")#(anchor = "s")#
 
         # Create a button to save the image
-        self.save_button = tk.Button(self.bottom_frame,fg=self.background_important_button_color, bg=self.background_header_button_color, text="Save Image", font=('Arial', 12), width=20, command=self.save_image)
+        self.save_button = tk.Button(self.bottom_frame,fg=self.background_important_button_color, bg=self.background_header_button_color, text="Save Image", font=('Arial', self.fz_xmd), width=20, command=self.save_image)
         self.save_button.pack(anchor = "s", side='left', padx=50, pady=25)#( side = "bottom")#(anchor = "s")#
 
         # Create a button to save the history process
-        self.history_button = tk.Button(self.bottom_frame,fg=self.background_important_button_color, bg=self.background_header_button_color, text="Save History", font=('Arial', 12), width=20, command=self.save_history)
+        self.history_button = tk.Button(self.bottom_frame,fg=self.background_important_button_color, bg=self.background_header_button_color, text="Save History", font=('Arial', self.fz_xmd), width=20, command=self.save_history)
         self.history_button.pack(anchor = "s", side='left', padx=50, pady=25)#( side = "bottom")#(anchor = "s")#
         
         # Create a button to save the histogram process
-        self.histogram_button = tk.Button(self.bottom_frame,fg=self.background_important_button_color, bg=self.background_header_button_color, text="Save Histogram", font=('Arial', 12), width=20, command=self.save_histogram)
+        self.histogram_button = tk.Button(self.bottom_frame,fg=self.background_important_button_color, bg=self.background_header_button_color, text="Save Histogram", font=('Arial', self.fz_xmd), width=20, command=self.save_histogram)
         self.histogram_button.pack(anchor = "s", side='left', padx=50, pady=25)#( side = "bottom")#(anchor = "s")#
 
     def minimize_window(self):
@@ -139,7 +148,7 @@ class FullScreenApp(tk.Tk):
 
     def upload_image(self):
         # Open a file dialog and get the path of the selected file
-        filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp, *.tif")]
+        filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp, *.tif, *.jtif")]
         file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
         
         # Check if a file was selected
@@ -249,7 +258,8 @@ class FullScreenApp(tk.Tk):
     def save_image(self):
         files = [("Image Files (png)", "*.png "),
                  ("Image Files (jpg)","*.jpg *"),
-                 ("Image Files (tif)","*.tif *")]
+                 ("Image Files (tif)","*.tif *"),
+                 ("Image Files (jtif)","*.jtif *")]
         # Prompt the user to choose a file name to save the modified image
         file_name = tk.filedialog.asksaveasfilename(filetypes = files, defaultextension = files)
 
