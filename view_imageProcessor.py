@@ -11,6 +11,7 @@ root.overrideredirect(False)
 
 '''
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
 
 #from tkinter import ttk
@@ -111,45 +112,42 @@ histogram_img_label.grid(row=1, column=2, sticky='WENS', padx=2, pady=5)
 #footer Wdiget
 footer_frame = tk.Frame(root, background=pry_color)
 footer_frame.rowconfigure(0, weight=1)
-footer_frame.columnconfigure(0, weight=4)
-footer_frame.columnconfigure(1, weight=4)
-footer_frame.columnconfigure(2, weight=3)
+footer_frame.columnconfigure(0, weight=5)
+footer_frame.columnconfigure(1, weight=5)
+footer_frame.columnconfigure(2, weight=4)
 
-contrast_frame = tk.Frame(footer_frame, background='gray')
-treshold_frame = tk.Frame(footer_frame, background='gray')
-save_frame = tk.Frame(footer_frame, background='gray')
+contrast_frame = tk.Frame(footer_frame, background=pry_color)
+treshold_frame = tk.Frame(footer_frame, background=pry_color)
+save_frame = tk.Frame(footer_frame, background=pry_color)
 
 
 #footer frame
 footer_frame.grid(row=2, column=0, sticky='WENS')
-contrast_frame.grid(row=0, column=0,sticky='WENS', padx=3, pady=3)
-treshold_frame.grid(row=0, column=1,sticky='WENS', padx=3, pady=3)
-save_frame.grid(row=0, column=2, padx=3,sticky='WENS', pady=3)
+contrast_frame.grid(row=0, column=0,sticky='WENS', ipadx=3,padx=2, pady=3)
+treshold_frame.grid(row=0, column=1,sticky='WENS', ipadx=3,padx=2, pady=3)
+save_frame.grid(row=0, column=2, ipadx=3,sticky='WENS',padx=2, pady=3)
 
 
 #Contrast Frame
 contrast_frame.columnconfigure(0, weight=1)
 contrast_frame.rowconfigure(0, weight=1)
-contrast_frame.rowconfigure(1, weight=8)
-contrast_frame.rowconfigure(2, weight=1)
+contrast_frame.rowconfigure(1, weight=9)
+#contrast_frame.rowconfigure(2, weight=1)
 
+#----- scale
 text_contrast = tk.Label(contrast_frame, text='CONTRAST',font= (font, mdx_font, 'bold'), background= pry_color)
-bar_contrast = tk.Scale(contrast_frame, from_=0.1, to=5.0, resolution=0.1, label="Value")
-value_contrast = tk.Label(contrast_frame, text='00')
+bar_contrast = tk.Scale(contrast_frame, from_=0.1, to=5.0,orient='horizontal',font = (font, sm_font),tickinterval= 0.5, resolution=0.1, label="Value",
+                        troughcolor = sec_color, bg= pry_color, border=None , activebackground=pry_color)
+#value_contrast = tk.Label(contrast_frame, text=scale_value())
 
 text_contrast.grid(row=0, column=0,sticky='NS', padx=3, pady=(5,10))
-bar_contrast.grid(row=1, column=0,sticky='EW', padx=3, pady=5)
-value_contrast.grid(row=2, column=0,sticky='N', padx=3, pady=5)
+bar_contrast.grid(row=1, column=0,sticky='EW', padx=25, pady=5, ipadx=5, ipady=5)
+#value_contrast.grid(row=2, column=0,sticky='N', padx=3, pady=5)
+
 
 
 #treshold Frame
 radio_selected = 0
-list_treshold_model = ['OTSU', 'XXX', 'YYYYYYYYYYYYYY']
-list_selected = tk.StringVar()
-list_selected.set(list_treshold_model[0])
-
-def selected():
-    print(tk.StringVar.get())
 
 treshold_frame.columnconfigure(0, weight=7)
 treshold_frame.columnconfigure(1, weight=3)
@@ -160,46 +158,115 @@ treshold_frame.rowconfigure(2, weight=1)
 treshold_frame.rowconfigure(3, weight=1)
 treshold_frame.rowconfigure(4, weight=1)
 
-text_treshold = tk.Label(treshold_frame, text='TRESHOLD',font= (font, mdx_font, 'bold'), background= pry_color)
-dropdow_treshold = tk.OptionMenu(treshold_frame,list_selected, *list_treshold_model)
-radio1_btn_treshold =tk.Radiobutton(treshold_frame,text='Automatic', value=0, variable = radio_selected, command= selected)
-radio2_btn_treshold =tk.Radiobutton(treshold_frame,text='Manual', value=1, variable = radio_selected, command= selected)
-value_treshold = tk.Label(treshold_frame, text= '000',)
-treshold_btn = tk.Button(treshold_frame, text='RUN MODEL')
+#----- DropDown
+def selected_model():
+    model =clicked_model.get()
+    print(model)
 
+list_treshold_model = ['OTSU', 'XXX', 'YYYYYYYYYYYYYY']
+clicked_model = tk.StringVar()
+clicked_model.set(list_treshold_model[0])
+dropdow_treshold = tk.OptionMenu(treshold_frame,clicked_model, *list_treshold_model)
+
+
+#----- combobox
+combobox_models = ttk.Combobox(treshold_frame, values=list_treshold_model, font= (font, md_font))
+combobox_models.current(0)
+combobox_models.bind("<<Combobox Selecred>>", selected_model)
+
+
+#----- radioBtn Treshhold
+radio1_btn_treshold =tk.Radiobutton(treshold_frame,text='Automatic', value=0, variable = radio_selected,bg= pry_color,
+                              activebackground= pry_color, font= (font, md_font), command= selected_model)
+radio2_btn_treshold =tk.Radiobutton(treshold_frame,text='Manual', value=1, variable = radio_selected,bg= pry_color,
+                              activebackground= pry_color, font= (font, md_font), command= selected_model)
+value_treshold = tk.Label(treshold_frame, text= 'VALUE: ', bg= pry_color, font= (font, sm_font))
+
+treshold_save = tk.PhotoImage(file=r'src\images\run_btn.png')
+treshold_label = tk.Label(image=treshold_save, background= pry_color)
+treshold_btn = tk.Button(treshold_frame, image=treshold_save,bg= pry_color, borderwidth=0, activebackground=pry_color)
+
+#treshold Widget 
+
+text_treshold = tk.Label(treshold_frame, text='TRESHOLD',font= (font, mdx_font, 'bold'), background= pry_color)
 text_treshold.grid(row=0, column=0,columnspan=2,sticky='N', padx=3, pady=5)
-dropdow_treshold.grid(row=1, column=0,sticky='N', padx=3, pady=5)
-radio1_btn_treshold.grid(row=2, column=0,sticky='N', padx=3, pady=5)
-radio2_btn_treshold.grid(row=3, column=0,sticky='N', padx=3, pady=5)
-value_treshold.grid(row=4, column=0,sticky='N', padx=3, pady=5)
+#dropdow_treshold.grid(row=1, column=0,sticky='we', padx=5, pady=5)
+combobox_models.grid(row=1, column=0,sticky='N', padx=5, pady=5)
+radio1_btn_treshold.grid(row=2, column=0,sticky='N', padx=5, pady=5)
+radio2_btn_treshold.grid(row=3, column=0,sticky='N', padx=5, pady=5)
+value_treshold.grid(row=4, column=0,sticky='N', padx=5, pady=5)
 treshold_btn.grid(row=2, column=1,rowspan=3,sticky='N', padx=3, pady=5)
 
 #Save Frame
 
 save_frame.columnconfigure(0, weight=7)
-save_frame.columnconfigure(0, weight=3)
+save_frame.columnconfigure(1, weight=3)
 save_frame.rowconfigure(0, weight=1)
 save_frame.rowconfigure(1, weight=1)
 save_frame.rowconfigure(2, weight=1)
 save_frame.rowconfigure(3, weight=1)
 save_frame.rowconfigure(4, weight=1)
 
+#checkbox widget
 
 text_checkbox = tk.Label(save_frame, text='SAVE PROJECT',font= (font, mdx_font, 'bold'), background= pry_color)
-checkbox1_frame = tk.Checkbutton(save_frame, text="SAVE IMAGE", variable= 'save_image')
-checkbox2_frame = tk.Checkbutton(save_frame, text="SAVE HISTORY", variable= 'save-history')
-checkbox3_frame = tk.Checkbutton(save_frame, text="SAVE HISTOGRAM", variable= 'save_histo')
+
+#----- Check Box
+img_save_value = tk.IntVar()
+history_save_value = tk.IntVar()
+histogram_save_value = tk.IntVar()
+
+
+def display_saves():
+    if(img_save_value.get()==1):
+        print("Savar imagem")
+    elif (history_save_value.get()==1):
+        print("Savar historico")
+    elif (histogram_save_value.get()==1):
+        print("Savar historico")
+    else:
+        print("salvar nada.")
+        
+
+checkbox1_frame = tk.Checkbutton(save_frame,
+                              text="SAVE IMAGE",
+                              variable = img_save_value,
+                              onvalue=1, offvalue=0,
+                              bg= pry_color,
+                              activebackground= pry_color,
+                              font= (font, md_font),
+                              command= display_saves
+                              )
+checkbox2_frame = tk.Checkbutton(save_frame,
+                              text="SAVE HISTORY",
+                              variable = history_save_value,
+                              onvalue=1, offvalue=0,
+                              bg= pry_color,
+                              activebackground= pry_color,
+                              font= (font, md_font),
+                              command= display_saves
+                              )
+checkbox3_frame = tk.Checkbutton(save_frame,
+                              text="SAVE HISTOGRAM",
+                              variable = histogram_save_value,
+                              onvalue=1, offvalue=0,
+                              bg= pry_color,
+                              activebackground= pry_color,
+                              font= (font, md_font),
+                              command= display_saves
+                              )
+
 
 #save button
 img_save = tk.PhotoImage(file=r'src\images\save_btn.png')
-img_save_label = tk.Label(image=img_save)
-save_btn = tk.Button(save_frame, text="testetestte",bg= pry_color, borderwidth=0)
+img_save_label = tk.Label(image=img_save, background= pry_color)
+save_btn = tk.Button(save_frame, image=img_save,bg= pry_color, borderwidth=0, activebackground=pry_color)
 
 text_checkbox.grid(row=0, column=0,columnspan=2, sticky='N', padx=2, pady=3)
-checkbox1_frame.grid(row=1, column=0, sticky='N', padx=2, pady=3)
-checkbox2_frame.grid(row=2, column=0, sticky='N', padx=2, pady=3)
-checkbox3_frame.grid(row=3, column=0, sticky='N', padx=2, pady=3)
-save_btn.grid(row=2, column=1, sticky='N', padx=2, pady=3)
+checkbox1_frame.grid(row=1, column=0, sticky='w', padx=5, pady=3)
+checkbox2_frame.grid(row=2, column=0, sticky='w', padx=5, pady=3)
+checkbox3_frame.grid(row=3, column=0, sticky='w', padx=5, pady=3)
+save_btn.grid(row=2, column=1, sticky='N', padx=(2,20), pady=3)
 
 
 
