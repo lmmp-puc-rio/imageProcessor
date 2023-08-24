@@ -7,6 +7,7 @@ import matplotlib.ticker as mtick
 from PIL import Image, ImageTk
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class FullScreenApp(tk.Tk):
 
@@ -111,30 +112,19 @@ class FullScreenApp(tk.Tk):
         self.main_frame = tk.Frame(self, background= self.bg_container_color)
         self.main_frame.rowconfigure(0, weight=0)
         self.main_frame.rowconfigure(1, weight=1)
-        self.main_frame.columnconfigure(0, weight=4)
-        self.main_frame.columnconfigure(1, weight=4)
-        self.main_frame.columnconfigure(2, weight=3)
+        self.main_frame.columnconfigure(0, weight=1)
+        self.main_frame.columnconfigure(1, weight=1)
+        self.main_frame.columnconfigure(2, weight=1)
 
         #main Elemnts txt
         self.original_txt = tk.Label(self.main_frame, text='Original Image',font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
         self.edited_txt = tk.Label(self.main_frame, text='Edited Image', font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
         self.histogram_txt = tk.Label(self.main_frame, text='Histogram', font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
 
-        #main Elemnts txt
-        self.original_img_label= tk.Label(self.main_frame, background= self.sec_color)
-        self.edited_img_label = tk.Label(self.main_frame, background= self.sec_color)
-        self.histogram_img_label = tk.Label(self.main_frame, background= self.sec_color)
-
-        ###################
-        ## Images on Canvas
-        ###################
-
         #main Elemnts Canvas
-        #self.original_img_canvas= tk.Canvas(self.original_img_label, width= self.original_img_label.winfo_reqwidth(), height = self.original_img_label.winfo_reqheight())
-        #self.edited_img_canvas = tk.Canvas(self.edited_img_label,width=  self.edited_img_label.winfo_geometry().split('+')[0].split('x')[0], height = self.edited_img_label.winfo_geometry().split('+')[0].split('x')[1])
-        #self.histogram_img_canvas = tk.Canvas(self.histogram_img_label,width=  self.histogram_img_label.winfo_geometry().split('+')[0].split('x')[0], height = self.histogram_img_label.winfo_geometry().split('+')[0].split('x')[1])
-
-
+        self.original_img_label= tk.Label(self.main_frame, background= self.sec_color)
+        self.edited_img_label = tk.Label(self.main_frame, background= self.sec_color)#, width= self.original_img_label.winfo_width(), height= self.original_img_label.winfo_height())
+        self.histogram_img_label = tk.Label(self.main_frame, background= self.sec_color)
 
         #main Position
         self.main_frame.grid(row=1, column=0, sticky='WENS')
@@ -143,25 +133,15 @@ class FullScreenApp(tk.Tk):
         self.edited_txt.grid(row=0, column=1, sticky='N', pady=(6,2))
         self.histogram_txt.grid(row=0, column=2, sticky='N', pady=(6,2))
 
-        self.original_img_label.grid(row=1, column=0, sticky='WENS', padx=2, pady=5)
-        self.edited_img_label.grid(row=1, column=1, sticky='WENS', padx=2, pady=5)
-        self.histogram_img_label.grid(row=1, column=2, sticky='WENS', padx=2, pady=5)
+        self.original_img_label.grid(row=1, column=0, sticky='WENS',padx=1, pady=3)
+        self.edited_img_label.grid(row=1, column=1, sticky='WENS',padx=1, pady=3)
+        self.histogram_img_label.grid(row=1, column=2, sticky='WENS',padx=1, pady=3)
 
         #sizes
         selforiginal_img_size = self.original_img_label.winfo_geometry().split('+')[0]
         self.edited_img_size = self.edited_img_label.winfo_geometry().split('+')[0].split('x')[0]
         self.histogram_img_size = self.histogram_img_label.winfo_geometry().split('+')[0]
 
-        '''
-            modo para pegar o valor do tamanho do container em width e height, porem quando passa para uma variavel ele retor o valor com 1.
-
-                def teste_print():
-                    print(self.edited_img_label.winfo_geometry().split('+')[0].split('x')[0])
-                    print(self.edited_img_label.winfo_geometry().split('+')[0].split('x')[1])
-                    print(self.edited_img_canvas.winfo_geometry())
-                    print(self.histogram_img_canvas.winfo_geometry())
-                    print(self.original_img_canvas.winfo_geometry())
-        '''
         ###############
         #footer frame
         ###############
@@ -350,6 +330,59 @@ class FullScreenApp(tk.Tk):
         filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
         file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
         
+        if file_path:
+            # Create a PhotoImage object from the selected file
+            self.file_path = file_path
+            self.original_image = Image.open(self.file_path)
+            self.original_size = self.original_image.size
+            
+            # Resize the image to fit the canvas while maintaining aspect ratio
+            new_width = self.original_img_label.winfo_width()
+            new_height = self.original_img_label.winfo_height()
+        
+            new_width_edited =  self.edited_img_label.winfo_width()
+            new_height_edited =  self.edited_img_label.winfo_height()
+
+            print(new_width, new_height, new_width_edited, new_height_edited)
+            self.original_image = resize_image(self.original_image, ((new_width), (new_height)))
+            self.edited_image = resize_image(self.original_image, ((new_width_edited), (new_height_edited)))
+            
+            self.image = self.original_image.copy()
+            self.image_edited = self.edited_image.copy()
+            
+            # Resize image to fit canvas and convert to PhotoImage
+            self.photo_image = ImageTk.PhotoImage(self.image)
+            self.photo_image_edited = ImageTk.PhotoImage(self.image_edited)
+            
+            # Clear any existing canvas and create a new one
+            if hasattr(self, "original_canvas"):
+                self.original_canvas.destroy()
+                self.edited_canvas.destroy()  # Destroy the previous canvas
+            
+            # Calculate the coordinates to center the image in the canvas
+            x_center = (new_width - self.photo_image.width()) / 2
+            y_center = (new_height - self.photo_image.height()) / 2
+            
+            # Create a canvas widget to display the image
+            self.original_canvas = tk.Canvas(self.original_img_label)
+            self.original_canvas.config(borderwidth=0)
+            self.original_canvas.pack()
+            self.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
+            self.original_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.photo_image)
+            
+            # Create a canvas widget to display the edited image
+            self.edited_canvas = tk.Canvas(self.edited_img_label)
+            self.edited_canvas.config(borderwidth=0)
+            self.edited_canvas.pack()  # Place canvas inside the label
+            self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
+            self.edited_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.photo_image_edited)
+ 
+    """
+    def upload_image_OG(self):
+        # Open a file dialog and get the path of the selected file
+        filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
+        file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
+        
         # Check if a file was selected
         if file_path:
             # Create a PhotoImage object from the selected file
@@ -381,9 +414,22 @@ class FullScreenApp(tk.Tk):
             self.edited_canvas.pack() #  Place canvas inside the label
             self.edited_canvas.place(relwidth=1.0, relheight=1.0 ) #  Place canvas inside the label
             self.edited_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
+            self.show_histogram()
+    """
 
-
-
+    def show_histogram(self):
+        plt.clf()
+        plt.hist(self.photo_image_edited.histogram(), weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))
+        self.histogram_canvas.figure.clear()
+        self.histogram_data, _ = np.histogram(self.photo_image_edited.histogram(), bins=20, weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))       
+        self.hist = self.f_hist.gca()
+        self.hist.hist(self.photo_image_edited.histogram(), bins=20, weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))#(self.photo_image_edited.histogram(), bins=256, range=(0, 256))
+        self.hist.set_xlabel('Pixel Value', fontsize = 12)
+        self.hist.set_title('Pixel Histogram', fontsize = 12)
+        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+        # p.yaxis.set_label('Percentual')
+        # self.histogram_canvas.figure.add_subplot(111).hist(self.photo_image_edited.histogram(), bins=256, range=(0, 256))
+        self.histogram_canvas.draw()
     # def upload_image(self):
     #         # Open a file dialog and get the path of the selected file
     #         print('passei aqui 1')
