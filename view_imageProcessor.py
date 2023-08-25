@@ -4,7 +4,7 @@ from tkinter import filedialog, simpledialog
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.ticker as mtick
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageEnhance
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -48,8 +48,8 @@ class FullScreenApp(tk.Tk):
         self.title("Image Processor")
 
         # Change the icon of the application
-        icon_path = r"src\images\lmmp_200x65.ico"  # trocar por uma imagem de tamanho ideal
-        self.iconbitmap(icon_path)
+        #icon_path = r"/home/renan/Repositorio/imageProcessor/src/images/lmmp_200x65.ico"  # trocar por uma imagem de tamanho ideal
+        #self.iconbitmap(icon_path)
 
 
         self.original_img_size = None
@@ -66,35 +66,35 @@ class FullScreenApp(tk.Tk):
         self.header_frame.columnconfigure(2, weight=1)
 
         #home button
-        self.img_home= (Image.open(r'src\images\logo_grey.png'))
+        self.img_home= (Image.open(r'/home/renan/Repositorio/imageProcessor/src/images/logo_grey.png'))
         self.btn_home_img = resize_image(self.img_home,(240,100))
         self.btn_home_model = ImageTk.PhotoImage(self.btn_home_img)
-        self.home_btn = tk.Button(self.header_frame, image= self.btn_home_model, background= self.btn_color, borderwidth=0, activebackground=self.pry_color,relief='sunken', command=home_page)
+        self.home_btn = tk.Button(self.header_frame, image= self.btn_home_model, background= self.btn_color, borderwidth=0, highlightthickness = 0 , activebackground=self.pry_color,relief='sunken', command=home_page)
         self.home_btn.bind("<Button-1>", lambda x: self.webbrowser.open_new("http://tmp-lmmp.mec.puc-rio.br/"))
+        
         #upload button
-
-        self.img_upload= (Image.open(r'src\images\upld_btn.png'))
+        self.img_upload= (Image.open(r'src/images/upld_btn.png'))
         self.btn_img_upload_img = resize_image(self.img_upload,(200,100))
         self.btn_img_upload_model = ImageTk.PhotoImage(self.btn_img_upload_img)
-        self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0, activebackground=self.pry_color, command=self.upload_image)
+        self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.upload_image)
 
         #help button
-        self.img_help= (Image.open(r'src\images\help_img.png'))
+        self.img_help= (Image.open(r'src/images/help_img.png'))
         self.btn_img_help_img = resize_image(self.img_help,(200,100))
         self.btn_img_help_model = ImageTk.PhotoImage(self.btn_img_help_img)
-        self.help_btn = tk.Button(self.header_frame, image = self.btn_img_help_model, bg= self.pry_color, borderwidth=0, activebackground=self.pry_color, command=help_page)
+        self.help_btn = tk.Button(self.header_frame, image = self.btn_img_help_model, bg= self.pry_color, borderwidth=0,highlightthickness = 0,  activebackground=self.pry_color, command=help_page)
 
         #close button
-        self.img_close= (Image.open(r'src\images\cls_btn.png'))
+        self.img_close= (Image.open(r'src/images/cls_btn.png'))
         self.btn_img_close_img = resize_image_predifined(self.img_close,(35,30))
         self.btn_img_close_model = ImageTk.PhotoImage(self.btn_img_close_img)
-        self.close_btn = tk.Button(self.header_frame, image=self.btn_img_close_model,bg= self.pry_color, borderwidth=0, activebackground=self.pry_color, command=self.quit_application)
+        self.close_btn = tk.Button(self.header_frame, image=self.btn_img_close_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.quit_application)
 
         #minimize button
-        self.img_minimize= (Image.open(r'src\images\min_btn.png'))
+        self.img_minimize= (Image.open(r'src/images/min_btn.png'))
         self.btn_img_minimize_img = resize_image_predifined(self.img_minimize,(35,30))
         self.btn_img_minimize_model = ImageTk.PhotoImage(self.btn_img_minimize_img)
-        self.minimize_btn = tk.Button(self.header_frame, image=self.btn_img_minimize_model,bg= self.pry_color, borderwidth=0, activebackground=self.pry_color, command=self.minimize_application)
+        self.minimize_btn = tk.Button(self.header_frame, image=self.btn_img_minimize_model,bg= self.pry_color, borderwidth=0, highlightthickness = 0, activebackground=self.pry_color, command=self.minimize_application)
 
         #top widget
         self.header_frame.grid(row=0, column=0, sticky='WENS')
@@ -122,9 +122,15 @@ class FullScreenApp(tk.Tk):
         self.histogram_txt = tk.Label(self.main_frame, text='Histogram', font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
 
         #main Elemnts Canvas
-        self.original_img_label= tk.Label(self.main_frame, background= self.sec_color)
-        self.edited_img_label = tk.Label(self.main_frame, background= self.sec_color)#, width= self.original_img_label.winfo_width(), height= self.original_img_label.winfo_height())
-        self.histogram_img_label = tk.Label(self.main_frame, background= self.sec_color)
+        self.original_img_label= tk.Label(self.main_frame, background = self.sec_color)
+        self.edited_img_label = tk.Label(self.main_frame, background = self.sec_color) #, width= self.original_img_label.winfo_width(), height= self.original_img_label.winfo_height())
+        self.histogram_img_label = tk.Label(self.main_frame, background = self.sec_color)
+
+        #histogram
+        #self.frist_histogram = plt.Figure(figsize=(5, 4))
+        #self.histogram_canvas = FigureCanvasTkAgg(self.frist_histogram, master=self)
+        # #self.histogram_canvas.get_tk_widget().pack(side=tk.RIGHT)#, anchor='s')
+        #self.histogram_canvas.get_tk_widget().pack(self.histogram_img_label)
 
         #main Position
         self.main_frame.grid(row=1, column=0, sticky='WENS')
@@ -133,12 +139,12 @@ class FullScreenApp(tk.Tk):
         self.edited_txt.grid(row=0, column=1, sticky='N', pady=(6,2))
         self.histogram_txt.grid(row=0, column=2, sticky='N', pady=(6,2))
 
-        self.original_img_label.grid(row=1, column=0, sticky='WENS',padx=1, pady=3)
-        self.edited_img_label.grid(row=1, column=1, sticky='WENS',padx=1, pady=3)
-        self.histogram_img_label.grid(row=1, column=2, sticky='WENS',padx=1, pady=3)
+        self.original_img_label.grid(row=1, column=0, sticky='WENS', pady=3)
+        self.edited_img_label.grid(row=1, column=1, sticky='WENS', pady=3)
+        self.histogram_img_label.grid(row=1, column=2, sticky='WENS', pady=3)
 
         #sizes
-        selforiginal_img_size = self.original_img_label.winfo_geometry().split('+')[0]
+        self.original_img_size = self.original_img_label.winfo_geometry().split('+')[0]
         self.edited_img_size = self.edited_img_label.winfo_geometry().split('+')[0].split('x')[0]
         self.histogram_img_size = self.histogram_img_label.winfo_geometry().split('+')[0]
 
@@ -170,17 +176,15 @@ class FullScreenApp(tk.Tk):
         self.contrast_frame.rowconfigure(1, weight=1)
         #contrast_frame.rowconfigure(2, weight=1)
 
-        #----- scale
+        #scale bar
 
         self.value_scale = tk.StringVar()
-        self.text_contrast = tk.Label(self.contrast_frame, text='CONTRAST',font= (self.font, self.fz_lg, 'bold'), background= self.pry_color)
+        self.text_contrast = tk.Label(self.contrast_frame, text='CONTRAST',font= (self.font, self.fz_lg, 'bold'),anchor=tk.N, background= self.pry_color)
         self.bar_contrast = tk.Scale(self.contrast_frame, from_=0.1, to=5.0,orient='horizontal',font = (self.font, self.fz_mn),tickinterval= 0.5, resolution=0.1, label="Value",
-                                troughcolor = self.sec_color, variable = self.value_scale ,bg= self.pry_color, border=None , activebackground=self.pry_color, command = self.update_scale)
-        #self.value_contrast = tk.Label(self.contrast_frame, textvariable=self.value_scale, font=(self.font, self.fz_mn))
+                                troughcolor = self.sec_color, variable = self.value_scale ,bg= self.pry_color, border=None ,highlightthickness = 0, activebackground=self.pry_color, command = self.update_scale)
 
         self.text_contrast.grid(row=0, column=0,sticky='NS', padx=3, pady=(5,10))
         self.bar_contrast.grid(row=1, column=0,sticky='EW', padx=25, pady=5, ipadx=5, ipady=5)
-        #self.value_contrast.grid(row=2, column=0,sticky='N', padx=3, pady=5)
 
         #treshold Frame
         self.radio_selected = 0
@@ -206,20 +210,20 @@ class FullScreenApp(tk.Tk):
         
         #----- radioBtn Treshhold
         self.radio_selected = tk.StringVar(value="automatic")
-        self.radio1_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Automatic', variable = self.radio_selected, value= "automatic", bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md))
-        self.radio2_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Manual', variable = self.radio_selected, value= "manual", bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md))
-        self.value_treshold = tk.Label(self.treshold_frame, text= 'VALUE: ', bg= self.pry_color, font= (self.font, self.fz_mn))
-        self.text_box_treshold = tk.Text(self.treshold_frame, width=4, height=1, font=(self.font, self.fz_md))
+        self.radio1_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Automatic', variable = self.radio_selected, value= "automatic", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
+        self.radio2_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Manual', variable = self.radio_selected, value= "manual", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
+        self.value_treshold = tk.Label(self.treshold_frame, text= 'VALUE: ', bg= self.pry_color,highlightthickness = 0, font= (self.font, self.fz_mn))
+        self.text_box_treshold = tk.Text(self.treshold_frame, width=4, height=1, font=(self.font, self.fz_md), highlightthickness = 0)
         
         # monitora cada mudança na variavel para chamar a função automaticamente
         self.radio_selected.trace("w", lambda *args: self.on_radio_select())
 
         #btn Run Model
-        self.run_model_img= (Image.open(r'src\images\run_btn.png'))
+        self.run_model_img= (Image.open(r'src/images/run_btn.png'))
         self.btn_run_model_img = resize_image(self.run_model_img,(200,100))
         self.btn_run_model = ImageTk.PhotoImage(self.btn_run_model_img)
         self.treshold_label = tk.Label(image=self.btn_run_model, background= self.pry_color)
-        self.treshold_btn = tk.Button(self.treshold_frame, image=self.btn_run_model,bg= self.pry_color, borderwidth=0, activebackground=self.pry_color, command= self.on_treshold_btn_click)
+        self.treshold_btn = tk.Button(self.treshold_frame, image=self.btn_run_model,bg= self.pry_color, borderwidth=0, activebackground=self.pry_color,highlightthickness = 0, command= self.on_treshold_btn_click)
 
         #treshold Widget 
 
@@ -267,18 +271,18 @@ class FullScreenApp(tk.Tk):
                 
 
         self.checkbox1_frame = tk.Checkbutton(self.save_frame, text="SAVE IMAGE", variable = self.img_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md), command= display_saves)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0, command= display_saves)
         self.checkbox2_frame = tk.Checkbutton(self.save_frame, text="SAVE HISTORY", variable = self.history_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md), command= display_saves)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0, command= display_saves)
         self.checkbox3_frame = tk.Checkbutton(self.save_frame, text="SAVE HISTOGRAM", variable = self.histogram_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md), command= display_saves)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0, command= display_saves)
 
-        #Load an image in the script
-        self.img= (Image.open(r'src\images\save_btn.png'))
+        #Load an image for the save btn
+        self.img= (Image.open(r'src/images/save_btn.png'))
         self.img = resize_image(self.img,(200,100))
         self.img_save = ImageTk.PhotoImage(self.img)
         self.img_save_label = tk.Label(image=self.img_save, background= self.pry_color)
-        self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0, activebackground=self.pry_color)
+        self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color)
 
         #self.text_checkbox.grid(row=0, column=0,columnspan=2, sticky='N', padx=2, pady=3)
         self.checkbox1_frame.grid(row=1, column=0, sticky='w', padx=5, pady=3)
@@ -313,18 +317,21 @@ class FullScreenApp(tk.Tk):
 
         selected_item = self.combobox_models.get()
         if selected_item == "OTSU":
-            self.radio1_btn_treshold.select()
-            self.text_box_treshold.delete("1.0", "end")
-            """ rodar a edição da foto e passar o valor para o model_value """
-            model_value = int(98)
-            self.text_box_treshold.insert("1.0", model_value)
+            #self.radio1_btn_treshold.select()
+            #self.text_box_treshold.delete("1.0", "end")
+            #""" rodar a edição da foto e passar o valor para o model_value """
+            #model_value = int(98)
+            #self.text_box_treshold.insert("1.0", model_value)
+            self.otsu_threshold()
         elif selected_item == "XXXX":
             self.radio2_btn_treshold.select()
             self.text_box_treshold.delete("1.0", "end")
             """ rodar a edição da foto e passar o valor para o model_value """
             model_value = int(84)
             self.text_box_treshold.insert("1.0", model_value)
-    
+
+
+
     def upload_image(self):
         # Open a file dialog and get the path of the selected file
         filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
@@ -362,6 +369,9 @@ class FullScreenApp(tk.Tk):
             # Calculate the coordinates to center the image in the canvas
             x_center = (new_width - self.photo_image.width()) / 2
             y_center = (new_height - self.photo_image.height()) / 2
+
+            x_center_edited = (new_width_edited - self.photo_image.width()) / 2
+            y_center_edited = (new_height_edited - self.photo_image.height()) / 2
             
             # Create a canvas widget to display the image
             self.original_canvas = tk.Canvas(self.original_img_label)
@@ -375,51 +385,12 @@ class FullScreenApp(tk.Tk):
             self.edited_canvas.config(borderwidth=0)
             self.edited_canvas.pack()  # Place canvas inside the label
             self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-            self.edited_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.photo_image_edited)
- 
-    """
-    def upload_image_OG(self):
-        # Open a file dialog and get the path of the selected file
-        filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
-        file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
-        
-        # Check if a file was selected
-        if file_path:
-            # Create a PhotoImage object from the selected file
-
-            self.file_path = file_path
-            self.original_image = Image.open(self.file_path)
-            self.original_size = self.original_image.size
-            #self.original_image.thumbnail(size = (self.original_img_label.winfo_width(), self.original_img_label.winfo_height()))
-            self.original_image = resize_image(self.original_image, (self.original_img_label.winfo_width(), self.original_img_label.winfo_height()))
-            self.image = self.original_image.copy()
-
-            # Resize image to fit canvas and convert to PhotoImage
-            self.photo_image = ImageTk.PhotoImage(self.image)
-
-            # Clear any existing canvas and create a new one
-            if hasattr(self, "original_canvas"):  # Check if canvas already exists
-                self.original_canvas.destroy()  # Destroy the previous canvas
-            
-            # Create a canvas widget to display the image
-            self.original_canvas = tk.Canvas(self.original_img_label)
-            self.original_canvas.config(borderwidth=0)
-            self.original_canvas.pack()
-            self.original_canvas.place(relwidth=1.0, relheight=1.0 ) #  Place canvas inside the label
-            self.original_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
-
-            # Create a canvas widget to display the edited image
-            self.edited_canvas = tk.Canvas(self.edited_img_label)
-            self.edited_canvas.config(borderwidth=0)
-            self.edited_canvas.pack() #  Place canvas inside the label
-            self.edited_canvas.place(relwidth=1.0, relheight=1.0 ) #  Place canvas inside the label
-            self.edited_canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
+            self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
             self.show_histogram()
-    """
-
+   
     def show_histogram(self):
         plt.clf()
-        plt.hist(self.photo_image_edited.histogram(), weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))
+        plt.hist(self.image_edited.histogram(), weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))
         self.histogram_canvas.figure.clear()
         self.histogram_data, _ = np.histogram(self.photo_image_edited.histogram(), bins=20, weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))       
         self.hist = self.f_hist.gca()
@@ -430,53 +401,84 @@ class FullScreenApp(tk.Tk):
         # p.yaxis.set_label('Percentual')
         # self.histogram_canvas.figure.add_subplot(111).hist(self.photo_image_edited.histogram(), bins=256, range=(0, 256))
         self.histogram_canvas.draw()
-    # def upload_image(self):
-    #         # Open a file dialog and get the path of the selected file
-    #         print('passei aqui 1')
-    #         filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp, *.tif, *.jtif")]
-    #         file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
-    #         print(f'passei aqui e meu path é:{file_path}')
-    #         # Check if a file was selected
-    #         if file_path:
-
-    #             # Create a PhotoImage object from the selected file
-    #             self.file_path = file_path
-    #             self.original_image = Image.open(self.file_path)
-    #             self.original_size = self.original_image.size
-    #             self.original_image.thumbnail(self.size)
-    #             self.image = self.original_image.copy()
-
-    #             # Resize image to fit canvas and convert to PhotoImage
-    #             # self.image = self.image.resize(self.size , Image.LANCZOS)
-                
-    #             # print(f'tamanho display desejado {self.size}') 
-    #             self.photo_image = ImageTk.PhotoImage(self.image)
-
-    #             # Create a canvas widget to display the image
-    #             canvas = tk.Canvas(self.original_img_label, width=self.image.width, height=self.image.height)
-    #             canvas.place(relx=0, rely=0.5, anchor=tk.W, y=10)
-    #             canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
-    #             #self.update_image()
-                
-    #             # initialize the filters parameters
-    #             #self.contrast_value = 1.0
-    #             #self.threshold_value = None
-    #             #self.histogram_data = None  
-                # print(f'tamanho original {self.original_size}')
-                #plt.clf()
-                #plt.hist(self.image.histogram(), weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))
-                #self.histogram_canvas.figure.clear()
-                #self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))       
-                #self.hist = self.f_hist.gca()
-                #self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
-                #self.hist.set_xlabel('Pixel Value', fontsize = 12)
-                #self.hist.set_title('Pixel Histogram', fontsize = 12)
-                
-                #self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-                # p.yaxis.set_label('Percentual')
-                # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
-                #self.histogram_canvas.draw()
     
+    def otsu_threshold(self):
+        # print('cheuei nesse ponto')
+        # Convert image to grayscale and get pixel values
+        self.image_gray = self.image.convert("L")
+        pixels = np.array(self.image_gray.getdata())
+
+        # Compute Otsu threshold and binary transform
+        self.threshold_value = threshold_otsu(pixels)
+        # print(self.threshold_value)
+        # print(type(self.threshold_value))
+        self.image_binary = self.image_gray.point(lambda x: 0 if x < self.threshold_value else 255)
+
+        # # Compute histogram data and plot histogram
+        # self.histogram_data, _ = np.histogram(pixels, bins=256, range=(0, 256))
+        # self.hist_plot.clear()
+        # self.hist_plot.plot(self.histogram_data)
+        # self.hist_plot.axvline(x=self.threshold_value, color="r")
+        # self.hist_canvas.draw()
+
+        # Update image display
+        self.photo_image = ImageTk.PhotoImage(self.image_binary)
+        canvas = tk.Canvas(self, width=self.image.width, height=self.image.height)
+        canvas.place(relx=0, rely=0.5, anchor=tk.W, y=10)
+        canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
+
+        plt.clf()
+        plt.hist(self.image.histogram(), bins=256, range=(0, 256))
+
+        self.histogram_canvas.figure.clear()
+        self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))       
+        self.hist = self.f_hist.gca()
+        self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
+        self.hist.axvline(self.threshold_value, color='r', ls='--')
+        self.hist.set_xlabel('Pixel Value', fontsize = 12)
+        self.hist.set_title('Pixel Histogram', fontsize = 12)
+        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+        # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
+
+        self.histogram_canvas.draw()
+        self.modified_img = self.image_binary.copy()
+
+    def update_contrast(self, value):
+        # Update the contrast of the image based on the current scale value
+        enhancer = ImageEnhance.Contrast(self.edited_image)
+        # contrasted_img = enhancer.enhance(float(value))
+        self.edited_image = enhancer.enhance(float(value))
+        # Resize image to fit canvas and convert to PhotoImage
+        # self.image = self.image.resize(self.size , Image.LANCZOS)
+        self.edited_image.thumbnail(self.size)
+
+        # Update the label with the new image
+        self.photo_image = ImageTk.PhotoImage(self.image)
+        # self.image_canvas.configure(image=self.photo_image)
+
+        canvas = tk.Canvas(self, width=self.image.width, height=self.image.height)
+        canvas.place(relx=0, rely=0.5, anchor=tk.W, y=10)
+        canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
+
+        # Store a reference to the modified image
+        self.modified_img = self.image.copy() 
+        
+        # Resize image to fit canvas and convert to PhotoImage
+        # self.modified_img = self.modified_img.resize(self.original_size , Image.LANCZOS)
+        plt.clf()
+        plt.hist(self.image.histogram(), bins=256, range=(0, 256))
+
+        self.histogram_canvas.figure.clear()
+        self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))        
+        self.hist = self.f_hist.gca()
+        self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
+        self.hist.set_xlabel('Pixel Value', fontsize = 12)
+        self.hist.set_title('Pixel Histogram', fontsize = 12)
+            
+        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+        # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
+        self.histogram_canvas.draw()
+
 if __name__ == '__main__':
     app = FullScreenApp()
     app.mainloop()

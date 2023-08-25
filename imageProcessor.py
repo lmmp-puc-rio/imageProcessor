@@ -48,7 +48,7 @@ class FullScreenApp(tk.Tk):
         self.overrideredirect(False)
 
         # Set the window state to maximized
-        self.wm_state('zoomed')
+        #self.wm_state('zoomed')
 
         # Create a frame for the header
         self.header_frame = tk.Frame(self, bg=self.background_header_color, height=50)
@@ -179,7 +179,7 @@ class FullScreenApp(tk.Tk):
             # self.histogram_data = None  
             # # print(f'tamanho original {self.original_size}')
             # plt.clf()
-            # plt.hist(self.image.histogram(), weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))
+            #plt.hist(self.image.histogram(), weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))
             # self.histogram_canvas.figure.clear()
             # self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))       
             # self.hist = self.f_hist.gca()
