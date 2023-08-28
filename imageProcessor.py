@@ -55,7 +55,7 @@ class FullScreenApp(tk.Tk):
         self.header_frame.pack(side='top', fill='x')
 
         # Add a logo to the header with hyperlink to google homepage
-        self.logo_image = tk.PhotoImage(file='src\images\logo_grey.png')
+        self.logo_image = tk.PhotoImage(file=r'src/images/logo_grey.png')
         self.logo_label = tk.Label(self.header_frame, image=self.logo_image, bg=self.background_header_color)
         self.logo_label.pack(side='left', padx=16, pady=10) 
         self.logo_label.bind("<Button-1>", lambda e: webbrowser.open_new("http://lmmp.mec.puc-rio.br/lmmp/"))
@@ -173,24 +173,24 @@ class FullScreenApp(tk.Tk):
             print('passei aqui e exibi?')
             # self.update_image()
             
-            # # initialize the filters parameters
-            # self.contrast_value = 1.0
-            # self.threshold_value = None
-            # self.histogram_data = None  
-            # # print(f'tamanho original {self.original_size}')
-            # plt.clf()
-            #plt.hist(self.image.histogram(), weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))
-            # self.histogram_canvas.figure.clear()
-            # self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))       
-            # self.hist = self.f_hist.gca()
-            # self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
-            # self.hist.set_xlabel('Pixel Value', fontsize = 12)
-            # self.hist.set_title('Pixel Histogram', fontsize = 12)
+            # initialize the filters parameters
+            self.contrast_value = 1.0
+            self.threshold_value = None
+            self.histogram_data = None  
+            # print(f'tamanho original {self.original_size}')
+            plt.clf()
+            plt.hist(self.image.histogram(), weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))
+            self.histogram_canvas.figure.clear()
+            self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))       
+            self.hist = self.f_hist.gca()
+            self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
+            self.hist.set_xlabel('Pixel Value', fontsize = 12)
+            self.hist.set_title('Pixel Histogram', fontsize = 12)
             
-            # self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-            # # p.yaxis.set_label('Percentual')
-            # # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
-            # self.histogram_canvas.draw()
+            self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+            # p.yaxis.set_label('Percentual')
+            # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
+            self.histogram_canvas.draw()
     
     def update_image(self):
         # Resize image to fit canvas and convert to PhotoImage

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog, simpledialog
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 import numpy as np
 import matplotlib.ticker as mtick
 from PIL import Image, ImageTk, ImageEnhance
@@ -114,24 +115,31 @@ class FullScreenApp(tk.Tk):
         self.main_frame.rowconfigure(1, weight=1)
         self.main_frame.columnconfigure(0, weight=1)
         self.main_frame.columnconfigure(1, weight=1)
-        self.main_frame.columnconfigure(2, weight=1)
+        self.main_frame.columnconfigure(2, weight=0)
 
         #main Elemnts txt
         self.original_txt = tk.Label(self.main_frame, text='Original Image',font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
         self.edited_txt = tk.Label(self.main_frame, text='Edited Image', font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
-        self.histogram_txt = tk.Label(self.main_frame, text='Histogram', font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
+        self.histogram_txt = tk.Label(self.main_frame, text='Pixel Histogram', font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
 
         #main Elemnts Canvas
         self.original_img_label= tk.Label(self.main_frame, background = self.sec_color)
         self.edited_img_label = tk.Label(self.main_frame, background = self.sec_color) #, width= self.original_img_label.winfo_width(), height= self.original_img_label.winfo_height())
         self.histogram_img_label = tk.Label(self.main_frame, background = self.sec_color)
+        self.histogram_inner_frame = tk.Frame(self.histogram_img_label)
+
+        self.histogram_img_label.rowconfigure(0, weight=1)
+        self.histogram_img_label.rowconfigure(1, weight=1)
+        self.histogram_img_label.rowconfigure(2, weight=1)
+
+        self.histogram_inner_frame.grid(row=1, column=0)
 
         #histogram
-        #self.frist_histogram = plt.Figure(figsize=(5, 4))
-        #self.histogram_canvas = FigureCanvasTkAgg(self.frist_histogram, master=self)
-        # #self.histogram_canvas.get_tk_widget().pack(side=tk.RIGHT)#, anchor='s')
-        #self.histogram_canvas.get_tk_widget().pack(self.histogram_img_label)
-
+        self.histogram_container = plt.Figure()
+        self.histogram_canvas = FigureCanvasTkAgg(self.histogram_container, master=self.histogram_inner_frame)
+        # self.histogram_canvas.get_tk_widget().pack(side=tk.RIGHT)#, anchor='s')
+        self.histogram_canvas.get_tk_widget().pack( fill='both')
+    
         #main Position
         self.main_frame.grid(row=1, column=0, sticky='WENS')
 
@@ -139,14 +147,14 @@ class FullScreenApp(tk.Tk):
         self.edited_txt.grid(row=0, column=1, sticky='N', pady=(6,2))
         self.histogram_txt.grid(row=0, column=2, sticky='N', pady=(6,2))
 
-        self.original_img_label.grid(row=1, column=0, sticky='WENS', pady=3)
-        self.edited_img_label.grid(row=1, column=1, sticky='WENS', pady=3)
-        self.histogram_img_label.grid(row=1, column=2, sticky='WENS', pady=3)
+        self.original_img_label.grid(row=1, column=0, sticky='WENS',padx=1.5, pady=3)
+        self.edited_img_label.grid(row=1, column=1, sticky='WENS',padx=1.5, pady=3)
+        self.histogram_img_label.grid(row=1, column=2, sticky='WENS',padx=1.5,pady=3)
 
-        #sizes
-        self.original_img_size = self.original_img_label.winfo_geometry().split('+')[0]
-        self.edited_img_size = self.edited_img_label.winfo_geometry().split('+')[0].split('x')[0]
-        self.histogram_img_size = self.histogram_img_label.winfo_geometry().split('+')[0]
+        #sizes 
+        #self.original_img_size = self.original_img_label.winfo_geometry().split('+')[0]
+        #self.edited_img_size = self.edited_img_label.winfo_geometry().split('+')[0].split('x')[0]
+        #self.histogram_img_size = self.histogram_img_label.winfo_geometry().split('+')[0]
 
         ###############
         #footer frame
@@ -224,6 +232,7 @@ class FullScreenApp(tk.Tk):
         self.btn_run_model = ImageTk.PhotoImage(self.btn_run_model_img)
         self.treshold_label = tk.Label(image=self.btn_run_model, background= self.pry_color)
         self.treshold_btn = tk.Button(self.treshold_frame, image=self.btn_run_model,bg= self.pry_color, borderwidth=0, activebackground=self.pry_color,highlightthickness = 0, command= self.on_treshold_btn_click)
+        
 
         #treshold Widget 
 
@@ -314,7 +323,6 @@ class FullScreenApp(tk.Tk):
             self.text_box_treshold.config(state='normal')
 
     def on_treshold_btn_click(self):
-
         selected_item = self.combobox_models.get()
         if selected_item == "OTSU":
             #self.radio1_btn_treshold.select()
@@ -386,20 +394,19 @@ class FullScreenApp(tk.Tk):
             self.edited_canvas.pack()  # Place canvas inside the label
             self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
             self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
-            self.show_histogram()
+            self.show_histogram(self.image_edited) #TIRAR DEPOIS. SOMENTE PRA TESTE
    
-    def show_histogram(self):
+    def show_histogram(self, photo):
+        bins_used = 50
+        rcParams['font.weight'] = 'bold'
         plt.clf()
-        plt.hist(self.image_edited.histogram(), weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))
+        plt.hist(photo.histogram(), weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
         self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(self.photo_image_edited.histogram(), bins=20, weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))       
-        self.hist = self.f_hist.gca()
-        self.hist.hist(self.photo_image_edited.histogram(), bins=20, weights=np.ones(len(self.photo_image_edited.histogram()))/len(self.photo_image_edited.histogram()), range=(0, 256))#(self.photo_image_edited.histogram(), bins=256, range=(0, 256))
-        self.hist.set_xlabel('Pixel Value', fontsize = 12)
-        self.hist.set_title('Pixel Histogram', fontsize = 12)
+        self.histogram_data, _ = np.histogram(photo.histogram(), bins=bins_used, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
+        self.hist = self.histogram_container.gca()
+        self.hist.hist(photo.histogram(), bins=bins_used, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(self.photo_image_edited.histogram(), bins=256, range=(0, 256)
+        self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-        # p.yaxis.set_label('Percentual')
-        # self.histogram_canvas.figure.add_subplot(111).hist(self.photo_image_edited.histogram(), bins=256, range=(0, 256))
         self.histogram_canvas.draw()
     
     def otsu_threshold(self):
@@ -432,7 +439,7 @@ class FullScreenApp(tk.Tk):
 
         self.histogram_canvas.figure.clear()
         self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))       
-        self.hist = self.f_hist.gca()
+        self.hist = self.histogram_container.gca()
         self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
         self.hist.axvline(self.threshold_value, color='r', ls='--')
         self.hist.set_xlabel('Pixel Value', fontsize = 12)
@@ -470,14 +477,17 @@ class FullScreenApp(tk.Tk):
 
         self.histogram_canvas.figure.clear()
         self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))        
-        self.hist = self.f_hist.gca()
+        self.hist = self.histogram_container.gca()
         self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
         self.hist.set_xlabel('Pixel Value', fontsize = 12)
         self.hist.set_title('Pixel Histogram', fontsize = 12)
             
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
+
         self.histogram_canvas.draw()
+        
+
 
 if __name__ == '__main__':
     app = FullScreenApp()
