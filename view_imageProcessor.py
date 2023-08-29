@@ -6,6 +6,7 @@ from matplotlib import rcParams
 import numpy as np
 import matplotlib.ticker as mtick
 from PIL import Image, ImageTk, ImageEnhance
+from skimage.filters import threshold_otsu
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -52,10 +53,7 @@ class FullScreenApp(tk.Tk):
         #icon_path = r"/home/renan/Repositorio/imageProcessor/src/images/lmmp_200x65.ico"  # trocar por uma imagem de tamanho ideal
         #self.iconbitmap(icon_path)
 
-
-        self.original_img_size = None
-        self.edited_img_size = None
-        self.histogram_img_size = None
+        self.threshold_value = None
 
         ###############
         #top frame
@@ -70,7 +68,7 @@ class FullScreenApp(tk.Tk):
         self.img_home= (Image.open(r'/home/renan/Repositorio/imageProcessor/src/images/logo_grey.png'))
         self.btn_home_img = resize_image(self.img_home,(240,100))
         self.btn_home_model = ImageTk.PhotoImage(self.btn_home_img)
-        self.home_btn = tk.Button(self.header_frame, image= self.btn_home_model, background= self.btn_color, borderwidth=0, highlightthickness = 0 , activebackground=self.pry_color,relief='sunken', command=home_page)
+        self.home_btn = tk.Button(self.header_frame, image= self.btn_home_model, background= self.pry_color, borderwidth=0, highlightthickness = 0 , activebackground= self.btn_color,relief='sunken', command=home_page)
         self.home_btn.bind("<Button-1>", lambda x: self.webbrowser.open_new("http://tmp-lmmp.mec.puc-rio.br/"))
         
         #upload button
@@ -136,6 +134,7 @@ class FullScreenApp(tk.Tk):
 
         #histogram
         self.histogram_container = plt.Figure()
+        self.histogram_container.patch.set_facecolor(self.sec_color)
         self.histogram_canvas = FigureCanvasTkAgg(self.histogram_container, master=self.histogram_inner_frame)
         # self.histogram_canvas.get_tk_widget().pack(side=tk.RIGHT)#, anchor='s')
         self.histogram_canvas.get_tk_widget().pack( fill='both')
@@ -150,11 +149,6 @@ class FullScreenApp(tk.Tk):
         self.original_img_label.grid(row=1, column=0, sticky='WENS',padx=1.5, pady=3)
         self.edited_img_label.grid(row=1, column=1, sticky='WENS',padx=1.5, pady=3)
         self.histogram_img_label.grid(row=1, column=2, sticky='WENS',padx=1.5,pady=3)
-
-        #sizes 
-        #self.original_img_size = self.original_img_label.winfo_geometry().split('+')[0]
-        #self.edited_img_size = self.edited_img_label.winfo_geometry().split('+')[0].split('x')[0]
-        #self.histogram_img_size = self.histogram_img_label.winfo_geometry().split('+')[0]
 
         ###############
         #footer frame
@@ -182,7 +176,7 @@ class FullScreenApp(tk.Tk):
         self.contrast_frame.columnconfigure(0, weight=1)
         self.contrast_frame.rowconfigure(0, weight=1)
         self.contrast_frame.rowconfigure(1, weight=1)
-        #contrast_frame.rowconfigure(2, weight=1)
+
 
         #scale bar
 
@@ -311,8 +305,8 @@ class FullScreenApp(tk.Tk):
     def update_scale(self, *args):
         value = self.value_scale.get()
         print("Scale Value:", value)
-        
-    
+        self.update_contrast(self.edited_image, value)
+         
     # verifica sempre que o radio button muda de auto para manual, dessa forma mudando o estado do TextBox
     def on_radio_select(self):
         if self.radio_selected.get() == "automatic":
@@ -330,15 +324,14 @@ class FullScreenApp(tk.Tk):
             #""" rodar a edição da foto e passar o valor para o model_value """
             #model_value = int(98)
             #self.text_box_treshold.insert("1.0", model_value)
-            self.otsu_threshold()
+            print(self.edited_image)
+            self.otsu_threshold(self.edited_image)
         elif selected_item == "XXXX":
             self.radio2_btn_treshold.select()
             self.text_box_treshold.delete("1.0", "end")
             """ rodar a edição da foto e passar o valor para o model_value """
             model_value = int(84)
             self.text_box_treshold.insert("1.0", model_value)
-
-
 
     def upload_image(self):
         # Open a file dialog and get the path of the selected file
@@ -358,7 +351,7 @@ class FullScreenApp(tk.Tk):
             new_width_edited =  self.edited_img_label.winfo_width()
             new_height_edited =  self.edited_img_label.winfo_height()
 
-            print(new_width, new_height, new_width_edited, new_height_edited)
+            print(new_width, new_height, new_width_edited, new_height_edited) #PARA SABER SE TEM O MESMO TAMANHO
             self.original_image = resize_image(self.original_image, ((new_width), (new_height)))
             self.edited_image = resize_image(self.original_image, ((new_width_edited), (new_height_edited)))
             
@@ -395,10 +388,10 @@ class FullScreenApp(tk.Tk):
             self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
             self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
             self.show_histogram(self.image_edited) #TIRAR DEPOIS. SOMENTE PRA TESTE
-   
+    
     def show_histogram(self, photo):
         bins_used = 50
-        rcParams['font.weight'] = 'bold'
+        rcParams['font.weight'] = 'bold'       
         plt.clf()
         plt.hist(photo.histogram(), weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
         self.histogram_canvas.figure.clear()
@@ -408,77 +401,99 @@ class FullScreenApp(tk.Tk):
         self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         self.histogram_canvas.draw()
-    
-    def otsu_threshold(self):
-        # print('cheuei nesse ponto')
+      
+    def otsu_threshold(self, photo):
         # Convert image to grayscale and get pixel values
-        self.image_gray = self.image.convert("L")
-        pixels = np.array(self.image_gray.getdata())
+        photo_gray = photo.convert("L")
+        pixels = np.array(photo_gray.getdata())
 
         # Compute Otsu threshold and binary transform
         self.threshold_value = threshold_otsu(pixels)
-        # print(self.threshold_value)
-        # print(type(self.threshold_value))
-        self.image_binary = self.image_gray.point(lambda x: 0 if x < self.threshold_value else 255)
 
-        # # Compute histogram data and plot histogram
-        # self.histogram_data, _ = np.histogram(pixels, bins=256, range=(0, 256))
-        # self.hist_plot.clear()
-        # self.hist_plot.plot(self.histogram_data)
-        # self.hist_plot.axvline(x=self.threshold_value, color="r")
-        # self.hist_canvas.draw()
+        photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
 
         # Update image display
-        self.photo_image = ImageTk.PhotoImage(self.image_binary)
-        canvas = tk.Canvas(self, width=self.image.width, height=self.image.height)
-        canvas.place(relx=0, rely=0.5, anchor=tk.W, y=10)
-        canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
+        new_width_edited =  self.edited_img_label.winfo_width()
+        new_height_edited =  self.edited_img_label.winfo_height()
 
+        x_center_edited = (new_width_edited - self.photo_image.width()) / 2
+        y_center_edited = (new_height_edited - self.photo_image.height()) / 2
+
+        self.photo_image_edited = ImageTk.PhotoImage(photo_binary)
+        if hasattr(photo, "edited_canvas"):
+                photo.edited_canvas.destroy()
+
+        canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
+        canvas.pack()
+        canvas.place(relwidth=1.0, relheight=1.0)
+        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
+
+        self.otsu_histogram_update( photo, self.threshold_value)
+
+    def otsu_histogram_update(self, photo, value ): #= self.threshold_value): não da pra colocar self como valor de um parametro??
+         #apply the red line in the histogram
         plt.clf()
-        plt.hist(self.image.histogram(), bins=256, range=(0, 256))
+        plt.hist(photo.histogram(), bins=256, range=(0, 256))
 
         self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))       
+        self.histogram_data, _ = np.histogram(photo.histogram(), bins=20, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
         self.hist = self.histogram_container.gca()
-        self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
-        self.hist.axvline(self.threshold_value, color='r', ls='--')
+        self.hist.hist(photo.histogram(), bins=20, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
+        self.hist.axvline(value, color='r', ls='--')
         self.hist.set_xlabel('Pixel Value', fontsize = 12)
         self.hist.set_title('Pixel Histogram', fontsize = 12)
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-        # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
-
         self.histogram_canvas.draw()
-        self.modified_img = self.image_binary.copy()
 
-    def update_contrast(self, value):
+    def update_contrast(self,photo, value):
+        """
         # Update the contrast of the image based on the current scale value
-        enhancer = ImageEnhance.Contrast(self.edited_image)
+        enhancer = ImageEnhance.Contrast(photo)
         # contrasted_img = enhancer.enhance(float(value))
-        self.edited_image = enhancer.enhance(float(value))
+        photo = enhancer.enhance(float(value))
         # Resize image to fit canvas and convert to PhotoImage
         # self.image = self.image.resize(self.size , Image.LANCZOS)
-        self.edited_image.thumbnail(self.size)
+        photo.thumbnail(photo.size)
 
         # Update the label with the new image
-        self.photo_image = ImageTk.PhotoImage(self.image)
-        # self.image_canvas.configure(image=self.photo_image)
+        self.photo_image = ImageTk.PhotoImage(photo)
+        # photo_canvas.configure(image=self.photo_image)
 
-        canvas = tk.Canvas(self, width=self.image.width, height=self.image.height)
+        canvas = tk.Canvas(self, width=photo.width, height=photo.height)
         canvas.place(relx=0, rely=0.5, anchor=tk.W, y=10)
         canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
 
         # Store a reference to the modified image
-        self.modified_img = self.image.copy() 
+        self.modified_img = photo.copy() 
+        """
+        enhancer = ImageEnhance.Contrast(photo)
+        photo_contrast = enhancer.enhance(float(value))
+
+        # Update image display
+        new_width_edited =  self.edited_img_label.winfo_width()
+        new_height_edited =  self.edited_img_label.winfo_height()
+
+        x_center_edited = (new_width_edited - self.photo_image.width()) / 2
+        y_center_edited = (new_height_edited - self.photo_image.height()) / 2
+
+        self.photo_image_edited = ImageTk.PhotoImage(photo_contrast)
+        if hasattr(photo, "edited_canvas"):
+                photo.edited_canvas.destroy()
+
+        canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
+        canvas.pack()
+        canvas.place(relwidth=1.0, relheight=1.0)
+        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
         
         # Resize image to fit canvas and convert to PhotoImage
         # self.modified_img = self.modified_img.resize(self.original_size , Image.LANCZOS)
         plt.clf()
-        plt.hist(self.image.histogram(), bins=256, range=(0, 256))
+        plt.hist(photo.histogram(), bins=256, range=(0, 256))
 
         self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))        
+        self.histogram_data, _ = np.histogram(photo.histogram(), bins=20, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))        
         self.hist = self.histogram_container.gca()
-        self.hist.hist(self.image.histogram(), bins=20, weights=np.ones(len(self.image.histogram()))/len(self.image.histogram()), range=(0, 256))#(self.image.histogram(), bins=256, range=(0, 256))
+        self.hist.hist(photo.histogram(), bins=20, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
         self.hist.set_xlabel('Pixel Value', fontsize = 12)
         self.hist.set_title('Pixel Histogram', fontsize = 12)
             

@@ -294,7 +294,7 @@ class FullScreenApp(tk.Tk):
         canvas = tk.Canvas(self, width=self.image.width, height=self.image.height)
         canvas.place(relx=0, rely=0.5, anchor=tk.W, y=10)
         canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
-
+        
         plt.clf()
         plt.hist(self.image.histogram(), bins=256, range=(0, 256))
 
