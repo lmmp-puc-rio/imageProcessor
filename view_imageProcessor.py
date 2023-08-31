@@ -10,6 +10,7 @@ from skimage.filters import threshold_otsu
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import os
 
 class FullScreenApp(tk.Tk):
 
@@ -53,7 +54,9 @@ class FullScreenApp(tk.Tk):
         #icon_path = r"/home/renan/Repositorio/imageProcessor/src/images/lmmp_200x65.ico"  # trocar por uma imagem de tamanho ideal
         #self.iconbitmap(icon_path)
 
+        self.contrast_value = 1.0
         self.threshold_value = None
+        self.histogram_data = None   
 
         ###############
         #top frame
@@ -184,7 +187,6 @@ class FullScreenApp(tk.Tk):
         self.text_contrast = tk.Label(self.contrast_frame, text='CONTRAST',font= (self.font, self.fz_lg, 'bold'),anchor=tk.N, background= self.pry_color)
         self.bar_contrast = tk.Scale(self.contrast_frame, from_=0.1, to=5.0,orient='horizontal',font = (self.font, self.fz_mn),tickinterval= 0.5, resolution=0.1, label="Value",
                                 troughcolor = self.sec_color, variable = self.value_scale ,bg= self.pry_color, border=None ,highlightthickness = 0, activebackground=self.pry_color, command = self.update_scale)
-
         self.text_contrast.grid(row=0, column=0,sticky='NS', padx=3, pady=(5,10))
         self.bar_contrast.grid(row=1, column=0,sticky='EW', padx=25, pady=5, ipadx=5, ipady=5)
 
@@ -200,25 +202,27 @@ class FullScreenApp(tk.Tk):
         self.treshold_frame.rowconfigure(3, weight=1)
         self.treshold_frame.rowconfigure(4, weight=1)
         
-        #----- combobox
+        #combobox
         self.list_treshold_model = ['OTSU', 'XXXX']
         self.clicked_model = tk.StringVar()
         self.clicked_model.set(self.list_treshold_model[0])
-        #dropdow_treshold = tk.OptionMenu(treshold_frame,clicked_model, *list_treshold_model)
-        self.combobox_models = ttk.Combobox(self.treshold_frame, values=self.list_treshold_model, font= (self.font, self.fz_md), state="readonly")
+        self.combobox_models = ttk.Combobox(self.treshold_frame, values=self.list_treshold_model, font= (self.font, self.fz_md), state="readonly", takefocus=None)
         self.combobox_models.current(0)
-        #self.combobox_models.bind("<<ComboboxSelected>>", self.on_combobox_select)
-        #print(self.combobox_models.get())
         
-        #----- radioBtn Treshhold
+        #radioBtn Treshhold
         self.radio_selected = tk.StringVar(value="automatic")
         self.radio1_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Automatic', variable = self.radio_selected, value= "automatic", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
         self.radio2_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Manual', variable = self.radio_selected, value= "manual", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
         self.value_treshold = tk.Label(self.treshold_frame, text= 'VALUE: ', bg= self.pry_color,highlightthickness = 0, font= (self.font, self.fz_mn))
-        self.text_box_treshold = tk.Text(self.treshold_frame, width=4, height=1, font=(self.font, self.fz_md), highlightthickness = 0)
+        self.text_box_treshold = tk.Text(self.treshold_frame, width=4, height=1, font=(self.font, self.fz_md))
+        self.text_box_alert = tk.Label(self.treshold_frame, text='* only use values between 0 and 255.',font=(self.font, 8), bg= self.pry_color)
+        
         
         # monitora cada mudança na variavel para chamar a função automaticamente
         self.radio_selected.trace("w", lambda *args: self.on_radio_select())
+
+        # value treshold starts disabled
+        self.text_box_treshold.config(state='disabled')
 
         #btn Run Model
         self.run_model_img= (Image.open(r'src/images/run_btn.png'))
@@ -234,13 +238,14 @@ class FullScreenApp(tk.Tk):
         self.text_treshold.grid(row=0, column=0,columnspan=2,sticky='N', padx=3, pady=5)
         self.combobox_models.grid(row=1, column=0,sticky='N', padx=5, pady=5)
         self.radio1_btn_treshold.grid(row=2, column=0,sticky='N', padx=5, pady=2)
-        self.radio1_btn_treshold.config(command=self.on_radio_select)
-
-        self.radio2_btn_treshold.grid(row=3, column=0,sticky='N', padx=5, pady=2)
-
-        self.value_treshold.grid(row=4, column=0,sticky='N', padx=5, pady=5)
+        #self.radio1_btn_treshold.config(command=self.on_radio_select)
         self.treshold_btn.grid(row=2, column=1,rowspan=3,sticky='N', padx=3, pady=5)
-        self.text_box_treshold.grid(row=4, column=0,sticky='N', padx=(140,0), pady=2)
+        self.radio2_btn_treshold.grid(row=3, column=0,sticky='N', padx=5, pady=2)
+        self.value_treshold.grid(row=4, column=0,columnspan=2 ,sticky='W',padx=(170,0), pady=5)
+        self.text_box_treshold.grid(row=4, column=0,columnspan=2 ,sticky='N', padx=(0,140), pady=2)
+        #self.text_box_alert.grid(row=4, column=0,columnspan=2,sticky='N', padx=(135,0), pady=(16,0))
+        self.text_box_treshold.bind("<Key>", self.on_key_press)
+        
 
         #Save Frame
 
@@ -256,69 +261,80 @@ class FullScreenApp(tk.Tk):
 
         text_checkbox = tk.Label(self.save_frame, text='SAVE PROJECT',font= (self.font, self.fz_lg, 'bold'), background= self.pry_color)
 
-        #----- Check Box
+        #Check Box
         self.img_save_value = tk.IntVar()
         self.history_save_value = tk.IntVar()
-        self.histogram_save_value = tk.IntVar()
-
-
-        def display_saves(self):
-            if(self.img_save_value.get()==1):
-                print("Savar imagem")
-            elif (self.history_save_value.get()==1):
-                print("Savar historico")
-            elif (self.histogram_save_value.get()==1):
-                print("Savar historico")
-            else:
-                print("salvar nada.")
-                
+        self.histogram_save_value = tk.IntVar()             
 
         self.checkbox1_frame = tk.Checkbutton(self.save_frame, text="SAVE IMAGE", variable = self.img_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0, command= display_saves)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0)
         self.checkbox2_frame = tk.Checkbutton(self.save_frame, text="SAVE HISTORY", variable = self.history_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0, command= display_saves)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0)
         self.checkbox3_frame = tk.Checkbutton(self.save_frame, text="SAVE HISTOGRAM", variable = self.histogram_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0, command= display_saves)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0)
 
         #Load an image for the save btn
         self.img= (Image.open(r'src/images/save_btn.png'))
         self.img = resize_image(self.img,(200,100))
         self.img_save = ImageTk.PhotoImage(self.img)
         self.img_save_label = tk.Label(image=self.img_save, background= self.pry_color)
-        self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color)
+        self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command= self.save_files)
 
         #self.text_checkbox.grid(row=0, column=0,columnspan=2, sticky='N', padx=2, pady=3)
         self.checkbox1_frame.grid(row=1, column=0, sticky='w', padx=5, pady=3)
         self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=5, pady=3)
         self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=5, pady=3)
         self.save_btn.grid(row=2, column=1, sticky='N', padx=(2,2), pady=3)
-
         
 
     def quit_application(self):
             close_app(self)
     
     def minimize_application(self):
-            minimize_app(self)
+            minimize_app(self)   
     
     #Show the scale value in real time
     def update_scale(self, *args):
         value = self.value_scale.get()
         print("Scale Value:", value)
-        self.update_contrast(self.edited_image, value)
-         
+        self.update_contrast(self.original_image, value)
+    
+    #validate user input in treshold value
+    def validate_input(self, P):
+        return P.isdigit() and 0 <= int(P) <= 255
+    
+    #validate user input in treshold value
+    def on_validate_input(self, P):
+        return self.validate_input(P) or P == ""
+
+    #validate user input in treshold value
+    def on_key_press(self, event):
+        if event.char == '\x08':  # Check for backspace character
+            return  # Allow backspace
+
+        current_position = self.text_box_treshold.index(tk.INSERT)
+        current_char = event.char
+        new_value = self.text_box_treshold.get("1.0", "end-1c") + current_char
+    
+        if not self.on_validate_input(new_value):
+            self.text_box_alert.grid(row=4, column=0,columnspan=2,sticky='N', padx=(135,0), pady=(16,0))
+            return "break"  
+           
     # verifica sempre que o radio button muda de auto para manual, dessa forma mudando o estado do TextBox
     def on_radio_select(self):
         if self.radio_selected.get() == "automatic":
-            self.text_box_treshold.delete("1.0", "end")
-            self.text_box_treshold.insert("1.0", "000")
             self.text_box_treshold.config(state='disabled')
+            print("automatico")
         else:
             self.text_box_treshold.config(state='normal')
+            print("manual")
 
     def on_treshold_btn_click(self):
+
         selected_item = self.combobox_models.get()
-        if selected_item == "OTSU":
+        self.text_box_alert.grid_remove()
+
+        if selected_item == self.list_treshold_model[0]:
             #self.radio1_btn_treshold.select()
             #self.text_box_treshold.delete("1.0", "end")
             #""" rodar a edição da foto e passar o valor para o model_value """
@@ -326,7 +342,8 @@ class FullScreenApp(tk.Tk):
             #self.text_box_treshold.insert("1.0", model_value)
             print(self.edited_image)
             self.otsu_threshold(self.edited_image)
-        elif selected_item == "XXXX":
+
+        elif selected_item == self.list_treshold_model[1]:
             self.radio2_btn_treshold.select()
             self.text_box_treshold.delete("1.0", "end")
             """ rodar a edição da foto e passar o valor para o model_value """
@@ -339,6 +356,11 @@ class FullScreenApp(tk.Tk):
         file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
         
         if file_path:
+            #reset all the variables
+            self.contrast_value = 1.0
+            self.threshold_value = None
+            self.histogram_data = None  
+
             # Create a PhotoImage object from the selected file
             self.file_path = file_path
             self.original_image = Image.open(self.file_path)
@@ -407,10 +429,22 @@ class FullScreenApp(tk.Tk):
         photo_gray = photo.convert("L")
         pixels = np.array(photo_gray.getdata())
 
+        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != "":
+            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
+        else: 
+            self.threshold_value = threshold_otsu(pixels)
+            
         # Compute Otsu threshold and binary transform
-        self.threshold_value = threshold_otsu(pixels)
+        print(f'Esse é meu treshold:{self.threshold_value}')
 
         photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
+
+        #set the otsu value in the valuebox
+        self.text_box_treshold.config(state='normal')
+        self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
+        self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
+        #self.text_box_treshold.config(state='disabled')
+        
 
         # Update image display
         new_width_edited =  self.edited_img_label.winfo_width()
@@ -436,9 +470,9 @@ class FullScreenApp(tk.Tk):
         plt.hist(photo.histogram(), bins=256, range=(0, 256))
 
         self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo.histogram(), bins=20, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
+        self.histogram_data, _ = np.histogram(photo.histogram(), bins=50, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
         self.hist = self.histogram_container.gca()
-        self.hist.hist(photo.histogram(), bins=20, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
+        self.hist.hist(photo.histogram(), bins=50, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
         self.hist.axvline(value, color='r', ls='--')
         self.hist.set_xlabel('Pixel Value', fontsize = 12)
         self.hist.set_title('Pixel Histogram', fontsize = 12)
@@ -468,6 +502,7 @@ class FullScreenApp(tk.Tk):
         """
         enhancer = ImageEnhance.Contrast(photo)
         photo_contrast = enhancer.enhance(float(value))
+        self.edited_image = enhancer.enhance(float(value))
 
         # Update image display
         new_width_edited =  self.edited_img_label.winfo_width()
@@ -488,20 +523,75 @@ class FullScreenApp(tk.Tk):
         # Resize image to fit canvas and convert to PhotoImage
         # self.modified_img = self.modified_img.resize(self.original_size , Image.LANCZOS)
         plt.clf()
-        plt.hist(photo.histogram(), bins=256, range=(0, 256))
+        plt.hist(photo_contrast.histogram(), bins=256, range=(0, 256))
 
         self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo.histogram(), bins=20, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))        
+        self.histogram_data, _ = np.histogram(photo_contrast.histogram(), bins=50, weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))        
         self.hist = self.histogram_container.gca()
-        self.hist.hist(photo.histogram(), bins=20, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
+        self.hist.hist(photo_contrast.histogram(), bins=50,weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
         self.hist.set_xlabel('Pixel Value', fontsize = 12)
         self.hist.set_title('Pixel Histogram', fontsize = 12)
             
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-        # self.histogram_canvas.figure.add_subplot(111).hist(self.image.histogram(), bins=256, range=(0, 256))
 
         self.histogram_canvas.draw()
-        
+    
+
+    def save_files(self):
+
+
+        if (self.img_save_value.get()==1) or (self.history_save_value.get()==1) or (self.histogram_save_value.get()==1):
+
+            #user insert the name than will be used in files
+            name_file =  simpledialog.askstring(title="Save files", prompt="Insert the name of the file(s).")
+
+            if not name_file:
+                name_file = "Binary_project" #  VER SE ESSE NOME FAZ SENTIDO PARA TODOS OS ARQUIVOS
+            
+            if (self.img_save_value.get()==1) and (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
+                print(name_file)
+                print("Savar imagem")
+                print("Savar historico")
+                print("Savar histograma")
+            elif (self.img_save_value.get()==1) and (self.history_save_value.get()==1):
+                print("Savar imagem")
+                print("Savar historico")
+            elif (self.img_save_value.get()==1) and (self.histogram_save_value.get()==1):
+                print("Savar imagem")
+                print("Savar histogram")
+            elif (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
+                print("Savar historico")
+                print("Savar histogram")
+            elif (self.img_save_value.get()==1):
+                print("Savar imagem") 
+            elif (self.history_save_value.get()==1):
+                print("Savar historico") 
+            elif (self.histogram_save_value.get()==1):
+                print("Savar histogram")
+            else:
+                print("salvar nada.")
+
+    #verifica se há a pasta no projeto
+    def create_projetc_folder(self):
+
+        self.current_path = os.path.dirname(os.path.abspath("projects"))
+        print(self.current_path)
+        # Name of the new folder you want to create
+        self.new_folder_name = "projects"
+
+        self.new_folder_path = os.path.join(self.current_path, self.new_folder_name)
+
+        # Create the new folder
+        os.makedirs(self.new_folder_path)
+
+    #save edited Image
+    #def save_edited_image(self):
+    
+    #save histogram
+    #def save_histogram(self):
+    
+    #save history
+    #def save_history(self):
 
 
 if __name__ == '__main__':
