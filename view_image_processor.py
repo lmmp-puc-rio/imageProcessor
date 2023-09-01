@@ -1,3 +1,5 @@
+
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog, simpledialog
@@ -56,7 +58,8 @@ class FullScreenApp(tk.Tk):
 
         self.contrast_value = 1.0
         self.threshold_value = None
-        self.histogram_data = None   
+        self.histogram_data = None  
+        self.original_size = None 
 
         ###############
         #top frame
@@ -295,9 +298,8 @@ class FullScreenApp(tk.Tk):
     
     #Show the scale value in real time
     def update_scale(self, *args):
-        value = self.value_scale.get()
-        print("Scale Value:", value)
-        self.update_contrast(self.original_image, value)
+        self.contrast_value = self.value_scale.get()
+        self.update_contrast(self.original_image, self.contrast_value)
     
     #validate user input in treshold value
     def validate_input(self, P):
@@ -324,10 +326,10 @@ class FullScreenApp(tk.Tk):
     def on_radio_select(self):
         if self.radio_selected.get() == "automatic":
             self.text_box_treshold.config(state='disabled')
-            print("automatico")
+
         else:
             self.text_box_treshold.config(state='normal')
-            print("manual")
+
 
     def on_treshold_btn_click(self):
 
@@ -340,7 +342,7 @@ class FullScreenApp(tk.Tk):
             #""" rodar a edição da foto e passar o valor para o model_value """
             #model_value = int(98)
             #self.text_box_treshold.insert("1.0", model_value)
-            print(self.edited_image)
+
             self.otsu_threshold(self.edited_image)
 
         elif selected_item == self.list_treshold_model[1]:
@@ -365,6 +367,7 @@ class FullScreenApp(tk.Tk):
             self.file_path = file_path
             self.original_image = Image.open(self.file_path)
             self.original_size = self.original_image.size
+
             
             # Resize the image to fit the canvas while maintaining aspect ratio
             new_width = self.original_img_label.winfo_width()
@@ -373,7 +376,7 @@ class FullScreenApp(tk.Tk):
             new_width_edited =  self.edited_img_label.winfo_width()
             new_height_edited =  self.edited_img_label.winfo_height()
 
-            print(new_width, new_height, new_width_edited, new_height_edited) #PARA SABER SE TEM O MESMO TAMANHO
+
             self.original_image = resize_image(self.original_image, ((new_width), (new_height)))
             self.edited_image = resize_image(self.original_image, ((new_width_edited), (new_height_edited)))
             
@@ -409,7 +412,7 @@ class FullScreenApp(tk.Tk):
             self.edited_canvas.pack()  # Place canvas inside the label
             self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
             self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
-            self.show_histogram(self.image_edited) #TIRAR DEPOIS. SOMENTE PRA TESTE
+            self.show_histogram(self.image_edited)
     
     def show_histogram(self, photo):
         bins_used = 50
@@ -434,8 +437,6 @@ class FullScreenApp(tk.Tk):
         else: 
             self.threshold_value = threshold_otsu(pixels)
             
-        # Compute Otsu threshold and binary transform
-        print(f'Esse é meu treshold:{self.threshold_value}')
 
         photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
 
@@ -480,26 +481,6 @@ class FullScreenApp(tk.Tk):
         self.histogram_canvas.draw()
 
     def update_contrast(self,photo, value):
-        """
-        # Update the contrast of the image based on the current scale value
-        enhancer = ImageEnhance.Contrast(photo)
-        # contrasted_img = enhancer.enhance(float(value))
-        photo = enhancer.enhance(float(value))
-        # Resize image to fit canvas and convert to PhotoImage
-        # self.image = self.image.resize(self.size , Image.LANCZOS)
-        photo.thumbnail(photo.size)
-
-        # Update the label with the new image
-        self.photo_image = ImageTk.PhotoImage(photo)
-        # photo_canvas.configure(image=self.photo_image)
-
-        canvas = tk.Canvas(self, width=photo.width, height=photo.height)
-        canvas.place(relx=0, rely=0.5, anchor=tk.W, y=10)
-        canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
-
-        # Store a reference to the modified image
-        self.modified_img = photo.copy() 
-        """
         enhancer = ImageEnhance.Contrast(photo)
         photo_contrast = enhancer.enhance(float(value))
         self.edited_image = enhancer.enhance(float(value))
@@ -536,63 +517,118 @@ class FullScreenApp(tk.Tk):
 
         self.histogram_canvas.draw()
     
-
     def save_files(self):
 
 
         if (self.img_save_value.get()==1) or (self.history_save_value.get()==1) or (self.histogram_save_value.get()==1):
 
-            #user insert the name than will be used in files
-            name_file =  simpledialog.askstring(title="Save files", prompt="Insert the name of the file(s).")
+            #user insert the name than will be used in the folder
+            name_folder =  simpledialog.askstring(title="Save files", prompt="Insert the name of the folder.")
 
-            if not name_file:
-                name_file = "Binary_project" #  VER SE ESSE NOME FAZ SENTIDO PARA TODOS OS ARQUIVOS
+            if not name_folder:
+                name_folder = "Binary_project" #  VER SE ESSE NOME FAZ SENTIDO PARA TODOS OS ARQUIVOS
             
             if (self.img_save_value.get()==1) and (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                print(name_file)
-                print("Savar imagem")
-                print("Savar historico")
-                print("Savar histograma")
+                self.save_edited_image(name_folder)
+                self.save_history(name_folder)
+                self.save_histogram(name_folder)
+
             elif (self.img_save_value.get()==1) and (self.history_save_value.get()==1):
-                print("Savar imagem")
-                print("Savar historico")
+                self.save_edited_image(name_folder)
+                self.save_history(name_folder)
+
             elif (self.img_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                print("Savar imagem")
-                print("Savar histogram")
+                self.save_edited_image(name_folder)
+                self.save_histogram(name_folder)
+
             elif (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                print("Savar historico")
-                print("Savar histogram")
+                self.save_history(name_folder)
+                self.save_histogram(name_folder)
+
             elif (self.img_save_value.get()==1):
-                print("Savar imagem") 
+                self.save_edited_image(name_folder)
+
             elif (self.history_save_value.get()==1):
-                print("Savar historico") 
+                self.save_history(name_folder) 
+
             elif (self.histogram_save_value.get()==1):
-                print("Savar histogram")
+                self.save_histogram(name_folder)
+
             else:
-                print("salvar nada.")
-
-    #verifica se há a pasta no projeto
-    def create_projetc_folder(self):
-
-        self.current_path = os.path.dirname(os.path.abspath("projects"))
-        print(self.current_path)
-        # Name of the new folder you want to create
-        self.new_folder_name = "projects"
-
-        self.new_folder_path = os.path.join(self.current_path, self.new_folder_name)
-
-        # Create the new folder
-        os.makedirs(self.new_folder_path)
+                return
 
     #save edited Image
-    #def save_edited_image(self):
-    
-    #save histogram
-    #def save_histogram(self):
-    
-    #save history
-    #def save_history(self):
+    def save_edited_image(self, folder_name):
 
+        #makes the image binary image back to PIL format
+        self.binary_photo_for_save = ImageTk.getimage(self.photo_image_edited)
+        
+        self.binary_photo_for_save = self.binary_photo_for_save.resize(self.original_size)
+
+        self.original_image = self.original_image.resize(self.original_size)
+        
+
+
+   
+        #self.original_image = ImageTk.getimage(self.original_image)
+
+        # Define the folder where you want to save the image
+        save_folder =f"./projects/{folder_name}" #folder_name
+        
+        # Ensure the folder exists; create it if it doesn't
+
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+            
+        # Save the image with a new name in the folder
+        output_path = os.path.join(save_folder, 'edited_image')
+        self.binary_photo_for_save.save(output_path, 'PNG')
+        output_path_original = os.path.join(save_folder, 'orinal_image')
+        self.original_image.save(output_path_original, 'PNG')
+
+        
+    #save histogram
+    def save_histogram(self, folder_name):
+        
+        # Define the folder where you want to save the image
+        save_folder =f"./projects/{folder_name}" #folder_name
+        
+        # Ensure the folder exists; create it if it doesn't
+
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+            
+        output_path = os.path.join(save_folder, 'histogram')
+        self.hist.figure.savefig(output_path)# self.histogram_canvas.save(folder_name)
+
+        
+    #save history
+    def save_history(self, folder_name):      
+        # Define the folder where you want to save the image
+        save_folder =f"./projects/{folder_name}" #folder_name
+        
+        # Ensure the folder exists; create it if it doesn't
+
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+
+        # Create string with processing history data
+        history_data = f"Image file path: {self.file_path}\nContrast value: {self.contrast_value}\n"
+
+        if self.threshold_value is not None:
+            history_data += f"Otsu threshold value: {self.threshold_value}\n"
+
+        if self.histogram_data is not None:
+            history_data += "Histogram data:\n"
+            for i, value in enumerate(self.histogram_data):
+                history_data += f"{i}: {value}\n"
+
+        # Write string to text file
+        filepath = os.path.join(save_folder, 'contrast history')
+        with open(filepath, "w") as f:
+            f.write(history_data)
+
+            
 
 if __name__ == '__main__':
     app = FullScreenApp()
