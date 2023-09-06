@@ -163,27 +163,29 @@ class FullScreenApp(tk.Tk):
 
         self.footer_frame = tk.Frame(self, background=self.pry_color, height=50)
         self.footer_frame.rowconfigure(0, weight=1)
+
+        self.footer_frame.grid(row=2, column=0, sticky='WENS')
         
-        self.footer_frame.columnconfigure(0, weight=5)
-        self.footer_frame.columnconfigure(1, weight=2)
+        self.footer_frame.columnconfigure(0, weight=0)
+        self.footer_frame.columnconfigure(1, weight=0)
         self.footer_frame.columnconfigure(2, weight=1)
 
         self.contrast_frame = tk.Frame(self.footer_frame, background=self.pry_color)
         self.treshold_frame = tk.Frame(self.footer_frame, background=self.pry_color)
-        self.save_frame = tk.Frame(self.footer_frame, background=self.pry_color)
+        self.save_frame = tk.Frame(self.footer_frame, background=self.pry_color, bg=self.pry_color)
 
 
         #footer Wdiget
-        self.footer_frame.grid(row=2, column=0, sticky='WENS')
+   
         self.contrast_frame.grid(row=0, column=0,sticky='WENS', ipadx=3,padx=2, pady=3)
         self.treshold_frame.grid(row=0, column=1,sticky='WENS', ipadx=3,padx=2, pady=3)
-        self.save_frame.grid(row=0, column=2, ipadx=3,sticky='WENS',padx=2, pady=3)
+        self.save_frame.grid(row=0, column=2,sticky='WENS', ipadx=3,padx=2, pady=3)
 
 
         #Contrast Frame
-        self.contrast_frame.columnconfigure(0, weight=1)
-        self.contrast_frame.columnconfigure(1, weight=1)
-        self.contrast_frame.columnconfigure(2, weight=1)
+        self.contrast_frame.columnconfigure(0, weight=0)
+        self.contrast_frame.columnconfigure(1, weight=0)
+    
         self.contrast_frame.rowconfigure(0, weight=1)
         self.contrast_frame.rowconfigure(1, weight=1)
         self.contrast_frame.rowconfigure(2, weight=1)
@@ -196,19 +198,41 @@ class FullScreenApp(tk.Tk):
         self.text_contrast = tk.Label(self.contrast_frame, text='CONTRAST',font= (self.font, self.fz_lg, 'bold'),anchor=tk.N, background= self.pry_color)
         self.bar_contrast = tk.Scale(self.contrast_frame, from_=0.1, to=5.0,orient='horizontal',font = (self.font, self.fz_mn),tickinterval= 0.5, resolution=0.1, label="Value",
                                 troughcolor = self.sec_color, variable = self.value_scale ,bg= self.pry_color, border=None ,highlightthickness = 0, activebackground=self.pry_color, command = self.update_scale)
-        self.text_contrast.grid(row=0, column=0,columnspan=3, sticky='NS', padx=3, pady=(5,10))
-        self.bar_contrast.grid(row=1, column=0,columnspan=3, sticky='EW', padx=25, pady=5, ipadx=5, ipady=5)
+        self.text_contrast.grid(row=0, column=0,columnspan=2, sticky='NS', padx=3, pady=(5,10))
+        self.bar_contrast.grid(row=1, column=0,columnspan=2, sticky='EW', padx=25, pady=5, ipadx=5, ipady=5)
 
         #blur filter
         self.radio_blur_selected = tk.StringVar(value='deactivated')
         self.blur_text = tk.Label(self.contrast_frame, text = 'BLUR', font = (self.font, self.fz_md, 'bold'), anchor=tk.N, background=self.pry_color)
         self.blur_text.grid(row=2, column=0, columnspan=3, sticky='N')
-        self.radio1_btn_blur =tk.Radiobutton(self.contrast_frame, text='3x3', variable = self.radio_blur_selected, value= "3x3",  anchor=tk.N, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
-        self.radio2_btn_blur =tk.Radiobutton(self.contrast_frame, text='5x5', variable = self.radio_blur_selected, value= "5x5",   anchor=tk.N,bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
-        self.radio3_btn_blur =tk.Radiobutton(self.contrast_frame, text='Deactivated', variable = self.radio_blur_selected, value= "deactivated",  anchor=tk.N, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
-        self.radio1_btn_blur.grid(row= 3, column= 0, sticky='WENS') 
-        self.radio2_btn_blur.grid(row= 3, column= 1, sticky='WENS')
-        self.radio3_btn_blur.grid(row= 3, column= 2, sticky='WENS')
+
+        #blur configs
+        self.blur_label1 = tk.Label(self.contrast_frame,  background= self.pry_color)
+        self.blur_label1.grid(row=3, column=0, sticky='w')
+        self.blur_label1.columnconfigure(0,weight=0)
+        self.blur_label1.columnconfigure(1,weight=0)
+        self.radio1_btn_blur =tk.Radiobutton(self.blur_label1, text='Activated', variable = self.radio_blur_selected, value= "activated",  anchor=tk.W, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
+        self.radio2_btn_blur =tk.Radiobutton(self.blur_label1, text='Deactivated', variable = self.radio_blur_selected, value= "deactivated",  anchor=tk.E, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
+        self.radio1_btn_blur.grid(row= 0, column= 0, padx=(20,10)) 
+        self.radio2_btn_blur.grid(row= 0, column= 1, padx=(10,20))
+
+        self.blur_label2 = tk.Label(self.contrast_frame,  background= self.pry_color)
+        self.blur_label2.columnconfigure(0,weight=0)
+        self.blur_label2.columnconfigure(0,weight=1)
+        self.blur_label2.columnconfigure(0,weight=2)
+
+        self.blur_label2.grid(row=3, column=1, sticky='W')
+
+        self.blur_value_label = tk.Label(self.blur_label2,  text='Blur Value', bg= self.pry_color,font= (self.font, self.fz_md))
+        self.blur_value_textbox = tk.Text(self.blur_label2,  width=2, height=1, font=(self.font, self.fz_md))
+        self.blur_text_box_alert = tk.Label(self.blur_label2, anchor=tk.S,  text='* only use values between 1 and 9.',font=(self.font, 8), bg= self.pry_color)
+        self.blur_text_box_alert_hidden = tk.Label(self.blur_label2, bg= self.pry_color) # create a label for hide the alert in the screen
+
+        self.blur_value_label.grid(row= 0, column=0, padx=6)
+        self.blur_value_textbox.grid(row= 0, column=1, padx=6)
+        self.blur_text_box_alert.grid(row= 0, column=2, padx=6)
+        self.blur_text_box_alert_hidden.grid(row= 0, column=2,sticky='WENS', padx=6)
+        self.blur_value_textbox.bind("<Key>", self.validate_blur_value)
 
         # monitora cada mudança no radio button do blur para ativar ou desativar o blur
         self.radio_blur_selected.trace("w", lambda *args: self.on_blur_select())
@@ -240,7 +264,7 @@ class FullScreenApp(tk.Tk):
         
         
         #TESTE DE INTERFACE VALUES, TEXBOX E MSG DE ERROR
-        self.value_model_label = tk.Label(self.treshold_frame, bg='red')
+        self.value_model_label = tk.Label(self.treshold_frame, bg=self.pry_color)
 
         self.value_model_label.columnconfigure(0, weight=1)
         self.value_model_label.columnconfigure(1, weight=1)
@@ -249,12 +273,8 @@ class FullScreenApp(tk.Tk):
         self.value_treshold = tk.Label(self.value_model_label, text= 'VALUE: ', bg= self.pry_color,highlightthickness = 0, font = (self.font, self.fz_mn))
         self.text_box_treshold = tk.Text(self.value_model_label, width=4, height=1, font=(self.font, self.fz_md))
         self.text_box_alert = tk.Label(self.value_model_label, text='* only use values between 0 and 255.',font=(self.font, 8), bg= self.pry_color)
+        self.text_box_alert_hidden = tk.Label(self.value_model_label, bg= self.pry_color) # create a label for hide the alert in the screen
 
-        ######################CERTO###############
-        #self.value_treshold = tk.Label(self.treshold_frame, text= 'VALUE: ', bg= self.pry_color,highlightthickness = 0, font = (self.font, self.fz_mn))
-        #self.text_box_treshold = tk.Text(self.treshold_frame, width=4, height=1, font=(self.font, self.fz_md))
-        #self.text_box_alert = tk.Label(self.treshold_frame, text='* only use values between 0 and 255.',font=(self.font, 8), bg= self.pry_color)
-        ######################CERTO###############
         
         # monitora cada mudança na variavel para chamar a função automaticamente
         self.radio_selected.trace("w", lambda *args: self.on_radio_select())
@@ -282,6 +302,8 @@ class FullScreenApp(tk.Tk):
         self.value_model_label.grid(row=4,column=0, columnspan=2, sticky='N')
         self.value_treshold.grid(row=0, column=0,sticky='E',padx=(30,0), pady=5)
         self.text_box_treshold.grid(row=0, column=1,sticky='N', padx=(30,0), pady=2)
+        self.text_box_alert.grid(row=0, column=2,sticky='S', padx= (12,0))
+        self.text_box_alert_hidden.grid(row=0, column=2,sticky='WENS', padx= (12,0))
         self.text_box_treshold.bind("<Key>", self.validate_model_value)
 
 
@@ -293,8 +315,8 @@ class FullScreenApp(tk.Tk):
 
         #Save Frame
 
-        self.save_frame.columnconfigure(0, weight=7)
-        self.save_frame.columnconfigure(1, weight=3)
+        self.save_frame.columnconfigure(0, weight=1)
+        self.save_frame.columnconfigure(1, weight=0)
         self.save_frame.rowconfigure(0, weight=1)
         self.save_frame.rowconfigure(1, weight=1)
         self.save_frame.rowconfigure(2, weight=1)
@@ -322,14 +344,14 @@ class FullScreenApp(tk.Tk):
         self.img = resize_image(self.img,(200,100))
         self.img_save = ImageTk.PhotoImage(self.img)
         self.img_save_label = tk.Label(image=self.img_save, background= self.pry_color)
-        self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command= self.save_files)
+        self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command= self.save_files, anchor='e')
 
         #self.text_checkbox.grid(row=0, column=0,columnspan=2, sticky='N', padx=2, pady=3)
-        self.checkbox1_frame.grid(row=1, column=0, sticky='w', padx=5, pady=3)
-        self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=5, pady=3)
-        self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=5, pady=3)
-        self.save_btn.grid(row=2, column=1, sticky='N', padx=(2,2), pady=3)
-        
+        self.checkbox1_frame.grid(row=1, column=0, sticky='w', padx=(75,0), pady=3)
+        self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=(75,0), pady=3)
+        self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=(75,0), pady=3)
+        self.save_btn.grid(row=2, column=1, sticky='e', padx=(2,20), pady=3)
+      
 
     def quit_application(self):
             close_app(self)
@@ -341,6 +363,28 @@ class FullScreenApp(tk.Tk):
     def update_scale(self, *args):
         self.contrast_value = self.value_scale.get()
         self.update_contrast(self.original_image, self.contrast_value)
+    
+    #validate user input in blur value
+    def validate_blur_value(self, event):
+        
+        def validate_input( P):
+            return P.isdigit() and 1 <= int(P) <= 9
+        
+
+        def on_validate_input( P):
+            return validate_input(P) or P == ""
+
+
+        if event.char == '\x08':  # Check for backspace character
+            return  # Allow backspace
+
+        #current_position = self.text_box_treshold.index(tk.INSERT)
+        current_char = event.char
+        new_value = self.blur_value_textbox.get("1.0", "end-1c") + current_char
+    
+        if not on_validate_input(new_value):
+            self.blur_text_box_alert_hidden.grid_remove()#row=0, column=2,sticky='S',columnspan=2, padx=(135,0), pady=(16,0))
+            return "break"  
     
     #validate user input in treshold value
     def validate_model_value(self, event):
@@ -361,7 +405,7 @@ class FullScreenApp(tk.Tk):
         new_value = self.text_box_treshold.get("1.0", "end-1c") + current_char
     
         if not on_validate_input(new_value):
-            self.text_box_alert.grid(row=0, column=2,sticky='S')#,columnspan=2, padx=(135,0), pady=(16,0))
+            self.text_box_alert_hidden.grid_remove()#row=0, column=2,sticky='S',columnspan=2, padx=(135,0), pady=(16,0))
             return "break"  
             
     # verifica sempre que o radio button muda de auto para manual, dessa forma mudando o estado do TextBox
@@ -389,10 +433,14 @@ class FullScreenApp(tk.Tk):
             #tira o filtro do blur
             return
 
+    def apply_blur(self):
+        pass
+    
     def on_treshold_btn_click(self):
 
         selected_item = self.combobox_models.get()
-        self.text_box_alert.grid_remove()
+        self.text_box_alert_hidden.grid()
+        self.blur_text_box_alert_hidden.grid()
 
         if selected_item == self.list_treshold_model[0]:
             #self.radio1_btn_treshold.select()
