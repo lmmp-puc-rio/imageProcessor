@@ -61,6 +61,9 @@ class FullScreenApp(tk.Tk):
         self.threshold_value = None
         self.histogram_data = None  
         self.original_size = None 
+        self.blur_value = 0
+        self.original_image = None
+        self.edited_image = None
 
         ###############
         #top frame
@@ -190,6 +193,7 @@ class FullScreenApp(tk.Tk):
         self.contrast_frame.rowconfigure(1, weight=1)
         self.contrast_frame.rowconfigure(2, weight=1)
         self.contrast_frame.rowconfigure(3, weight=1)
+        self.contrast_frame.rowconfigure(4, weight=1)
 
 
         #scale bar
@@ -211,8 +215,8 @@ class FullScreenApp(tk.Tk):
         self.blur_label1.grid(row=3, column=0, sticky='w')
         self.blur_label1.columnconfigure(0,weight=0)
         self.blur_label1.columnconfigure(1,weight=0)
-        self.radio1_btn_blur =tk.Radiobutton(self.blur_label1, text='Activated', variable = self.radio_blur_selected, value= "activated",  anchor=tk.W, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
-        self.radio2_btn_blur =tk.Radiobutton(self.blur_label1, text='Deactivated', variable = self.radio_blur_selected, value= "deactivated",  anchor=tk.E, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
+        self.radio1_btn_blur =tk.Radiobutton(self.blur_label1, text='Activated', variable = self.radio_blur_selected, value= "activated",  anchor=tk.W, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_mn))
+        self.radio2_btn_blur =tk.Radiobutton(self.blur_label1, text='Deactivated', variable = self.radio_blur_selected, value= "deactivated",  anchor=tk.E, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_mn))
         self.radio1_btn_blur.grid(row= 0, column= 0, padx=(20,10)) 
         self.radio2_btn_blur.grid(row= 0, column= 1, padx=(10,20))
 
@@ -223,19 +227,29 @@ class FullScreenApp(tk.Tk):
 
         self.blur_label2.grid(row=3, column=1, sticky='W')
 
-        self.blur_value_label = tk.Label(self.blur_label2,  text='Blur Value', bg= self.pry_color,font= (self.font, self.fz_md))
+        self.blur_value_label = tk.Label(self.blur_label2,  text='Blur Value: ', bg= self.pry_color,font= (self.font, self.fz_mn))
         self.blur_value_textbox = tk.Text(self.blur_label2,  width=2, height=1, font=(self.font, self.fz_md))
-        self.blur_text_box_alert = tk.Label(self.blur_label2, anchor=tk.S,  text='* only use values between 1 and 9.',font=(self.font, 8), bg= self.pry_color)
+        self.blur_text_box_alert = tk.Label(self.blur_label2, anchor=tk.S,  text='* only use values between 0 and 9.',font=(self.font, 8), bg= self.pry_color)
         self.blur_text_box_alert_hidden = tk.Label(self.blur_label2, bg= self.pry_color) # create a label for hide the alert in the screen
+        
+        #image blur btn
+        self.blur_btn_img= (Image.open(r'src/images/blur_btn.png'))
+        self.btn_blur_btn_img = resize_image(self.blur_btn_img,(120,30))
+        self.btn_blur_btn = ImageTk.PhotoImage(self.btn_blur_btn_img)
+        self.btn_run_blur = tk.Button(self.contrast_frame, image=self.btn_blur_btn,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command = self.apply_blur)
+
+         #tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command= self.save_files, anchor='e')
 
         self.blur_value_label.grid(row= 0, column=0, padx=6)
         self.blur_value_textbox.grid(row= 0, column=1, padx=6)
         self.blur_text_box_alert.grid(row= 0, column=2, padx=6)
         self.blur_text_box_alert_hidden.grid(row= 0, column=2,sticky='WENS', padx=6)
+        self.blur_value_textbox.config(state='disabled')
         self.blur_value_textbox.bind("<Key>", self.validate_blur_value)
 
-        # monitora cada mudança no radio button do blur para ativar ou desativar o blur
-        self.radio_blur_selected.trace("w", lambda *args: self.on_blur_select())
+        self.btn_run_blur.grid(row=4, column=0, columnspan=2, sticky="N", pady=5)
+        # monitora cada mudança no radio button do blur para ativar ou desativar a caixa de texto do blur
+        self.radio_blur_selected.trace("w", lambda *args: self.verify_blur())
 
         #treshold Frame
         self.radio_selected = 0
@@ -263,14 +277,14 @@ class FullScreenApp(tk.Tk):
         self.radio2_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Manual', variable = self.radio_selected, value= "manual", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
         
         
-        #TESTE DE INTERFACE VALUES, TEXBOX E MSG DE ERROR
+        #Model Value and alert msg
         self.value_model_label = tk.Label(self.treshold_frame, bg=self.pry_color)
 
         self.value_model_label.columnconfigure(0, weight=1)
         self.value_model_label.columnconfigure(1, weight=1)
         self.value_model_label.columnconfigure(2, weight=1)
 
-        self.value_treshold = tk.Label(self.value_model_label, text= 'VALUE: ', bg= self.pry_color,highlightthickness = 0, font = (self.font, self.fz_mn))
+        self.value_treshold = tk.Label(self.value_model_label, text= 'Value: ', bg= self.pry_color,highlightthickness = 0, font = (self.font, self.fz_mn))
         self.text_box_treshold = tk.Text(self.value_model_label, width=4, height=1, font=(self.font, self.fz_md))
         self.text_box_alert = tk.Label(self.value_model_label, text='* only use values between 0 and 255.',font=(self.font, 8), bg= self.pry_color)
         self.text_box_alert_hidden = tk.Label(self.value_model_label, bg= self.pry_color) # create a label for hide the alert in the screen
@@ -368,7 +382,7 @@ class FullScreenApp(tk.Tk):
     def validate_blur_value(self, event):
         
         def validate_input( P):
-            return P.isdigit() and 1 <= int(P) <= 9
+            return P.isdigit() and 0 <= int(P) <= 9
         
 
         def on_validate_input( P):
@@ -417,25 +431,61 @@ class FullScreenApp(tk.Tk):
             self.text_box_treshold.config(state='normal')
     
     #verifica sempre que o blur radio button muda para ativo
-    def on_blur_select(self):
-        if self.radio_blur_selected.get() == "3x3":
-            return
-        elif self.radio_blur_selected.get() == "5x5":
-            current_image = self.original_image
-            
-            if current_image:
-                image = current_image._PhotoImage__photo.copy()  # Make a copy of the displayed image
-                blurred_image = image.filter(ImageFilter.GaussianBlur(radius=5))  # Adjust the radius as needed
-                photo = ImageTk.PhotoImage(blurred_image)
-                self.update_image(photo)
-    
-        else:
-            #tira o filtro do blur
-            return
+    def verify_blur(self):
+        selected_item = self.radio_blur_selected.get()
+        self.blur_value = self.blur_value_textbox.get("1.0","2.0")
 
-    def apply_blur(self):
-        pass
+        if selected_item == "activated":
+            self.blur_value_textbox.config(state='normal')
+        else:
+            self.blur_value_textbox.config(state='disabled')
     
+    def apply_blur(self):
+ 
+        image = self.edited_image
+        self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
+
+        # Convert the PIL image to a NumPy array
+        image_array = np.array(image)
+        image_array = image_array.astype(np.uint8)
+
+        # Apply Gaussian blur using OpenCV
+        blurred_image = cv2.GaussianBlur(image_array, (9, 9), self.blur_value)
+        # blurred_image = cv2.GaussianBlur(image_array, (3, 3),1)
+        print("passei aqui pelo blur")
+
+        # Convert the NumPy array back to a PIL image
+        print(1)
+        blurred_image = Image.fromarray(blurred_image)
+
+        w, h = blurred_image.size
+        print('width: ', w)
+        print('height:', h)
+        print(type(blurred_image))
+        print(2)
+                
+        #self.update_image(blurred_image)
+        self.edited_image = ImageTk.PhotoImage(blurred_image)
+
+        if hasattr(image, "edited_canvas"):
+                image.edited_canvas.destroy()
+
+        new_width_edited =  self.edited_img_label.winfo_width()
+        new_height_edited =  self.edited_img_label.winfo_height()
+
+        w, h = blurred_image.size
+
+        x_center_edited = (new_width_edited - w) / 2
+        y_center_edited = (new_height_edited - h) / 2
+
+        #x_center_edited = (new_width_edited - self.edited_image.width()) / 2
+        #y_center_edited = (new_height_edited - self.edited_image.height()) / 2
+
+        canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
+        canvas.pack()
+        canvas.place(relwidth=1.0, relheight=1.0)
+        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.edited_image)
+
     def on_treshold_btn_click(self):
 
         selected_item = self.combobox_models.get()
@@ -443,21 +493,9 @@ class FullScreenApp(tk.Tk):
         self.blur_text_box_alert_hidden.grid()
 
         if selected_item == self.list_treshold_model[0]:
-            #self.radio1_btn_treshold.select()
-            #self.text_box_treshold.delete("1.0", "end")
-            #""" rodar a edição da foto e passar o valor para o model_value """
-            #model_value = int(98)
-            #self.text_box_treshold.insert("1.0", model_value)
-
             self.otsu_threshold(self.edited_image)
 
         elif selected_item == self.list_treshold_model[1]:
-            # self.radio2_btn_treshold.select()
-            # self.text_box_treshold.delete("1.0", "end")
-            # """ rodar a edição da foto e passar o valor para o model_value """
-            # model_value = int(84)
-            # self.text_box_treshold.insert("1.0", model_value)
-
             self.triangle_threshold(self.edited_image)
 
     def show_histogram(self, photo):
@@ -475,7 +513,9 @@ class FullScreenApp(tk.Tk):
       
     def otsu_threshold(self, photo):
         # Convert image to grayscale and get pixel values
+        print(type(photo))
         nimg = np.array(photo)
+        print(type(nimg))
         gray = cv2.cvtColor(nimg, cv2.COLOR_BGR2GRAY)
         photo_gray = photo.convert("L")
         pixels = np.array(photo_gray.getdata()) #gray# 
@@ -559,7 +599,7 @@ class FullScreenApp(tk.Tk):
 
         self.otsu_histogram_update( photo, self.threshold_value)
     
-    def otsu_histogram_update(self, photo, value ): #= self.threshold_value): não da pra colocar self como valor de um parametro??
+    def otsu_histogram_update(self, photo, value ):
          #apply the red line in the histogram
         plt.clf()
         plt.hist(photo.histogram(), bins=256, range=(0, 256))
@@ -616,8 +656,10 @@ class FullScreenApp(tk.Tk):
         self.histogram_canvas.draw()
    
     def update_image(self, photo):
+
         photo = ImageTk.getimage(photo)
-        
+
+
         # Clear any existing canvas and create a new one
         if hasattr(photo, "edited_canvas"):
             self.edited_canvas.destroy()  # Destroy the previous canvas
