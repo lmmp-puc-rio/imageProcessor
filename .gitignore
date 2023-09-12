@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#remove project files
+*projects/
+
 # C extensions
 *.so
 
