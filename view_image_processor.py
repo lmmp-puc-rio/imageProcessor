@@ -70,6 +70,7 @@ class FullScreenApp(tk.Tk):
         self.image_edited_tk = None
         self.original_edited_width = None
         self.original_edited_height = None
+        self.image_without_blur = None
 
         ###############
         #top frame
@@ -234,7 +235,7 @@ class FullScreenApp(tk.Tk):
 
         self.blur_value_label = tk.Label(self.blur_label2,  text='Blur Value: ', bg= self.pry_color,font= (self.font, self.fz_mn))
         self.blur_value_textbox = tk.Text(self.blur_label2,  width=2, height=1, font=(self.font, self.fz_md))
-        self.blur_text_box_alert = tk.Label(self.blur_label2, anchor=tk.S,  text='* only use values between 0 and 9.',font=(self.font, 8), bg= self.pry_color)
+        self.blur_text_box_alert = tk.Label(self.blur_label2, anchor=tk.S,  text='* only use values between 1 and 9.',font=(self.font, 8), bg= self.pry_color)
         self.blur_text_box_alert_hidden = tk.Label(self.blur_label2, bg= self.pry_color) # create a label for hide the alert in the screen
         
         #image blur btn
@@ -388,7 +389,7 @@ class FullScreenApp(tk.Tk):
     def validate_blur_value(self, event):
         
         def validate_input( P):
-            return P.isdigit() and 0 <= int(P) <= 9
+            return P.isdigit() and 1 <= int(P) <= 9
         
 
         def on_validate_input( P):
@@ -448,15 +449,14 @@ class FullScreenApp(tk.Tk):
     
     def apply_blur(self):
  
-        
-        image = self.image_edited
         #create a copy of the photo so you don't apply blur on top of blur, that way you always apply it to the image without blur
-        image_without_blur = image.copy()
+        image = self.image_without_blur
+
         self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
 
     
         # Convert the PIL image to a NumPy array
-        image_array = np.array(image_without_blur)
+        image_array = np.array(image)
 
 
         # Apply Gaussian blur using OpenCV
@@ -637,6 +637,7 @@ class FullScreenApp(tk.Tk):
         enhancer = ImageEnhance.Contrast(photo)
         photo_contrast = enhancer.enhance(float(value))
         self.image_edited = enhancer.enhance(float(value))      
+        self.image_without_blur = self.image_edited
 
         self.update_image(photo_contrast)
         """
@@ -775,7 +776,7 @@ class FullScreenApp(tk.Tk):
         
 
         #reset Blur
-        self.blur_value_textbox.config(state='disabled')
+        self.blur_value_textbox.delete("1.0","2.0")
         self.blur_value = 0
 
         #reset MODEL
