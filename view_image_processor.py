@@ -57,13 +57,19 @@ class FullScreenApp(tk.Tk):
         #icon_path = r"/home/renan/Repositorio/imageProcessor/src/images/lmmp_200x65.ico"  # trocar por uma imagem de tamanho ideal
         #self.iconbitmap(icon_path)
 
+
+        #variables
         self.contrast_value = 1.0
         self.threshold_value = None
         self.histogram_data = None  
         self.original_size = None 
         self.blur_value = 0
-        self.original_image = None
-        self.edited_image = None
+        self.image_original = None
+        self.image_original_tk = None
+        self.image_edited = None
+        self.image_edited_tk = None
+        self.original_edited_width = None
+        self.original_edited_height = None
 
         ###############
         #top frame
@@ -132,7 +138,7 @@ class FullScreenApp(tk.Tk):
 
         #main Elemnts Canvas
         self.original_img_label= tk.Label(self.main_frame, background = self.sec_color)
-        self.edited_img_label = tk.Label(self.main_frame, background = self.sec_color) #, width= self.original_img_label.winfo_width(), height= self.original_img_label.winfo_height())
+        self.edited_img_label = tk.Label(self.main_frame, background = self.sec_color)
         self.histogram_img_label = tk.Label(self.main_frame, background = self.sec_color)
         self.histogram_inner_frame = tk.Frame(self.histogram_img_label)
 
@@ -146,7 +152,6 @@ class FullScreenApp(tk.Tk):
         self.histogram_container = plt.Figure()
         self.histogram_container.patch.set_facecolor(self.sec_color)
         self.histogram_canvas = FigureCanvasTkAgg(self.histogram_container, master=self.histogram_inner_frame)
-        # self.histogram_canvas.get_tk_widget().pack(side=tk.RIGHT)#, anchor='s')
         self.histogram_canvas.get_tk_widget().pack( fill='both')
     
         #main Position
@@ -238,8 +243,6 @@ class FullScreenApp(tk.Tk):
         self.btn_blur_btn = ImageTk.PhotoImage(self.btn_blur_btn_img)
         self.btn_run_blur = tk.Button(self.contrast_frame, image=self.btn_blur_btn,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command = self.apply_blur)
 
-         #tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command= self.save_files, anchor='e')
-
         self.blur_value_label.grid(row= 0, column=0, padx=6)
         self.blur_value_textbox.grid(row= 0, column=1, padx=6)
         self.blur_text_box_alert.grid(row= 0, column=2, padx=6)
@@ -248,6 +251,7 @@ class FullScreenApp(tk.Tk):
         self.blur_value_textbox.bind("<Key>", self.validate_blur_value)
 
         self.btn_run_blur.grid(row=4, column=0, columnspan=2, sticky="N", pady=5)
+
         # monitora cada mudança no radio button do blur para ativar ou desativar a caixa de texto do blur
         self.radio_blur_selected.trace("w", lambda *args: self.verify_blur())
 
@@ -262,7 +266,7 @@ class FullScreenApp(tk.Tk):
         self.treshold_frame.rowconfigure(2, weight=1)
         self.treshold_frame.rowconfigure(3, weight=1)
         self.treshold_frame.rowconfigure(4, weight=1)
-        #self.treshold_frame.rowconfigure(5, weight=1)
+
         
         #combobox
         self.list_treshold_model = ['OTSU', 'TRIANGLE']
@@ -303,6 +307,13 @@ class FullScreenApp(tk.Tk):
         self.treshold_label = tk.Label(image=self.btn_run_model, background= self.pry_color)
         self.treshold_btn = tk.Button(self.treshold_frame, image=self.btn_run_model,bg= self.pry_color, borderwidth=0, activebackground=self.pry_color,highlightthickness = 0, command= self.on_treshold_btn_click)
         
+        #btn Reset Project
+        self.reset_project_img= (Image.open(r'src/images/reset_btn.png'))
+        self.btn_reset_project_img = resize_image(self.reset_project_img,(200,100))
+        self.btn_reset_project = ImageTk.PhotoImage(self.btn_reset_project_img)
+        self.reset_label = tk.Label(image=self.btn_reset_project, background= self.pry_color)
+        self.reset_btn = tk.Button(self.treshold_frame, image=self.btn_reset_project, bg= self.pry_color, borderwidth=0, activebackground=self.pry_color,highlightthickness = 0, command= self.reset_project)
+        
 
         #treshold Widget 
 
@@ -310,7 +321,8 @@ class FullScreenApp(tk.Tk):
         self.text_treshold.grid(row=0, column=0,columnspan=2,sticky='N', padx=3, pady=5)
         self.combobox_models.grid(row=1, column=0,sticky='N', padx=5, pady=5)
         self.radio1_btn_treshold.grid(row=2, column=0,sticky='N', padx=5, pady=2)
-        self.treshold_btn.grid(row=2, column=1, rowspan=2, columnspan=2,sticky='N', padx=3, pady=5)
+        self.treshold_btn.grid(row=2, column=1, columnspan=2,padx=(55,0), pady=5)
+        self.reset_btn.grid(row=3, column=1, columnspan=2, padx=(55,0),pady=5)
         self.radio2_btn_treshold.grid(row=3, column=0, sticky='N', padx=5, pady=2)
 
         self.value_model_label.grid(row=4,column=0, columnspan=2, sticky='N')
@@ -320,12 +332,6 @@ class FullScreenApp(tk.Tk):
         self.text_box_alert_hidden.grid(row=0, column=2,sticky='WENS', padx= (12,0))
         self.text_box_treshold.bind("<Key>", self.validate_model_value)
 
-
-
-        #self.value_treshold.grid(row=4, column=0,sticky='N',padx=(30,0), pady=5)
-        #self.text_box_treshold.grid(row=5, column=0,sticky='N', padx=(30,0), pady=2)
-        #self.text_box_treshold.bind("<Key>", self.validate_model_value)
-        
 
         #Save Frame
 
@@ -376,7 +382,7 @@ class FullScreenApp(tk.Tk):
     #Show the scale value in real time
     def update_scale(self, *args):
         self.contrast_value = self.value_scale.get()
-        self.update_contrast(self.original_image, self.contrast_value)
+        self.update_contrast(self.image_original, self.contrast_value)
     
     #validate user input in blur value
     def validate_blur_value(self, event):
@@ -442,33 +448,36 @@ class FullScreenApp(tk.Tk):
     
     def apply_blur(self):
  
-        image = self.edited_image
+        
+        image = self.image_edited
+        #create a copy of the photo so you don't apply blur on top of blur, that way you always apply it to the image without blur
+        image_without_blur = image.copy()
         self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
 
+    
         # Convert the PIL image to a NumPy array
-        image_array = np.array(image)
-        image_array = image_array.astype(np.uint8)
+        image_array = np.array(image_without_blur)
+
 
         # Apply Gaussian blur using OpenCV
-        blurred_image = cv2.GaussianBlur(image_array, (9, 9), self.blur_value)
+        blurred_image = cv2.GaussianBlur(image_array, (0, 0), self.blur_value)
         # blurred_image = cv2.GaussianBlur(image_array, (3, 3),1)
-        print("passei aqui pelo blur")
 
         # Convert the NumPy array back to a PIL image
-        print(1)
+
         blurred_image = Image.fromarray(blurred_image)
 
-        w, h = blurred_image.size
-        print('width: ', w)
-        print('height:', h)
-        print(type(blurred_image))
-        print(2)
+        #w, h = blurred_image.size
                 
-        #self.update_image(blurred_image)
-        self.edited_image = ImageTk.PhotoImage(blurred_image)
+        self.image_edited = blurred_image
+        
 
+        self.update_image(self.image_edited)
+        """
+
+        self.image_edited_tk = ImageTk.PhotoImage(blurred_image)
         if hasattr(image, "edited_canvas"):
-                image.edited_canvas.destroy()
+                self.edited_canvas.destroy()
 
         new_width_edited =  self.edited_img_label.winfo_width()
         new_height_edited =  self.edited_img_label.winfo_height()
@@ -478,14 +487,15 @@ class FullScreenApp(tk.Tk):
         x_center_edited = (new_width_edited - w) / 2
         y_center_edited = (new_height_edited - h) / 2
 
-        #x_center_edited = (new_width_edited - self.edited_image.width()) / 2
-        #y_center_edited = (new_height_edited - self.edited_image.height()) / 2
+        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
+        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
 
         canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
         canvas.pack()
         canvas.place(relwidth=1.0, relheight=1.0)
-        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.edited_image)
-
+        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
+        """
+    
     def on_treshold_btn_click(self):
 
         selected_item = self.combobox_models.get()
@@ -493,10 +503,10 @@ class FullScreenApp(tk.Tk):
         self.blur_text_box_alert_hidden.grid()
 
         if selected_item == self.list_treshold_model[0]:
-            self.otsu_threshold(self.edited_image)
+            self.otsu_threshold(self.image_edited)
 
         elif selected_item == self.list_treshold_model[1]:
-            self.triangle_threshold(self.edited_image)
+            self.triangle_threshold(self.image_edited)
 
     def show_histogram(self, photo):
         bins_used = 50
@@ -506,28 +516,22 @@ class FullScreenApp(tk.Tk):
         self.histogram_canvas.figure.clear()
         self.histogram_data, _ = np.histogram(photo.histogram(), bins=bins_used, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
         self.hist = self.histogram_container.gca()
-        self.hist.hist(photo.histogram(), bins=bins_used, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(self.photo_image_edited.histogram(), bins=256, range=(0, 256)
+        self.hist.hist(photo.histogram(), bins=bins_used, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(self.image_edited.histogram(), bins=256, range=(0, 256)
         self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         self.histogram_canvas.draw()
       
     def otsu_threshold(self, photo):
         # Convert image to grayscale and get pixel values
-        print(type(photo))
-        nimg = np.array(photo)
-        print(type(nimg))
-        gray = cv2.cvtColor(nimg, cv2.COLOR_BGR2GRAY)
         photo_gray = photo.convert("L")
         pixels = np.array(photo_gray.getdata()) #gray# 
 
-        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != "":
-            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
-        else: 
+        if self.radio_selected.get() == "manual" and self.threshold_value == None:
             self.threshold_value = threshold_otsu(pixels)
-            # ret, mask1 = cv2.threshold(pixels, 0, 255, cv2.THRESH_OTSU)
-            # self.threshold_value = int(ret)
-            # photo_binary = Image.fromarray(mask1)
-            
+        elif self.radio_selected.get() == "automatic":
+            self.threshold_value = threshold_otsu(pixels)
+        else: 
+            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))     
 
         photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
 
@@ -535,33 +539,36 @@ class FullScreenApp(tk.Tk):
         self.text_box_treshold.config(state='normal')
         self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
         self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
-        #self.text_box_treshold.config(state='disabled')
         
 
         # Update image display
-        
+        self.image_edited = photo_binary
+        self.update_image(self.image_edited)
+        self.otsu_histogram_update( self.image_edited, self.threshold_value)
+        """
         new_width_edited =  self.edited_img_label.winfo_width()
         new_height_edited =  self.edited_img_label.winfo_height()
         
-        self.edited_image = resize_image(self.original_image, ((new_width_edited), (new_height_edited)))
-
-    
-
-        self.photo_image_edited = ImageTk.PhotoImage(photo_binary)
+        self.image_edited = resize_image(self.image_original, ((new_width_edited), (new_height_edited)))
+        
+        self.image_edited = photo_binary
+        self.image_edited_tk = ImageTk.PhotoImage(photo_binary)
         if hasattr(photo, "edited_canvas"):
-                photo.edited_canvas.destroy()
+                self.edited_canvas.destroy()
 
-        x_center_edited = (new_width_edited - self.photo_image_edited.width()) / 2
-        y_center_edited = (new_height_edited - self.photo_image_edited.height()) / 2
+        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
+        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
 
         canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
         canvas.pack()
         canvas.place(relwidth=1.0, relheight=1.0)
-        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
+        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
 
         self.otsu_histogram_update( photo, self.threshold_value)
+        """
 
     def triangle_threshold(self, photo):
+
         # Convert image to grayscale and get pixel values
         photo_gray = photo.convert("L")
         pixels = np.array(photo_gray.getdata()) 
@@ -575,29 +582,35 @@ class FullScreenApp(tk.Tk):
         photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
 
         #set the otsu value in the valuebox
+
         self.text_box_treshold.config(state='normal')
         self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
         self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
-        #self.text_box_treshold.config(state='disabled')
+
         
 
         # Update image display
+        self.image_edited = photo_binary
+        self.update_image(self.image_edited)
+        """
         new_width_edited =  self.edited_img_label.winfo_width()
         new_height_edited =  self.edited_img_label.winfo_height()
 
-        x_center_edited = (new_width_edited - self.photo_image.width()) / 2
-        y_center_edited = (new_height_edited - self.photo_image.height()) / 2
+        x_center_edited = (new_width_edited - self.image_edited.width()) / 2
+        y_center_edited = (new_height_edited - self.image_edited.height()) / 2
 
-        self.photo_image_edited = ImageTk.PhotoImage(photo_binary)
+        self.image_edited = photo_binary
+        self.image_edited_tk = ImageTk.PhotoImage(photo_binary)
         if hasattr(photo, "edited_canvas"):
-                photo.edited_canvas.destroy()
+                self.edited_canvas.destroy()
 
-        canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
+        canvas = tk.Canvas(self.edited_img_label)
         canvas.pack()
         canvas.place(relwidth=1.0, relheight=1.0)
-        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
+        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
 
         self.otsu_histogram_update( photo, self.threshold_value)
+        """
     
     def otsu_histogram_update(self, photo, value ):
          #apply the red line in the histogram
@@ -614,8 +627,7 @@ class FullScreenApp(tk.Tk):
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         self.histogram_canvas.draw()
 
-    def update_contrast(self,photo, value):
-
+    def update_contrast(self,photo, value): 
         # Update image display
         new_width_edited =  self.edited_img_label.winfo_width()
         new_height_edited =  self.edited_img_label.winfo_height()
@@ -624,23 +636,24 @@ class FullScreenApp(tk.Tk):
 
         enhancer = ImageEnhance.Contrast(photo)
         photo_contrast = enhancer.enhance(float(value))
-        self.edited_image = enhancer.enhance(float(value))      
+        self.image_edited = enhancer.enhance(float(value))      
 
-        x_center_edited = (new_width_edited - self.photo_image_edited.width()) / 2
-        y_center_edited = (new_height_edited - self.photo_image_edited.height()) / 2
+        self.update_image(photo_contrast)
+        """
+        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
+        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
 
-        self.photo_image_edited = ImageTk.PhotoImage(photo_contrast)
+        self.image_edited_tk = ImageTk.PhotoImage(photo_contrast)
         if hasattr(photo, "edited_canvas"):
-                photo.edited_canvas.destroy()
+                self.edited_canvas.destroy()
 
-        canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
+        canvas = tk.Canvas(self.edited_img_label)
         canvas.pack()
         canvas.place(relwidth=1.0, relheight=1.0)
-        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
+        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
         
         # Resize image to fit canvas and convert to PhotoImage
-
-        # self.modified_img = self.modified_img.resize(self.original_size , Image.LANCZOS)
+        """
         plt.clf()
         plt.hist(photo_contrast.histogram(), bins=256, range=(0, 256))
 
@@ -655,28 +668,32 @@ class FullScreenApp(tk.Tk):
 
         self.histogram_canvas.draw()
    
-    def update_image(self, photo):
-
-        photo = ImageTk.getimage(photo)
-
+    def update_image(self, photo): #receber a photo_image_edited    
 
         # Clear any existing canvas and create a new one
         if hasattr(photo, "edited_canvas"):
             self.edited_canvas.destroy()  # Destroy the previous canvas
 
-        new_width_edited =  self.edited_img_label.winfo_width() 
-        new_height_edited =  self.edited_img_label.winfo_height()
+        #new_width_edited =  self.edited_img_label.winfo_width() 
+        #new_height_edited =  self.edited_img_label.winfo_height()
         
+        new_width_edited = self.original_edited_width
+        new_height_edited = self.original_edited_height
+
         # Calculate the coordinates to center the image in the canvas
-        x_center_edited = (new_width_edited - photo.width()) / 2
-        y_center_edited = (new_height_edited - photo.height()) / 2
+        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
+        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
+
+
+        self.image_edited = photo
+        self.image_edited_tk = ImageTk.PhotoImage(photo)
 
         # Create a canvas widget to display the edited image
         self.edited_canvas = tk.Canvas(self.edited_img_label)
         self.edited_canvas.config(borderwidth=0)
         self.edited_canvas.pack()  # Place canvas inside the label
         self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-        self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=photo)
+        self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
   
     def upload_image(self):
         # Open a file dialog and get the path of the selected file
@@ -691,8 +708,8 @@ class FullScreenApp(tk.Tk):
 
             # Create a PhotoImage object from the selected file
             self.file_path = file_path
-            self.original_image = Image.open(self.file_path)
-            self.original_size = self.original_image.size
+            self.image_original = Image.open(self.file_path)
+            self.original_size = self.image_original.size
 
             
             # Resize the image to fit the canvas while maintaining aspect ratio
@@ -702,16 +719,19 @@ class FullScreenApp(tk.Tk):
             new_width_edited =  self.edited_img_label.winfo_width() 
             new_height_edited =  self.edited_img_label.winfo_height()
 
+            self.original_edited_width = new_width_edited
+            self.original_edited_height = new_height_edited
 
-            self.original_image = resize_image(self.original_image, ((new_width), (new_height)))
-            self.edited_image = resize_image(self.original_image, ((new_width_edited), (new_height_edited)))
+
+            self.image_original = resize_image(self.image_original, ((new_width), (new_height)))
+            self.image_edited = resize_image(self.image_original, ((new_width_edited), (new_height_edited)))
             
-            self.image = self.original_image.copy()
-            self.image_edited = self.edited_image.copy()
+            self.image_original_tk = self.image_original.copy()
+            self.image_edited_tk = self.image_edited.copy()
             
             # Resize image to fit canvas and convert to PhotoImage
-            self.photo_image = ImageTk.PhotoImage(self.image)
-            self.photo_image_edited = ImageTk.PhotoImage(self.image_edited)
+            self.image_original_tk = ImageTk.PhotoImage(self.image_original)
+            self.image_edited_tk = ImageTk.PhotoImage(self.image_edited)
             
             # Clear any existing canvas and create a new one
             if hasattr(self, "original_canvas"):
@@ -719,74 +739,52 @@ class FullScreenApp(tk.Tk):
                 self.edited_canvas.destroy()  # Destroy the previous canvas
             
             # Calculate the coordinates to center the image in the canvas
-            x_center = (new_width - self.photo_image.width()) / 2
-            y_center = (new_height - self.photo_image.height()) / 2
+            x_center = (new_width - self.image_original_tk.width()) / 2
+            y_center = (new_height - self.image_original_tk.height()) / 2
 
 
-            x_center_edited = (new_width_edited - self.photo_image_edited.width()) / 2
-            y_center_edited = (new_height_edited - self.photo_image_edited.height()) / 2
+            x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
+            y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
 
             # Create a canvas widget to display the image
             self.original_canvas = tk.Canvas(self.original_img_label)
             self.original_canvas.config(borderwidth=0)
             self.original_canvas.pack()
             self.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-            self.original_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.photo_image)
+            self.original_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.image_original_tk)
             
             # Create a canvas widget to display the edited image
             self.edited_canvas = tk.Canvas(self.edited_img_label)
             self.edited_canvas.config(borderwidth=0)
             self.edited_canvas.pack()  # Place canvas inside the label
             self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-            self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
+            self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
             self.show_histogram(self.image_edited)
-            #self.update_contrast(self.image_edited)
+            self.bar_contrast.set(1.0)
 
-    """ 
-    def update_edited_image(self,photo, value = 0):
+    def reset_project(self):
+        #reseting the edited image for the original
+        self.image_edited = self.image_original
+        self.image_edited = resize_image(self.image_original, ((self.original_edited_width),(self.original_edited_height)))
+        self.update_image(self.image_edited)
+
+        #reset contrast
+        self.bar_contrast.set(1.0)
+        self.contrast_value = 0
+        #self.update_contrast(self.image_edited, self.contrast_value)
         
-        if value != 0:
-            # Update image display
-            new_width_edited =  self.edited_img_label.winfo_width()
-            new_height_edited =  self.edited_img_label.winfo_height()
-            
-            photo = resize_image(photo, ((new_width_edited), (new_height_edited)))
 
-            enhancer = ImageEnhance.Contrast(photo)
-            photo_contrast = enhancer.enhance(float(value))
-            self.edited_image = enhancer.enhance(float(value))      
+        #reset Blur
+        self.blur_value_textbox.config(state='disabled')
+        self.blur_value = 0
 
-            x_center_edited = (new_width_edited - self.photo_image_edited.width()) / 2
-            y_center_edited = (new_height_edited - self.photo_image_edited.height()) / 2
+        #reset MODEL
+        #self.show_histogram(self.image_edited)
+        self.radio_selected.set('automatic')
+        self.text_box_treshold.config(state='disable')
 
-            self.photo_image_edited = ImageTk.PhotoImage(photo_contrast)
-            if hasattr(photo, "edited_canvas"):
-                    photo.edited_canvas.destroy()
 
-            canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
-            canvas.pack()
-            canvas.place(relwidth=1.0, relheight=1.0)
-            canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.photo_image_edited)
-
-        else:
-            # Update image display
-            new_width_edited =  self.edited_img_label.winfo_width()
-            new_height_edited =  self.edited_img_label.winfo_height()
-            
-            photo = resize_image(photo, ((new_width_edited), (new_height_edited)))
-
-            x_center_edited = (new_width_edited - photo.width()) / 2
-            y_center_edited = (new_height_edited - photo.height()) / 2
-
-            self.photo_image_edited = ImageTk.PhotoImage(photo)
-            if hasattr(photo, "edited_canvas"):
-                    photo.edited_canvas.destroy()
-
-            canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
-            canvas.pack()
-            canvas.place(relwidth=1.0, relheight=1.0)
-            canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=photo)
-    """
+    
     def save_files(self):
 
 
@@ -799,16 +797,16 @@ class FullScreenApp(tk.Tk):
                 name_folder = "Binary_project" #  VER SE ESSE NOME FAZ SENTIDO PARA TODOS OS ARQUIVOS
             
             if (self.img_save_value.get()==1) and (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_edited_image(name_folder)
+                self.save_image_edited(name_folder)
                 self.save_history(name_folder)
                 self.save_histogram(name_folder)
 
             elif (self.img_save_value.get()==1) and (self.history_save_value.get()==1):
-                self.save_edited_image(name_folder)
+                self.save_image_edited(name_folder)
                 self.save_history(name_folder)
 
             elif (self.img_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_edited_image(name_folder)
+                self.save_image_edited(name_folder)
                 self.save_histogram(name_folder)
 
             elif (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
@@ -816,7 +814,7 @@ class FullScreenApp(tk.Tk):
                 self.save_histogram(name_folder)
 
             elif (self.img_save_value.get()==1):
-                self.save_edited_image(name_folder)
+                self.save_image_edited(name_folder)
 
             elif (self.history_save_value.get()==1):
                 self.save_history(name_folder) 
@@ -828,19 +826,14 @@ class FullScreenApp(tk.Tk):
                 return
 
     #save edited Image
-    def save_edited_image(self, folder_name):
+    def save_image_edited(self, folder_name):
 
         #makes the image binary image back to PIL format
-        self.binary_photo_for_save = ImageTk.getimage(self.photo_image_edited)
+        self.binary_photo_for_save_tk = self.image_edited
         
-        self.binary_photo_for_save = self.binary_photo_for_save.resize(self.original_size)
+        self.binary_photo_for_save_tk = self.binary_photo_for_save_tk.resize(self.original_size)
 
-        self.original_image = self.original_image.resize(self.original_size)
-        
-
-
-   
-        #self.original_image = ImageTk.getimage(self.original_image)
+        self.image_original = self.image_original.resize(self.original_size)
 
         # Define the folder where you want to save the image
         save_folder =f"./projects/{folder_name}" #folder_name
@@ -851,10 +844,10 @@ class FullScreenApp(tk.Tk):
             os.makedirs(save_folder)
             
         # Save the image with a new name in the folder
-        output_path = os.path.join(save_folder, 'edited_image')
-        self.binary_photo_for_save.save(output_path, 'PNG')
+        output_path = os.path.join(save_folder, 'image_edited')
+        self.binary_photo_for_save_tk.save(output_path, 'PNG')
         output_path_original = os.path.join(save_folder, 'orinal_image')
-        self.original_image.save(output_path_original, 'PNG')
+        self.image_original.save(output_path_original, 'PNG')
        
     #save histogram
     def save_histogram(self, folder_name):
@@ -868,11 +861,12 @@ class FullScreenApp(tk.Tk):
             os.makedirs(save_folder)
             
         output_path = os.path.join(save_folder, 'histogram')
-        self.hist.figure.savefig(output_path)# self.histogram_canvas.save(folder_name)
-       
+        self.hist.figure.savefig(output_path)
+
     #save history
     def save_history(self, folder_name):      
         # Define the folder where you want to save the image
+
         save_folder =f"./projects/{folder_name}" #folder_name
         
         # Ensure the folder exists; create it if it doesn't
@@ -885,6 +879,9 @@ class FullScreenApp(tk.Tk):
 
         if self.threshold_value is not None:
             history_data += f"Otsu threshold value: {self.threshold_value}\n"
+
+        if self.blur_value is not None:
+            history_data += f"Blur value: {self.blur_value}\n"
 
         if self.histogram_data is not None:
             history_data += "Histogram data:\n"
