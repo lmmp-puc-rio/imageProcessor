@@ -71,6 +71,7 @@ class FullScreenApp(tk.Tk):
         self.original_edited_width = None
         self.original_edited_height = None
         self.image_without_blur = None
+        self.num_of_bins = int(256/2)
 
         ###############
         #top frame
@@ -473,28 +474,21 @@ class FullScreenApp(tk.Tk):
         
 
         self.update_image(self.image_edited)
-        """
 
-        self.image_edited_tk = ImageTk.PhotoImage(blurred_image)
-        if hasattr(image, "edited_canvas"):
-                self.edited_canvas.destroy()
+        plt.clf()
+        plt.hist(self.image_edited.histogram(), bins=self.num_of_bins, range=(0, 256))
 
-        new_width_edited =  self.edited_img_label.winfo_width()
-        new_height_edited =  self.edited_img_label.winfo_height()
+        self.histogram_canvas.figure.clear()
+        self.histogram_data, _ = np.histogram(self.image_edited.histogram(), bins=self.num_of_bins, weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))        
+        self.hist = self.histogram_container.gca()
+        self.hist.hist(self.image_edited.histogram(), bins=self.num_of_bins,weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
+        self.hist.set_xlabel('Pixel Value', fontsize = 12)
+        self.hist.set_title('Pixel Histogram', fontsize = 12)
+            
+        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
 
-        w, h = blurred_image.size
+        self.histogram_canvas.draw()
 
-        x_center_edited = (new_width_edited - w) / 2
-        y_center_edited = (new_height_edited - h) / 2
-
-        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
-
-        canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
-        canvas.pack()
-        canvas.place(relwidth=1.0, relheight=1.0)
-        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
-        """
     
     def on_treshold_btn_click(self):
 
@@ -509,14 +503,13 @@ class FullScreenApp(tk.Tk):
             self.triangle_threshold(self.image_edited)
 
     def show_histogram(self, photo):
-        bins_used = 50
         rcParams['font.weight'] = 'bold'       
         plt.clf()
         plt.hist(photo.histogram(), weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
         self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo.histogram(), bins=bins_used, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
+        self.histogram_data, _ = np.histogram(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
         self.hist = self.histogram_container.gca()
-        self.hist.hist(photo.histogram(), bins=bins_used, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(self.image_edited.histogram(), bins=256, range=(0, 256)
+        self.hist.hist(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(self.image_edited.histogram(), bins=256, range=(0, 256)
         self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         self.histogram_canvas.draw()
@@ -525,13 +518,15 @@ class FullScreenApp(tk.Tk):
         # Convert image to grayscale and get pixel values
         photo_gray = photo.convert("L")
         pixels = np.array(photo_gray.getdata()) #gray# 
+        
+        pixels = pixels.astype(np.uint8)
 
-        if self.radio_selected.get() == "manual" and self.threshold_value == None:
-            self.threshold_value = threshold_otsu(pixels)
-        elif self.radio_selected.get() == "automatic":
-            self.threshold_value = threshold_otsu(pixels)
+        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
+
+            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
         else: 
-            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))     
+            self.threshold_value = threshold_otsu(pixels)
+            
 
         photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
 
@@ -544,40 +539,19 @@ class FullScreenApp(tk.Tk):
         # Update image display
         self.image_edited = photo_binary
         self.update_image(self.image_edited)
-        self.otsu_histogram_update( self.image_edited, self.threshold_value)
-        """
-        new_width_edited =  self.edited_img_label.winfo_width()
-        new_height_edited =  self.edited_img_label.winfo_height()
-        
-        self.image_edited = resize_image(self.image_original, ((new_width_edited), (new_height_edited)))
-        
-        self.image_edited = photo_binary
-        self.image_edited_tk = ImageTk.PhotoImage(photo_binary)
-        if hasattr(photo, "edited_canvas"):
-                self.edited_canvas.destroy()
-
-        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
-
-        canvas = tk.Canvas(self.edited_img_label)#, width=photo.width, height=photo.height)
-        canvas.pack()
-        canvas.place(relwidth=1.0, relheight=1.0)
-        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
-
-        self.otsu_histogram_update( photo, self.threshold_value)
-        """
+        self.draw_red_line_in_hist()
 
     def triangle_threshold(self, photo):
 
         # Convert image to grayscale and get pixel values
         photo_gray = photo.convert("L")
         pixels = np.array(photo_gray.getdata()) 
+        pixels = pixels.astype(np.uint8)
 
-        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != "":
+        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
             self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
         else: 
             self.threshold_value = threshold_triangle(pixels)
-            
 
         photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
 
@@ -592,40 +566,16 @@ class FullScreenApp(tk.Tk):
         # Update image display
         self.image_edited = photo_binary
         self.update_image(self.image_edited)
-        """
-        new_width_edited =  self.edited_img_label.winfo_width()
-        new_height_edited =  self.edited_img_label.winfo_height()
+        self.draw_red_line_in_hist()
 
-        x_center_edited = (new_width_edited - self.image_edited.width()) / 2
-        y_center_edited = (new_height_edited - self.image_edited.height()) / 2
-
-        self.image_edited = photo_binary
-        self.image_edited_tk = ImageTk.PhotoImage(photo_binary)
-        if hasattr(photo, "edited_canvas"):
-                self.edited_canvas.destroy()
-
-        canvas = tk.Canvas(self.edited_img_label)
-        canvas.pack()
-        canvas.place(relwidth=1.0, relheight=1.0)
-        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
-
-        self.otsu_histogram_update( photo, self.threshold_value)
-        """
     
-    def otsu_histogram_update(self, photo, value ):
-         #apply the red line in the histogram
-        plt.clf()
-        plt.hist(photo.histogram(), bins=256, range=(0, 256))
-
-        self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo.histogram(), bins=50, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
-        self.hist = self.histogram_container.gca()
-        self.hist.hist(photo.histogram(), bins=50, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
-        self.hist.axvline(value, color='r', ls='--')
-        self.hist.set_xlabel('Pixel Value', fontsize = 12)
-        self.hist.set_title('Pixel Histogram', fontsize = 12)
-        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+    def draw_red_line_in_hist(self):
+        rcParams['font.weight'] = 'bold' 
+        #apply the red line in the histogram
+          
+        self.hist.axvline(self.threshold_value, color='r', ls='--')
         self.histogram_canvas.draw()
+
 
     def update_contrast(self,photo, value): 
         # Update image display
@@ -640,28 +590,14 @@ class FullScreenApp(tk.Tk):
         self.image_without_blur = self.image_edited
 
         self.update_image(photo_contrast)
-        """
-        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
 
-        self.image_edited_tk = ImageTk.PhotoImage(photo_contrast)
-        if hasattr(photo, "edited_canvas"):
-                self.edited_canvas.destroy()
-
-        canvas = tk.Canvas(self.edited_img_label)
-        canvas.pack()
-        canvas.place(relwidth=1.0, relheight=1.0)
-        canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
-        
-        # Resize image to fit canvas and convert to PhotoImage
-        """
         plt.clf()
-        plt.hist(photo_contrast.histogram(), bins=256, range=(0, 256))
+        plt.hist(photo_contrast.histogram(), bins=self.num_of_bins, range=(0, 256))
 
         self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo_contrast.histogram(), bins=50, weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))        
+        self.histogram_data, _ = np.histogram(photo_contrast.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))        
         self.hist = self.histogram_container.gca()
-        self.hist.hist(photo_contrast.histogram(), bins=50,weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
+        self.hist.hist(photo_contrast.histogram(), bins=self.num_of_bins,weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
         self.hist.set_xlabel('Pixel Value', fontsize = 12)
         self.hist.set_title('Pixel Histogram', fontsize = 12)
             
@@ -781,11 +717,13 @@ class FullScreenApp(tk.Tk):
 
         #reset MODEL
         #self.show_histogram(self.image_edited)
+        self.text_box_treshold.delete("1.0", "end")
         self.radio_selected.set('automatic')
         self.text_box_treshold.config(state='disable')
 
+        #reset histogram
+        self.show_histogram(self.image_edited)
 
-    
     def save_files(self):
 
 
