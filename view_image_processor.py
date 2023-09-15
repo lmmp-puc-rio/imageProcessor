@@ -1,8 +1,8 @@
 
 
 import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog, simpledialog
+from tkinter import ttk, filedialog, simpledialog
+from tkinter import font
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import numpy as np
@@ -34,6 +34,8 @@ class FullScreenApp(tk.Tk):
 
         #font
         self.font='Monstserrat'
+        self.font='Arial'
+        
 
         # Set the app title in the title bar
         self.title('Image Processor')
