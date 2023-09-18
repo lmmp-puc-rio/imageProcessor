@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk, filedialog, simpledialog
-from tkinter import font
+import tkinter.font as TkFont
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import numpy as np
@@ -32,19 +32,28 @@ class FullScreenApp(tk.Tk):
         self.btn_color = "#6484DA"
         self.bg_container_color = "#DEDDDD"
 
-        #font
-        self.font='Monstserrat'
-        self.font='Arial'
+        #fonts
+        #font sizes
+        self.fz_alerts = 7
+        self.fz_mn = 10
+        self.fz_md = 12
+        self.fz_lg = 14
+        self.fz_xl = 22
+
+        #self.font='Monstserrat'
         
+        self.font_name = "LKLUG"
+        self.font_alerts = TkFont.Font(font=(self.font_name, self.fz_mn))
+        self.font_mn = TkFont.Font(font=(self.font_name, self.fz_mn))
+        self.font_md = TkFont.Font(font=(self.font_name, self.fz_md))
+        self.font_lg = TkFont.Font(font=(self.font_name, self.fz_lg))
+        self.font_xl = TkFont.Font(font=(self.font_name, self.fz_xl))
+
+        self.font_md_bold = TkFont.Font(font=(self.font_name, self.fz_md, "bold"))
+        self.font_lg_bold = TkFont.Font(font=(self.font_name, self.fz_lg, "bold"))
 
         # Set the app title in the title bar
         self.title('Image Processor')
-
-        #font sizes
-        self.fz_mn = 12
-        self.fz_md = 14
-        self.fz_lg = 18
-        self.fz_xl = 22
 
         #root config
         self.columnconfigure(0, weight=1)
@@ -54,11 +63,6 @@ class FullScreenApp(tk.Tk):
 
         #title
         self.title("Image Processor")
-
-        # Change the icon of the application
-        #icon_path = r"/home/renan/Repositorio/imageProcessor/src/images/lmmp_200x65.ico"  # trocar por uma imagem de tamanho ideal
-        #self.iconbitmap(icon_path)
-
 
         #variables
         self.contrast_value = 1.0
@@ -85,7 +89,7 @@ class FullScreenApp(tk.Tk):
         self.header_frame.columnconfigure(2, weight=1)
 
         #home button
-        self.img_home= (Image.open(r'/home/renan/Repositorio/imageProcessor/src/images/logo_grey.png'))
+        self.img_home= (Image.open(r'src/images/logo_grey.png'))
         self.btn_home_img = resize_image(self.img_home,(240,100))
         self.btn_home_model = ImageTk.PhotoImage(self.btn_home_img)
         self.home_btn = tk.Button(self.header_frame, image= self.btn_home_model, background= self.pry_color, borderwidth=0, highlightthickness = 0 , activebackground= self.btn_color,relief='sunken', command=home_page)
@@ -136,9 +140,9 @@ class FullScreenApp(tk.Tk):
         self.main_frame.columnconfigure(2, weight=0)
 
         #main Elemnts txt
-        self.original_txt = tk.Label(self.main_frame, text='Original Image',font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
-        self.edited_txt = tk.Label(self.main_frame, text='Edited Image', font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
-        self.histogram_txt = tk.Label(self.main_frame, text='Pixel Histogram', font= (self.font, self.fz_lg, 'bold'), background= self.bg_container_color )
+        self.original_txt = tk.Label(self.main_frame, text='ORIGINAL IMAGE',font= (self.font_lg_bold), background= self.bg_container_color )
+        self.edited_txt = tk.Label(self.main_frame, text='EDITED IMAGE', font= (self.font_lg_bold), background= self.bg_container_color )
+        self.histogram_txt = tk.Label(self.main_frame, text='PIXEL HISTOGRAM', font= (self.font_lg_bold), background= self.bg_container_color )
 
         #main Elemnts Canvas
         self.original_img_label= tk.Label(self.main_frame, background = self.sec_color)
@@ -208,15 +212,15 @@ class FullScreenApp(tk.Tk):
         #scale bar
 
         self.value_scale = tk.StringVar()
-        self.text_contrast = tk.Label(self.contrast_frame, text='CONTRAST',font= (self.font, self.fz_lg, 'bold'),anchor=tk.N, background= self.pry_color)
-        self.bar_contrast = tk.Scale(self.contrast_frame, from_=0.1, to=5.0,orient='horizontal',font = (self.font, self.fz_mn),tickinterval= 0.5, resolution=0.1, label="Value",
+        self.text_contrast = tk.Label(self.contrast_frame, text='CONTRAST',font= (self.font_md_bold),anchor=tk.N, background= self.pry_color)
+        self.bar_contrast = tk.Scale(self.contrast_frame, from_=0.1, to=5.0,orient='horizontal',font = (self.font_mn),tickinterval= 0.5, resolution=0.1, label="Value",
                                 troughcolor = self.sec_color, variable = self.value_scale ,bg= self.pry_color, border=None ,highlightthickness = 0, activebackground=self.pry_color, command = self.update_scale)
         self.text_contrast.grid(row=0, column=0,columnspan=2, sticky='NS', padx=3, pady=(5,10))
         self.bar_contrast.grid(row=1, column=0,columnspan=2, sticky='EW', padx=25, pady=5, ipadx=5, ipady=5)
 
         #blur filter
         self.radio_blur_selected = tk.StringVar(value='deactivated')
-        self.blur_text = tk.Label(self.contrast_frame, text = 'BLUR', font = (self.font, self.fz_md, 'bold'), anchor=tk.N, background=self.pry_color)
+        self.blur_text = tk.Label(self.contrast_frame, text = 'BLUR', font = (self.font_md_bold), anchor=tk.N, background=self.pry_color)
         self.blur_text.grid(row=2, column=0, columnspan=3, sticky='N')
 
         #blur configs
@@ -224,8 +228,8 @@ class FullScreenApp(tk.Tk):
         self.blur_label1.grid(row=3, column=0, sticky='w')
         self.blur_label1.columnconfigure(0,weight=0)
         self.blur_label1.columnconfigure(1,weight=0)
-        self.radio1_btn_blur =tk.Radiobutton(self.blur_label1, text='Activated', variable = self.radio_blur_selected, value= "activated",  anchor=tk.W, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_mn))
-        self.radio2_btn_blur =tk.Radiobutton(self.blur_label1, text='Deactivated', variable = self.radio_blur_selected, value= "deactivated",  anchor=tk.E, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_mn))
+        self.radio1_btn_blur =tk.Radiobutton(self.blur_label1, text='Activated', variable = self.radio_blur_selected, value= "activated",  anchor=tk.W, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font_mn))
+        self.radio2_btn_blur =tk.Radiobutton(self.blur_label1, text='Deactivated', variable = self.radio_blur_selected, value= "deactivated",  anchor=tk.E, bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font_mn))
         self.radio1_btn_blur.grid(row= 0, column= 0, padx=(20,10)) 
         self.radio2_btn_blur.grid(row= 0, column= 1, padx=(10,20))
 
@@ -236,9 +240,9 @@ class FullScreenApp(tk.Tk):
 
         self.blur_label2.grid(row=3, column=1, sticky='W')
 
-        self.blur_value_label = tk.Label(self.blur_label2,  text='Blur Value: ', bg= self.pry_color,font= (self.font, self.fz_mn))
-        self.blur_value_textbox = tk.Text(self.blur_label2,  width=2, height=1, font=(self.font, self.fz_md))
-        self.blur_text_box_alert = tk.Label(self.blur_label2, anchor=tk.S,  text='* only use values between 1 and 9.',font=(self.font, 8), bg= self.pry_color)
+        self.blur_value_label = tk.Label(self.blur_label2,  text='Blur Value: ', bg= self.pry_color,font= (self.font_mn))
+        self.blur_value_textbox = tk.Text(self.blur_label2,  width=3, height=1, font=(self.font_mn))
+        self.blur_text_box_alert = tk.Label(self.blur_label2, anchor=tk.S,  text='* only use values between 1 and 9.',font=(self.font_alerts), bg= self.pry_color)
         self.blur_text_box_alert_hidden = tk.Label(self.blur_label2, bg= self.pry_color) # create a label for hide the alert in the screen
         
         #image blur btn
@@ -276,13 +280,13 @@ class FullScreenApp(tk.Tk):
         self.list_treshold_model = ['OTSU', 'TRIANGLE']
         self.clicked_model = tk.StringVar()
         self.clicked_model.set(self.list_treshold_model[0])
-        self.combobox_models = ttk.Combobox(self.treshold_frame, values=self.list_treshold_model, font= (self.font, self.fz_md), state="readonly", takefocus=None)
+        self.combobox_models = ttk.Combobox(self.treshold_frame, values=self.list_treshold_model, font= (self.font_mn), state="readonly", takefocus=None)
         self.combobox_models.current(0)
         
         #radioBtn Treshhold
         self.radio_selected = tk.StringVar(value="automatic")
-        self.radio1_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Automatic', variable = self.radio_selected, value= "automatic", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
-        self.radio2_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Manual', variable = self.radio_selected, value= "manual", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font, self.fz_md))
+        self.radio1_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Automatic', variable = self.radio_selected, value= "automatic", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font_md))
+        self.radio2_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Manual', variable = self.radio_selected, value= "manual", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font_md))
         
         
         #Model Value and alert msg
@@ -292,9 +296,9 @@ class FullScreenApp(tk.Tk):
         self.value_model_label.columnconfigure(1, weight=1)
         self.value_model_label.columnconfigure(2, weight=1)
 
-        self.value_treshold = tk.Label(self.value_model_label, text= 'Value: ', bg= self.pry_color,highlightthickness = 0, font = (self.font, self.fz_mn))
-        self.text_box_treshold = tk.Text(self.value_model_label, width=4, height=1, font=(self.font, self.fz_md))
-        self.text_box_alert = tk.Label(self.value_model_label, text='* only use values between 0 and 255.',font=(self.font, 8), bg= self.pry_color)
+        self.value_treshold = tk.Label(self.value_model_label, text= 'Value: ', bg= self.pry_color,highlightthickness = 0, font = (self.font_mn))
+        self.text_box_treshold = tk.Text(self.value_model_label, width=4, height=1, font=(self.font_mn))
+        self.text_box_alert = tk.Label(self.value_model_label, text='* only use values between 0 and 255.',font=(self.font_alerts), bg= self.pry_color)
         self.text_box_alert_hidden = tk.Label(self.value_model_label, bg= self.pry_color) # create a label for hide the alert in the screen
 
         
@@ -321,7 +325,7 @@ class FullScreenApp(tk.Tk):
 
         #treshold Widget 
 
-        self.text_treshold = tk.Label(self.treshold_frame, text='TRESHOLD',font= (self.font, self.fz_lg, 'bold'), background= self.pry_color)
+        self.text_treshold = tk.Label(self.treshold_frame, text='TRESHOLD',font= (self.font_md_bold), background= self.pry_color)
         self.text_treshold.grid(row=0, column=0,columnspan=2,sticky='N', padx=3, pady=5)
         self.combobox_models.grid(row=1, column=0,sticky='N', padx=5, pady=5)
         self.radio1_btn_treshold.grid(row=2, column=0,sticky='N', padx=5, pady=2)
@@ -347,21 +351,17 @@ class FullScreenApp(tk.Tk):
         self.save_frame.rowconfigure(3, weight=1)
         self.save_frame.rowconfigure(4, weight=1)
 
-        #checkbox widget
-
-        text_checkbox = tk.Label(self.save_frame, text='SAVE PROJECT',font= (self.font, self.fz_lg, 'bold'), background= self.pry_color)
-
         #Check Box
         self.img_save_value = tk.IntVar()
         self.history_save_value = tk.IntVar()
         self.histogram_save_value = tk.IntVar()             
 
         self.checkbox1_frame = tk.Checkbutton(self.save_frame, text="SAVE IMAGE", variable = self.img_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font_md),highlightthickness = 0)
         self.checkbox2_frame = tk.Checkbutton(self.save_frame, text="SAVE HISTORY", variable = self.history_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font_md),highlightthickness = 0)
         self.checkbox3_frame = tk.Checkbutton(self.save_frame, text="SAVE HISTOGRAM", variable = self.histogram_save_value, onvalue=1, offvalue=0,
-                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font, self.fz_md),highlightthickness = 0)
+                                                 bg= self.pry_color, activebackground= self.pry_color, font= (self.font_md),highlightthickness = 0)
 
         #Load an image for the save btn
         self.img= (Image.open(r'src/images/save_btn.png'))
@@ -371,9 +371,9 @@ class FullScreenApp(tk.Tk):
         self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command= self.save_files, anchor='e')
 
         #self.text_checkbox.grid(row=0, column=0,columnspan=2, sticky='N', padx=2, pady=3)
-        self.checkbox1_frame.grid(row=1, column=0, sticky='w', padx=(75,0), pady=3)
-        self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=(75,0), pady=3)
-        self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=(75,0), pady=3)
+        self.checkbox1_frame.grid(row=1, column=0, sticky='w', padx=(90,0), pady=3)
+        self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=(90,0), pady=3)
+        self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=(90,0), pady=3)
         self.save_btn.grid(row=2, column=1, sticky='e', padx=(2,20), pady=3)
       
 
