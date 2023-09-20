@@ -20,9 +20,11 @@ class FullScreenApp(tk.Tk):
     def __init__(self):
         super().__init__()
         
-        ###############
-        #Basic config
-        ###############
+        #####################
+        ##   Basic config  ##
+        #####################
+
+        #app in fullscreen
         self.attributes("-fullscreen", True)
         self.overrideredirect(False)
 
@@ -32,16 +34,16 @@ class FullScreenApp(tk.Tk):
         self.btn_color = "#6484DA"
         self.bg_container_color = "#DEDDDD"
 
-        #fonts
+       
         #font sizes
         self.fz_alerts = 7
         self.fz_mn = 10
         self.fz_md = 12
         self.fz_lg = 14
         self.fz_xl = 22
-
-        #self.font='Monstserrat'
         
+        #fonts config
+
         self.font_name = "LKLUG"
         self.font_alerts = TkFont.Font(font=(self.font_name, self.fz_mn))
         self.font_mn = TkFont.Font(font=(self.font_name, self.fz_mn))
@@ -61,10 +63,10 @@ class FullScreenApp(tk.Tk):
         self.rowconfigure(1, weight=9)
         self.rowconfigure(2, weight=1)
 
-        #title
+        #App title
         self.title("Image Processor")
 
-        #variables
+        #Global variables
         self.contrast_value = 1.0
         self.threshold_value = None
         self.histogram_data = None  
@@ -80,9 +82,10 @@ class FullScreenApp(tk.Tk):
         self.num_of_bins = int(256/2)
 
         ###############
-        #top frame
+        ## top frame ##
         ###############
 
+        #grid config
         self.header_frame = tk.Frame(self, background = self.pry_color)
         self.header_frame.columnconfigure(0, weight=0)
         self.header_frame.columnconfigure(1, weight=8)
@@ -119,7 +122,7 @@ class FullScreenApp(tk.Tk):
         self.btn_img_minimize_model = ImageTk.PhotoImage(self.btn_img_minimize_img)
         self.minimize_btn = tk.Button(self.header_frame, image=self.btn_img_minimize_model,bg= self.pry_color, borderwidth=0, highlightthickness = 0, activebackground=self.pry_color, command=self.minimize_application)
 
-        #top widget
+        #Placing widget in main framePlacing widget in top widget
         self.header_frame.grid(row=0, column=0, sticky='WENS')
         self.home_btn.grid(row= 0 , column= 0, sticky ='W', ipady=5, ipadx=7)
         self.upload_btn.grid(row= 0 , column= 1, padx=(0,255), sticky ='E', pady=2)
@@ -128,10 +131,10 @@ class FullScreenApp(tk.Tk):
         self.close_btn.grid(row= 0 , column= 2, sticky ='E', padx=(2,5), pady=2)
 
         ###############
-        #main
+        ##    main   ##
         ###############
 
-        #main Segmentation
+        #Grid config
         self.main_frame = tk.Frame(self, background= self.bg_container_color)
         self.main_frame.rowconfigure(0, weight=0)
         self.main_frame.rowconfigure(1, weight=1)
@@ -139,17 +142,18 @@ class FullScreenApp(tk.Tk):
         self.main_frame.columnconfigure(1, weight=1)
         self.main_frame.columnconfigure(2, weight=0)
 
-        #main Elemnts txt
+        #main titles texts
         self.original_txt = tk.Label(self.main_frame, text='ORIGINAL IMAGE',font= (self.font_lg_bold), background= self.bg_container_color )
         self.edited_txt = tk.Label(self.main_frame, text='EDITED IMAGE', font= (self.font_lg_bold), background= self.bg_container_color )
         self.histogram_txt = tk.Label(self.main_frame, text='PIXEL HISTOGRAM', font= (self.font_lg_bold), background= self.bg_container_color )
 
-        #main Elemnts Canvas
+        #main Canvas
         self.original_img_label= tk.Label(self.main_frame, background = self.sec_color)
         self.edited_img_label = tk.Label(self.main_frame, background = self.sec_color)
         self.histogram_img_label = tk.Label(self.main_frame, background = self.sec_color)
         self.histogram_inner_frame = tk.Frame(self.histogram_img_label)
 
+        #Canvas grid config
         self.histogram_img_label.rowconfigure(0, weight=1)
         self.histogram_img_label.rowconfigure(1, weight=1)
         self.histogram_img_label.rowconfigure(2, weight=1)
@@ -162,55 +166,50 @@ class FullScreenApp(tk.Tk):
         self.histogram_canvas = FigureCanvasTkAgg(self.histogram_container, master=self.histogram_inner_frame)
         self.histogram_canvas.get_tk_widget().pack( fill='both')
     
-        #main Position
+        #Placing widget in main frame
         self.main_frame.grid(row=1, column=0, sticky='WENS')
-
         self.original_txt.grid(row=0, column=0, sticky='N', pady=(6,2))
         self.edited_txt.grid(row=0, column=1, sticky='N', pady=(6,2))
         self.histogram_txt.grid(row=0, column=2, sticky='N', pady=(6,2))
-
         self.original_img_label.grid(row=1, column=0, sticky='WENS',padx=1.5, pady=3)
         self.edited_img_label.grid(row=1, column=1, sticky='WENS',padx=1.5, pady=3)
         self.histogram_img_label.grid(row=1, column=2, sticky='WENS',padx=1.5,pady=3)
 
-        ###############
-        #footer frame
-        ###############
+        ##################
+        ## footer frame ##
+        ##################
 
+        #Grid config
         self.footer_frame = tk.Frame(self, background=self.pry_color, height=50)
-        self.footer_frame.rowconfigure(0, weight=1)
-
         self.footer_frame.grid(row=2, column=0, sticky='WENS')
-        
+        self.footer_frame.rowconfigure(0, weight=1)
         self.footer_frame.columnconfigure(0, weight=0)
         self.footer_frame.columnconfigure(1, weight=0)
         self.footer_frame.columnconfigure(2, weight=1)
 
+        #footer widgets
         self.contrast_frame = tk.Frame(self.footer_frame, background=self.pry_color)
         self.treshold_frame = tk.Frame(self.footer_frame, background=self.pry_color)
         self.save_frame = tk.Frame(self.footer_frame, background=self.pry_color, bg=self.pry_color)
 
-
-        #footer Wdiget
-   
+        #placing footer widgets   
         self.contrast_frame.grid(row=0, column=0,sticky='WENS', ipadx=3,padx=2, pady=3)
         self.treshold_frame.grid(row=0, column=1,sticky='WENS', ipadx=3,padx=2, pady=3)
         self.save_frame.grid(row=0, column=2,sticky='WENS', ipadx=3,padx=2, pady=3)
 
+        ##############################
+        ##Contrast Frame Gird Config##
+        ##############################
 
-        #Contrast Frame
         self.contrast_frame.columnconfigure(0, weight=0)
         self.contrast_frame.columnconfigure(1, weight=0)
-    
         self.contrast_frame.rowconfigure(0, weight=1)
         self.contrast_frame.rowconfigure(1, weight=1)
         self.contrast_frame.rowconfigure(2, weight=1)
         self.contrast_frame.rowconfigure(3, weight=1)
         self.contrast_frame.rowconfigure(4, weight=1)
 
-
-        #scale bar
-
+        #Scale Bar Widgets
         self.value_scale = tk.StringVar()
         self.text_contrast = tk.Label(self.contrast_frame, text='CONTRAST',font= (self.font_md_bold),anchor=tk.N, background= self.pry_color)
         self.bar_contrast = tk.Scale(self.contrast_frame, from_=0.1, to=5.0,orient='horizontal',font = (self.font_mn),tickinterval= 0.5, resolution=0.1, label="Value",
@@ -218,7 +217,7 @@ class FullScreenApp(tk.Tk):
         self.text_contrast.grid(row=0, column=0,columnspan=2, sticky='NS', padx=3, pady=(5,10))
         self.bar_contrast.grid(row=1, column=0,columnspan=2, sticky='EW', padx=25, pady=5, ipadx=5, ipady=5)
 
-        #blur filter
+        #blur filter WIdgets
         self.radio_blur_selected = tk.StringVar(value='deactivated')
         self.blur_text = tk.Label(self.contrast_frame, text = 'BLUR', font = (self.font_md_bold), anchor=tk.N, background=self.pry_color)
         self.blur_text.grid(row=2, column=0, columnspan=3, sticky='N')
@@ -243,7 +242,9 @@ class FullScreenApp(tk.Tk):
         self.blur_value_label = tk.Label(self.blur_label2,  text='Blur Value: ', bg= self.pry_color,font= (self.font_mn))
         self.blur_value_textbox = tk.Text(self.blur_label2,  width=3, height=1, font=(self.font_mn))
         self.blur_text_box_alert = tk.Label(self.blur_label2, anchor=tk.S,  text='* only use values between 1 and 9.',font=(self.font_alerts), bg= self.pry_color)
-        self.blur_text_box_alert_hidden = tk.Label(self.blur_label2, bg= self.pry_color) # create a label for hide the alert in the screen
+        
+        # create a label for hide the alert in the screen
+        self.blur_text_box_alert_hidden = tk.Label(self.blur_label2, bg= self.pry_color)
         
         #image blur btn
         self.blur_btn_img= (Image.open(r'src/images/blur_btn.png'))
@@ -260,15 +261,17 @@ class FullScreenApp(tk.Tk):
 
         self.btn_run_blur.grid(row=4, column=0, columnspan=2, sticky="N", pady=5)
 
-        # monitora cada mudança no radio button do blur para ativar ou desativar a caixa de texto do blur
+        # monitors each change in the blur radio button to activate or deactivate the blur text box
         self.radio_blur_selected.trace("w", lambda *args: self.verify_blur())
 
-        #treshold Frame
-        self.radio_selected = 0
 
+        ##############################
+        ##      treshold Frame      ##
+        ##############################
+
+        #Grid Config
         self.treshold_frame.columnconfigure(0, weight=3)
         self.treshold_frame.columnconfigure(1, weight=3)
-
         self.treshold_frame.rowconfigure(0, weight=1)
         self.treshold_frame.rowconfigure(1, weight=1)
         self.treshold_frame.rowconfigure(2, weight=1)
@@ -276,14 +279,15 @@ class FullScreenApp(tk.Tk):
         self.treshold_frame.rowconfigure(4, weight=1)
 
         
-        #combobox
+        #model Combobox
         self.list_treshold_model = ['OTSU', 'TRIANGLE']
         self.clicked_model = tk.StringVar()
         self.clicked_model.set(self.list_treshold_model[0])
         self.combobox_models = ttk.Combobox(self.treshold_frame, values=self.list_treshold_model, font= (self.font_mn), state="readonly", takefocus=None)
         self.combobox_models.current(0)
         
-        #radioBtn Treshhold
+        #Radio buttons Treshhold
+        self.radio_selected = 0
         self.radio_selected = tk.StringVar(value="automatic")
         self.radio1_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Automatic', variable = self.radio_selected, value= "automatic", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font_md))
         self.radio2_btn_treshold =tk.Radiobutton(self.treshold_frame,text='Manual', variable = self.radio_selected, value= "manual", bg= self.pry_color,highlightthickness = 0, activebackground= self.pry_color, font= (self.font_md))
@@ -299,10 +303,11 @@ class FullScreenApp(tk.Tk):
         self.value_treshold = tk.Label(self.value_model_label, text= 'Value: ', bg= self.pry_color,highlightthickness = 0, font = (self.font_mn))
         self.text_box_treshold = tk.Text(self.value_model_label, width=4, height=1, font=(self.font_mn))
         self.text_box_alert = tk.Label(self.value_model_label, text='* only use values between 0 and 255.',font=(self.font_alerts), bg= self.pry_color)
-        self.text_box_alert_hidden = tk.Label(self.value_model_label, bg= self.pry_color) # create a label for hide the alert in the screen
 
-        
-        # monitora cada mudança na variavel para chamar a função automaticamente
+        # create a label for hide the alert in the screen
+        self.text_box_alert_hidden = tk.Label(self.value_model_label, bg= self.pry_color)
+
+        # monitors each change in the model radio button to activate or deactivate the value model text box
         self.radio_selected.trace("w", lambda *args: self.on_radio_select())
 
         # value treshold starts disabled
@@ -340,9 +345,11 @@ class FullScreenApp(tk.Tk):
         self.text_box_alert_hidden.grid(row=0, column=2,sticky='WENS', padx= (12,0))
         self.text_box_treshold.bind("<Key>", self.validate_model_value)
 
+        #########################
+        ##      Save Frame     ##
+        #########################
 
-        #Save Frame
-
+        #Grid Config
         self.save_frame.columnconfigure(0, weight=1)
         self.save_frame.columnconfigure(1, weight=0)
         self.save_frame.rowconfigure(0, weight=1)
@@ -351,7 +358,7 @@ class FullScreenApp(tk.Tk):
         self.save_frame.rowconfigure(3, weight=1)
         self.save_frame.rowconfigure(4, weight=1)
 
-        #Check Box
+        #Check Boxs for saves
         self.img_save_value = tk.IntVar()
         self.history_save_value = tk.IntVar()
         self.histogram_save_value = tk.IntVar()             
@@ -363,14 +370,14 @@ class FullScreenApp(tk.Tk):
         self.checkbox3_frame = tk.Checkbutton(self.save_frame, text="SAVE HISTOGRAM", variable = self.histogram_save_value, onvalue=1, offvalue=0,
                                                  bg= self.pry_color, activebackground= self.pry_color, font= (self.font_md),highlightthickness = 0)
 
-        #Load an image for the save btn
+        #Save button
         self.img= (Image.open(r'src/images/save_btn.png'))
         self.img = resize_image(self.img,(200,100))
         self.img_save = ImageTk.PhotoImage(self.img)
         self.img_save_label = tk.Label(image=self.img_save, background= self.pry_color)
-        self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command= self.save_files, anchor='e')
+        self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0,
+                                  activebackground=self.pry_color, command= self.save_files, anchor='e')
 
-        #self.text_checkbox.grid(row=0, column=0,columnspan=2, sticky='N', padx=2, pady=3)
         self.checkbox1_frame.grid(row=1, column=0, sticky='w', padx=(90,0), pady=3)
         self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=(90,0), pady=3)
         self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=(90,0), pady=3)
@@ -490,7 +497,6 @@ class FullScreenApp(tk.Tk):
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
 
         self.histogram_canvas.draw()
-
     
     def on_treshold_btn_click(self):
 
@@ -570,14 +576,12 @@ class FullScreenApp(tk.Tk):
         self.update_image(self.image_edited)
         self.draw_red_line_in_hist()
 
-    
     def draw_red_line_in_hist(self):
         rcParams['font.weight'] = 'bold' 
         #apply the red line in the histogram
           
         self.hist.axvline(self.threshold_value, color='r', ls='--')
         self.histogram_canvas.draw()
-
 
     def update_contrast(self,photo, value): 
         # Update image display
