@@ -383,21 +383,66 @@ class FullScreenApp(tk.Tk):
         self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=(90,0), pady=3)
         self.save_btn.grid(row=2, column=1, sticky='e', padx=(2,20), pady=3)
       
-
+    #estrutura certa para comentarios com Doxygen
+    #"""!
+    # @brief (Aqui entra uma breve explicação do motodo/função)
+    #
+    # @param (Aqui você explica os parametros a serem recebidos, como o tipo do dado e o que pode receber)
+    #
+    # @note (Explicação de como funciona a função, qual dado retorna falando o nome da variavel e o tipo da mesma)
+    #
+    # @throws ()
+    #"""
     def quit_application(self):
-            close_app(self)
+        """!
+        @brief ends the application
+        
+        @param self app
+        
+        @note Closes the app with the tk.destroy()
+        
+        @return None
+        """
+        close_app(self)
     
     def minimize_application(self):
-            minimize_app(self)   
+        """!
+        @brief minimize the application
+        
+        @param self app
+        
+        @note minimize the app and quit the fullscreen with the app.iconify()
+        
+        @return None
+        """
+        minimize_app(self)   
     
     #Show the scale value in real time
     def update_scale(self, *args):
+        """!
+        @brief take the atual value of the contrast bar.
+        
+        @param self.value_scale(str)
+        
+        @note Take the value of the contrast bar e pass to the update_contrast function for update the edited image with the contrast value
+        
+        @return self.update_contrast(self,photo, value)
+        """
         self.contrast_value = self.value_scale.get()
         self.update_contrast(self.image_original, self.contrast_value)
     
     #validate user input in blur value
     def validate_blur_value(self, event):
+        """!
+        @brief show an alert msg on blur value
         
+        @param key pressed on self.blur_value_textbox(str)
+        
+        @note shows a warning message when the user enters a value that is not accepted,
+         just removes the label above the message.
+        
+        @return None
+        """
         def validate_input( P):
             return P.isdigit() and 1 <= int(P) <= 9
         
@@ -414,12 +459,21 @@ class FullScreenApp(tk.Tk):
         new_value = self.blur_value_textbox.get("1.0", "end-1c") + current_char
     
         if not on_validate_input(new_value):
-            self.blur_text_box_alert_hidden.grid_remove()#row=0, column=2,sticky='S',columnspan=2, padx=(135,0), pady=(16,0))
+            self.blur_text_box_alert_hidden.grid_remove()
             return "break"  
     
     #validate user input in treshold value
     def validate_model_value(self, event):
+        """!
+        @brief show an alert msg on model value
         
+        @param key pressed on self.model_value_textbox(str)
+        
+        @note shows a warning message when the user enters a value that is not accepted,
+         just removes the label above the message.
+        
+        @return None
+        """
         def validate_input( P):
             return P.isdigit() and 0 <= int(P) <= 255
         
@@ -441,6 +495,16 @@ class FullScreenApp(tk.Tk):
             
     # verifica sempre que o radio button muda de auto para manual, dessa forma mudando o estado do TextBox
     def on_radio_select(self):
+        """!
+        @brief check the changes of the radio button
+        
+        @param self.radio_selected(radion button)
+        
+        @note checks whenever the radio button changes from auto to manual,
+          changing the state of the Model TextBox
+        
+        @return None
+        """
         if self.radio_selected.get() == "automatic":
             self.text_box_treshold.config(state='disabled')
 
@@ -449,6 +513,17 @@ class FullScreenApp(tk.Tk):
     
     #verifica sempre que o blur radio button muda para ativo
     def verify_blur(self):
+        """!
+        @brief Verify and configure blur settings based on the selected item.
+
+        @param self.radio_blur_selected
+
+        @note This function verifies the selected blur setting (activated or disabled) and configures
+        the blur value textbox accordingly. If 'activated' is selected, the textbox is enabled
+        to allow user input for the blur value. If 'disabled' is selected, the textbox is disabled.
+
+        @return: None
+        """
         selected_item = self.radio_blur_selected.get()
         self.blur_value = self.blur_value_textbox.get("1.0","2.0")
 
@@ -458,30 +533,32 @@ class FullScreenApp(tk.Tk):
             self.blur_value_textbox.config(state='disabled')
     
     def apply_blur(self):
- 
+        """!
+        @brief Apply Gaussian blur to the image.
+
+        @param The function uses attributes: `self.image_without_blur`, `self.blur_value_textbox`,
+        `self.blur_value`, `self.num_of_bins`, `self.image_edited`, `self.histogram_canvas`.
+
+        @note This function applies Gaussian blur to the edited image using the specified blur value.
+        It also updates the edited image, displays the updated image, and generates the new pixel histogram for the updated edited image.
+
+
+        @return: None
+        """
+
         #create a copy of the photo so you don't apply blur on top of blur, that way you always apply it to the image without blur
         image = self.image_without_blur
-
         self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
 
-    
         # Convert the PIL image to a NumPy array
         image_array = np.array(image)
 
-
         # Apply Gaussian blur using OpenCV
         blurred_image = cv2.GaussianBlur(image_array, (0, 0), self.blur_value)
-        # blurred_image = cv2.GaussianBlur(image_array, (3, 3),1)
 
         # Convert the NumPy array back to a PIL image
-
         blurred_image = Image.fromarray(blurred_image)
-
-        #w, h = blurred_image.size
-                
         self.image_edited = blurred_image
-        
-
         self.update_image(self.image_edited)
 
         plt.clf()
@@ -499,7 +576,17 @@ class FullScreenApp(tk.Tk):
         self.histogram_canvas.draw()
     
     def on_treshold_btn_click(self):
+        """!
+        @brief Apply Gaussian blur to the image.
 
+        @param The function uses attributes: `self.image_without_blur`, `self.blur_value_textbox`,
+        `self.blur_value`, `self.num_of_bins`, `self.image_edited`, `self.histogram_canvas`.
+
+        @note This function applies Gaussian blur to the edited image using the specified blur value.
+        It also updates the edited image, displays the updated image, and generates the new pixel histogram for the updated edited image.
+
+        @return: None
+        """
         selected_item = self.combobox_models.get()
         self.text_box_alert_hidden.grid()
         self.blur_text_box_alert_hidden.grid()
@@ -511,18 +598,38 @@ class FullScreenApp(tk.Tk):
             self.triangle_threshold(self.image_edited)
 
     def show_histogram(self, photo):
+        """!
+        @brief plot the frist histogram of the original image and reset the histogram
+
+        @param self.image_edited(PIL Image)
+        
+        @note This function plots the histogram on the screen of the given photo and updates the histogram
+    
+        @return: None
+        """
+        
         rcParams['font.weight'] = 'bold'       
         plt.clf()
         plt.hist(photo.histogram(), weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
         self.histogram_canvas.figure.clear()
         self.histogram_data, _ = np.histogram(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
         self.hist = self.histogram_container.gca()
-        self.hist.hist(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))#(self.image_edited.histogram(), bins=256, range=(0, 256)
+        self.hist.hist(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
         self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         self.histogram_canvas.draw()
       
     def otsu_threshold(self, photo):
+        """!
+        @brief transform the edited image in gray scale image, based on the chosen model
+
+        @param self.image_edited(PIL Image)
+        
+        @note This function take the PIL image, transform in a numpy array and pass to the threshold_otsu of the Skimage filters.
+          Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
+    
+        @return: None
+        """
         # Convert image to grayscale and get pixel values
         photo_gray = photo.convert("L")
         pixels = np.array(photo_gray.getdata()) #gray# 
@@ -550,7 +657,16 @@ class FullScreenApp(tk.Tk):
         self.draw_red_line_in_hist()
 
     def triangle_threshold(self, photo):
+        """!
+        @brief transform the edited image in gray scale image, based on the chosen model
 
+        @param self.image_edited(PIL Image)
+        
+        @note This function take the PIL image, transform in a numpy array and pass to the threshold_triangle of the Skimage filters.
+          Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
+    
+        @return: None
+        """
         # Convert image to grayscale and get pixel values
         photo_gray = photo.convert("L")
         pixels = np.array(photo_gray.getdata()) 
@@ -577,6 +693,15 @@ class FullScreenApp(tk.Tk):
         self.draw_red_line_in_hist()
 
     def draw_red_line_in_hist(self):
+        """!
+        @brief Draw a red line in the histogram
+
+        @param self.threshold_value(int)
+        
+        @note This function take self.threshold_value, after activated the model and draw a red line in the histogram showing the value model
+    
+        @return: None
+        """
         rcParams['font.weight'] = 'bold' 
         #apply the red line in the histogram
           
@@ -584,6 +709,18 @@ class FullScreenApp(tk.Tk):
         self.histogram_canvas.draw()
 
     def update_contrast(self,photo, value): 
+        """!
+        @brief Update the edited image and the histogram.
+
+        This function updates the edited image and its associated histogram based on the original photo and contrast value.
+
+        @param 'self.image_original'(PIL image), 'self.contrast_value'(float)
+
+        @note the function applies the contrast value to the edited image based on the original image,
+          so the contrast will always have the right value, without applying contrast on top of contrast
+
+        @return: None
+        """
         # Update image display
         new_width_edited =  self.edited_img_label.winfo_width()
         new_height_edited =  self.edited_img_label.winfo_height()
@@ -611,7 +748,16 @@ class FullScreenApp(tk.Tk):
 
         self.histogram_canvas.draw()
    
-    def update_image(self, photo): #receber a photo_image_edited    
+    def update_image(self, photo):
+        """!
+        @brief Update the edited image.
+
+        @param photo_image_edited (PIL.Image.Image)
+
+        @note This function destoy the original canvas and creates a new to display the edited image with all the changes the image receives.
+
+        @return: None
+        """  
 
         # Clear any existing canvas and create a new one
         if hasattr(photo, "edited_canvas"):
@@ -639,6 +785,15 @@ class FullScreenApp(tk.Tk):
         self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
   
     def upload_image(self):
+        """!
+        @brief Upload the chosen image and show on the screen
+
+        @param photo_image_edited (PIL.Image.Image)
+
+        @note This function creates a canvas to display the original image, the edited image and centers the images in the canvas. And plot the histogram of the original image
+
+        @return: None
+        """  
         # Open a file dialog and get the path of the selected file
         filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
         file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
@@ -706,6 +861,15 @@ class FullScreenApp(tk.Tk):
             self.bar_contrast.set(1.0)
 
     def reset_project(self):
+        """!
+        @brief Resets all variables , photos and histogram
+
+        @param 'self.image_original'(PIL image), 'self.image_edited'(PIL image), 'self.contrast_value'(float), 'self.contrast_value(int)', 'self.blur_value(int)'
+
+        @note This function updates the edited image, the original image, the histogram and updates all variables relating to photo editing and the histogram
+
+        @return: None
+        """
         #reseting the edited image for the original
         self.image_edited = self.image_original
         self.image_edited = resize_image(self.image_original, ((self.original_edited_width),(self.original_edited_height)))
@@ -731,7 +895,15 @@ class FullScreenApp(tk.Tk):
         self.show_histogram(self.image_edited)
 
     def save_files(self):
+        """!
+        @brief call one or all chosen save option
 
+        @param 'self.img_save_value, 'self.history_save_value', 'self.histogram_save_value'
+
+        @note this function calls each function related to a type of recording. Just the photos, the histogram or the history or all of them together
+
+        @return: None
+        """
 
         if (self.img_save_value.get()==1) or (self.history_save_value.get()==1) or (self.histogram_save_value.get()==1):
 
@@ -772,13 +944,18 @@ class FullScreenApp(tk.Tk):
 
     #save edited Image
     def save_image_edited(self, folder_name):
+        """!
+        @brief save the images
 
-        #makes the image binary image back to PIL format
-        self.binary_photo_for_save_tk = self.image_edited
-        
-        self.binary_photo_for_save_tk = self.binary_photo_for_save_tk.resize(self.original_size)
+        @param 'self.image_edited', 'self.original_size'
 
-        self.image_original = self.image_original.resize(self.original_size)
+        @note this function resizes the original and the edited image to the original size and save this 2 images.
+
+        @return: None
+        """
+        self.binary_photo_for_save = self.image_edited.resize(self.original_size)
+
+        self.image_original_for_save = self.image_original.resize(self.original_size)
 
         # Define the folder where you want to save the image
         save_folder =f"./projects/{folder_name}" #folder_name
@@ -790,9 +967,9 @@ class FullScreenApp(tk.Tk):
             
         # Save the image with a new name in the folder
         output_path = os.path.join(save_folder, 'image_edited')
-        self.binary_photo_for_save_tk.save(output_path, 'PNG')
+        self.binary_photo_for_save.save(output_path, 'PNG')
         output_path_original = os.path.join(save_folder, 'orinal_image')
-        self.image_original.save(output_path_original, 'PNG')
+        self.image_original_for_save.save(output_path_original, 'PNG')
        
     #save histogram
     def save_histogram(self, folder_name):
