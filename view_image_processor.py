@@ -953,6 +953,7 @@ class FullScreenApp(tk.Tk):
 
         @return: None
         """
+
         self.binary_photo_for_save = self.image_edited.resize(self.original_size)
 
         self.image_original_for_save = self.image_original.resize(self.original_size)
@@ -963,7 +964,7 @@ class FullScreenApp(tk.Tk):
         # Ensure the folder exists; create it if it doesn't
 
         if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
+           os.makedirs(save_folder)
             
         # Save the image with a new name in the folder
         output_path = os.path.join(save_folder, 'image_edited')
@@ -973,7 +974,15 @@ class FullScreenApp(tk.Tk):
        
     #save histogram
     def save_histogram(self, folder_name):
-        
+        """!
+        @brief save the histogram
+
+        @param 'self.hist'
+
+        @note this function save the histogram in PNG format
+
+        @return: None
+        """
         # Define the folder where you want to save the image
         save_folder =f"./projects/{folder_name}" #folder_name
         
@@ -986,7 +995,16 @@ class FullScreenApp(tk.Tk):
         self.hist.figure.savefig(output_path)
 
     #save history
-    def save_history(self, folder_name):      
+    def save_history(self, folder_name):    
+        """!
+        @brief save the history and the bins o the histogram
+
+        @param 'self.blur_value, 'self.contrast_value', 'self.threshold_value', 'blur_value'
+
+        @note this function save some of the variables aboute the edited image and save the histogram data in a TXT file
+
+        @return: None
+        """  
         # Define the folder where you want to save the image
 
         save_folder =f"./projects/{folder_name}" #folder_name
