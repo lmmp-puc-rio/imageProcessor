@@ -5,6 +5,9 @@ __pycache__/
 
 #remove project files
 *projects/
+*html/
+*latex/
+*Doxyfile
 
 # C extensions
 *.so
