@@ -11,6 +11,7 @@ from PIL import Image, ImageTk, ImageEnhance, ImageFilter
 from skimage.filters import threshold_otsu,threshold_triangle,gaussian
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
+from utils.name_folder import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 import cv2
@@ -894,6 +895,8 @@ class FullScreenApp(tk.Tk):
         #reset histogram
         self.show_histogram(self.image_edited)
 
+        
+
     def save_files(self):
         """!
         @brief call one or all chosen save option
@@ -909,41 +912,50 @@ class FullScreenApp(tk.Tk):
 
             #user insert the name than will be used in the folder
             name_folder =  simpledialog.askstring(title="Save files", prompt="Insert the name of the folder.")
+            #Calls the function to generate a not duplicated folder
+            name_folder = create_unique_folder_name(name_folder)
+
+            # Define the folder where you want to save the image
+            save_folder =f"./projects/{name_folder}" #folder_name
+            
+            #Ensure the folder exists; create it if it doesn't
+            if not os.path.exists(save_folder):
+                os.makedirs(save_folder)
 
             if not name_folder:
                 name_folder = "Binary_project" #  VER SE ESSE NOME FAZ SENTIDO PARA TODOS OS ARQUIVOS
             
             if (self.img_save_value.get()==1) and (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_image_edited(name_folder)
-                self.save_history(name_folder)
-                self.save_histogram(name_folder)
+                self.save_image_edited(save_folder)
+                self.save_history(save_folder)
+                self.save_histogram(save_folder)
 
             elif (self.img_save_value.get()==1) and (self.history_save_value.get()==1):
-                self.save_image_edited(name_folder)
-                self.save_history(name_folder)
+                self.save_image_edited(save_folder)
+                self.save_history(save_folder)
 
             elif (self.img_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_image_edited(name_folder)
-                self.save_histogram(name_folder)
+                self.save_image_edited(save_folder)
+                self.save_histogram(save_folder)
 
             elif (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_history(name_folder)
-                self.save_histogram(name_folder)
+                self.save_history(save_folder)
+                self.save_histogram(save_folder)
 
             elif (self.img_save_value.get()==1):
-                self.save_image_edited(name_folder)
+                self.save_image_edited(save_folder)
 
             elif (self.history_save_value.get()==1):
-                self.save_history(name_folder) 
+                self.save_history(save_folder) 
 
             elif (self.histogram_save_value.get()==1):
-                self.save_histogram(name_folder)
+                self.save_histogram(save_folder)
 
             else:
                 return
 
     #save edited Image
-    def save_image_edited(self, folder_name):
+    def save_image_edited(self, save_folder):
         """!
         @brief save the images
 
@@ -953,18 +965,13 @@ class FullScreenApp(tk.Tk):
 
         @return: None
         """
-
         self.binary_photo_for_save = self.image_edited.resize(self.original_size)
 
         self.image_original_for_save = self.image_original.resize(self.original_size)
 
-        # Define the folder where you want to save the image
-        save_folder =f"./projects/{folder_name}" #folder_name
-        
-        # Ensure the folder exists; create it if it doesn't
-
+        # #Ensure the folder exists; create it if it doesn't
         if not os.path.exists(save_folder):
-           os.makedirs(save_folder)
+            os.makedirs(save_folder)
             
         # Save the image with a new name in the folder
         output_path = os.path.join(save_folder, 'image_edited')
@@ -973,7 +980,7 @@ class FullScreenApp(tk.Tk):
         self.image_original_for_save.save(output_path_original, 'PNG')
        
     #save histogram
-    def save_histogram(self, folder_name):
+    def save_histogram(self, save_folder):
         """!
         @brief save the histogram
 
@@ -983,11 +990,7 @@ class FullScreenApp(tk.Tk):
 
         @return: None
         """
-        # Define the folder where you want to save the image
-        save_folder =f"./projects/{folder_name}" #folder_name
-        
-        # Ensure the folder exists; create it if it doesn't
-
+        # #Ensure the folder exists; create it if it doesn't
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
             
@@ -995,7 +998,7 @@ class FullScreenApp(tk.Tk):
         self.hist.figure.savefig(output_path)
 
     #save history
-    def save_history(self, folder_name):    
+    def save_history(self, save_folder):    
         """!
         @brief save the history and the bins o the histogram
 
@@ -1005,12 +1008,7 @@ class FullScreenApp(tk.Tk):
 
         @return: None
         """  
-        # Define the folder where you want to save the image
-
-        save_folder =f"./projects/{folder_name}" #folder_name
-        
-        # Ensure the folder exists; create it if it doesn't
-
+        # #Ensure the folder exists; create it if it doesn't
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
 
