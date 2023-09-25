@@ -4,11 +4,11 @@
 
 This project consists on a tkinter tool to help in the process of image binarization:
 
-![App Image](src\images\image.png)
+![App Image](src/images/image.png)
 
 After the choose of the correct image you can make the automatic binzaritaion process, like in the following image
 
-![App Image in the binarization process](src\images\image-1.png)
+![App Image in the binarization process](src/images/image-1.png)
 
 
 ## Authors:
