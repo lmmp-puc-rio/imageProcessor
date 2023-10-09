@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import numpy as np
 import matplotlib.ticker as mtick
-from PIL import Image, ImageTk, ImageEnhance, ImageFilter
-from skimage.filters import threshold_otsu,threshold_triangle,gaussian
+from PIL import Image, ImageTk, ImageEnhance
+from skimage.filters import threshold_otsu,threshold_triangle
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
 from utils.name_folder import *
@@ -923,7 +923,7 @@ class FullScreenApp(tk.Tk):
                 os.makedirs(save_folder)
 
             if not name_folder:
-                name_folder = "Binary_project" #  VER SE ESSE NOME FAZ SENTIDO PARA TODOS OS ARQUIVOS
+                name_folder = "Binary_project"
             
             if (self.img_save_value.get()==1) and (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
                 self.save_image_edited(save_folder)
@@ -976,7 +976,7 @@ class FullScreenApp(tk.Tk):
         # Save the image with a new name in the folder
         output_path = os.path.join(save_folder, 'image_edited')
         self.binary_photo_for_save.save(output_path, 'PNG')
-        output_path_original = os.path.join(save_folder, 'orinal_image')
+        output_path_original = os.path.join(save_folder, 'original_image')
         self.image_original_for_save.save(output_path_original, 'PNG')
        
     #save histogram
