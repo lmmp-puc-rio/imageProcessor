@@ -1,24 +1,29 @@
 import tkinter as tk
-from tkinter import filedialog
-from PIL.Image import open
+from tkinter.filedialog import askopenfilename
+from PIL.Image import open as PIL_Image
 from PIL import ImageTk
 
 from utils.resize_image import resize_image
 
 
-class Image():
-    def __init__(self,app, label):
+class Image(PIL_Image):
+    def __init__(self, app, label):
         self.app = app
-        self.image = self.upload_image()
-        self.label = label       
-        self.original_size = self.image.size   
         self.filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
+        self.label = label
+        self.image = self.upload_image()        
+        self.original_size = self.image.size   
+        self.contrast_value = 1.0
+        self.threshold_value = None
+        self.histogram_data = None  
+        self.blur_value = None
+        
         
         self.display_image(self.app)
     
     def upload_image(self):
         
-        self.file_path = filedialog.askopenfilename(title="Select Image File", filetypes=self.filetypes)
+        self.file_path = askopenfilename(title="Select Image File", filetypes=self.filetypes)
 
         if self.file_path:
             self.file_path = self.file_path
@@ -54,3 +59,4 @@ class Image():
         app.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
         app.original_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=self.image_original_tk)
         #self.original_canvas.create_image(image=self.image_original_tk)
+    
