@@ -1,7 +1,6 @@
-
-
 import tkinter as tk
-from tkinter import ttk, filedialog, simpledialog
+from tkinter import ttk, simpledialog
+from tkinter.filedialog import askopenfilename #TIRAR 
 import tkinter.font as TkFont
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
@@ -15,6 +14,8 @@ from utils.name_folder import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 import cv2
+
+from utils.Image import CustomImage
 
 class FullScreenApp(tk.Tk):
 
@@ -103,7 +104,10 @@ class FullScreenApp(tk.Tk):
         self.img_upload= (Image.open(r'src/images/upld_btn.png'))
         self.btn_img_upload_img = resize_image(self.img_upload,(200,100))
         self.btn_img_upload_model = ImageTk.PhotoImage(self.btn_img_upload_img)
-        self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.upload_image)
+        #self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.upload_image)
+        
+        #BOTÃO QUE CHAMA A CLASSE IMAGEM
+        self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.create_object_image)
 
         #help button
         self.img_help= (Image.open(r'src/images/help_img.png'))
@@ -784,82 +788,85 @@ class FullScreenApp(tk.Tk):
         self.edited_canvas.pack()  # Place canvas inside the label
         self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
         self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
-  
-    def upload_image(self):
-        """!
-        @brief Upload the chosen image and show on the screen
-
-        @param photo_image_edited (PIL.Image.Image)
-
-        @note This function creates a canvas to display the original image, the edited image and centers the images in the canvas. And plot the histogram of the original image
-
-        @return: None
-        """  
-        # Open a file dialog and get the path of the selected file
-        filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
-        file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
+    
+    def create_object_image(self):
+        self.image_original = CustomImage(app = self, label = self.original_img_label)
         
-        if file_path:
-            #reset all the variables
-            self.contrast_value = 1.0
-            self.threshold_value = None
-            self.histogram_data = None  
+    # def upload_image(self):
+    #     """!
+    #     @brief Upload the chosen image and show on the screen
 
-            # Create a PhotoImage object from the selected file
-            self.file_path = file_path
-            self.image_original = Image.open(self.file_path)
-            self.original_size = self.image_original.size
+    #     @param photo_image_edited (PIL.Image.Image)
 
-            
-            # Resize the image to fit the canvas while maintaining aspect ratio
-            new_width = self.original_img_label.winfo_width()  
-            new_height = self.original_img_label.winfo_height() 
+    #     @note This function creates a canvas to display the original image, the edited image and centers the images in the canvas. And plot the histogram of the original image
+
+    #     @return: None
+    #     """  
+    #     # Open a file dialog and get the path of the selected file
+    #     filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
+    #     file_path = askopenfilename(title="Select Image File", filetypes=filetypes)
         
-            new_width_edited =  self.edited_img_label.winfo_width() 
-            new_height_edited =  self.edited_img_label.winfo_height()
+    #     if file_path:
+    #         #reset all the variables
+    #         self.contrast_value = 1.0
+    #         self.threshold_value = None
+    #         self.histogram_data = None  
 
-            self.original_edited_width = new_width_edited
-            self.original_edited_height = new_height_edited
+    #         # Create a PhotoImage object from the selected file
+    #         self.file_path = file_path
+    #         self.image_original = Image.open(self.file_path)
+    #         self.original_size = self.image_original.size
 
-
-            self.image_original = resize_image(self.image_original, ((new_width), (new_height)))
-            self.image_edited = resize_image(self.image_original, ((new_width_edited), (new_height_edited)))
             
-            self.image_original_tk = self.image_original.copy()
-            self.image_edited_tk = self.image_edited.copy()
-            
-            # Resize image to fit canvas and convert to PhotoImage
-            self.image_original_tk = ImageTk.PhotoImage(self.image_original)
-            self.image_edited_tk = ImageTk.PhotoImage(self.image_edited)
-            
-            # Clear any existing canvas and create a new one
-            if hasattr(self, "original_canvas"):
-                self.original_canvas.destroy()
-                self.edited_canvas.destroy()  # Destroy the previous canvas
-            
-            # Calculate the coordinates to center the image in the canvas
-            x_center = (new_width - self.image_original_tk.width()) / 2
-            y_center = (new_height - self.image_original_tk.height()) / 2
+    #         # Resize the image to fit the canvas while maintaining aspect ratio
+    #         new_width = self.original_img_label.winfo_width()  
+    #         new_height = self.original_img_label.winfo_height() 
+        
+    #         new_width_edited =  self.edited_img_label.winfo_width() 
+    #         new_height_edited =  self.edited_img_label.winfo_height()
+
+    #         self.original_edited_width = new_width_edited
+    #         self.original_edited_height = new_height_edited
 
 
-            x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-            y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
-
-            # Create a canvas widget to display the image
-            self.original_canvas = tk.Canvas(self.original_img_label)
-            self.original_canvas.config(borderwidth=0)
-            self.original_canvas.pack()
-            self.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-            self.original_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.image_original_tk)
+    #         self.image_original = resize_image(self.image_original, ((new_width), (new_height)))
+    #         self.image_edited = resize_image(self.image_original, ((new_width_edited), (new_height_edited)))
             
-            # Create a canvas widget to display the edited image
-            self.edited_canvas = tk.Canvas(self.edited_img_label)
-            self.edited_canvas.config(borderwidth=0)
-            self.edited_canvas.pack()  # Place canvas inside the label
-            self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-            self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
-            self.show_histogram(self.image_edited)
-            self.bar_contrast.set(1.0)
+    #         self.image_original_tk = self.image_original.copy()
+    #         self.image_edited_tk = self.image_edited.copy()
+            
+    #         # Resize image to fit canvas and convert to PhotoImage
+    #         self.image_original_tk = ImageTk.PhotoImage(self.image_original)
+    #         self.image_edited_tk = ImageTk.PhotoImage(self.image_edited)
+            
+    #         # Clear any existing canvas and create a new one
+    #         if hasattr(self, "original_canvas"):
+    #             self.original_canvas.destroy()
+    #             self.edited_canvas.destroy()  # Destroy the previous canvas
+            
+    #         # Calculate the coordinates to center the image in the canvas
+    #         x_center = (new_width - self.image_original_tk.width()) / 2
+    #         y_center = (new_height - self.image_original_tk.height()) / 2
+
+
+    #         x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
+    #         y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
+
+    #         # Create a canvas widget to display the image
+    #         self.original_canvas = tk.Canvas(self.original_img_label)
+    #         self.original_canvas.config(borderwidth=0)
+    #         self.original_canvas.pack()
+    #         self.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
+    #         self.original_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.image_original_tk)
+            
+    #         # Create a canvas widget to display the edited image
+    #         self.edited_canvas = tk.Canvas(self.edited_img_label)
+    #         self.edited_canvas.config(borderwidth=0)
+    #         self.edited_canvas.pack()  # Place canvas inside the label
+    #         self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
+    #         self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
+    #         self.show_histogram(self.image_edited)
+    #         self.bar_contrast.set(1.0)
 
     def reset_project(self):
         """!
@@ -976,7 +983,7 @@ class FullScreenApp(tk.Tk):
         # Save the image with a new name in the folder
         output_path = os.path.join(save_folder, 'image_edited')
         self.binary_photo_for_save.save(output_path, 'PNG')
-        output_path_original = os.path.join(save_folder, 'original_image')
+        output_path_original = os.path.join(save_folder, 'image_original')
         self.image_original_for_save.save(output_path_original, 'PNG')
        
     #save histogram
