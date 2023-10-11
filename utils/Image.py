@@ -1,20 +1,26 @@
-
+#for create widget in app
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-# from PIL.Image import open
-# from PIL import ImageTk
+
+#for histogram
+import numpy as np
+import matplotlib.ticker as mtick
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib import rcParams
+
+#for create and edited the images
 from PIL import ImageTk
 from PIL import Image
 from utils.resize_image import resize_image
 
 
 class CustomImage(Image.Image, ImageTk.PhotoImage):
-    def __init__(self, app, label_original, label_edited, label_histogram):
+    def __init__(self, app, label_original, label_edited, canvas_histogram ,label_histogram):
         self.app = app
         self.filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
         self.label_original = label_original
         self.label_edited = label_edited
-        self.label_histogram = label_histogram
         self.image = self.upload_image()        
         self.original_size = self.image.size
         self.new_width = None
@@ -24,6 +30,9 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.histogram_data = None  
         self.blur_value = None
         self.image_edited = None
+        self.label_histogram = label_histogram
+        self.canvas_histogram = canvas_histogram
+        self.num_of_bins = int(256/2)
 
 
         self.image_original,self.image_original_tk = self.display_image_in_label(self.image, self.label_original)
@@ -33,6 +42,9 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.image_edited = self.image
         self.image_edited,self.image_edited_tk = self.display_image_in_label(self.image_edited, self.label_edited)
         self.show_image(self.app, self.label_edited, self.image_edited_tk)
+
+        #create and show the histogram based in the edited Image
+        self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
 
     
 
@@ -89,3 +101,16 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         image_tk = ImageTk.PhotoImage(image)
 
         return image_tk
+
+    def create_histogram(self, image, canvas, container):
+    
+        rcParams['font.weight'] = 'bold'       
+        plt.clf()
+        plt.hist(image.histogram(), weights=np.ones(len(image.histogram()))/len(image.histogram()), range=(0, 256))
+        canvas.figure.clear()
+        self.histogram_data, _ = np.histogram(image.histogram(), bins=self.num_of_bins, weights=np.ones(len(image.histogram()))/len(image.histogram()), range=(0, 256))       
+        self.hist = container.gca()
+        self.hist.hist(image.histogram(), bins=self.num_of_bins, weights=np.ones(len(image.histogram()))/len(image.histogram()), range=(0, 256))
+        self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
+        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+        canvas.draw()

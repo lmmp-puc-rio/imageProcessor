@@ -602,28 +602,7 @@ class FullScreenApp(tk.Tk):
         elif selected_item == self.list_treshold_model[1]:
             self.triangle_threshold(self.image_edited)
 
-    def show_histogram(self, photo):
-        """!
-        @brief plot the frist histogram of the original image and reset the histogram
 
-        @param self.image_edited(PIL Image)
-        
-        @note This function plots the histogram on the screen of the given photo and updates the histogram
-    
-        @return: None
-        """
-        
-        rcParams['font.weight'] = 'bold'       
-        plt.clf()
-        plt.hist(photo.histogram(), weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
-        self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
-        self.hist = self.histogram_container.gca()
-        self.hist.hist(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
-        self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
-        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-        self.histogram_canvas.draw()
-      
     def otsu_threshold(self, photo):
         """!
         @brief transform the edited image in gray scale image, based on the chosen model
@@ -790,83 +769,8 @@ class FullScreenApp(tk.Tk):
         self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
     
     def create_object_image(self):
-        self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram= self.histogram_inner_frame)
+        self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram = self.histogram_container, canvas_histogram = self.histogram_canvas)
         
-    # def upload_image(self):
-    #     """!
-    #     @brief Upload the chosen image and show on the screen
-
-    #     @param photo_image_edited (PIL.Image.Image)
-
-    #     @note This function creates a canvas to display the original image, the edited image and centers the images in the canvas. And plot the histogram of the original image
-
-    #     @return: None
-    #     """  
-    #     # Open a file dialog and get the path of the selected file
-    #     filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
-    #     file_path = askopenfilename(title="Select Image File", filetypes=filetypes)
-        
-    #     if file_path:
-    #         #reset all the variables
-    #         self.contrast_value = 1.0
-    #         self.threshold_value = None
-    #         self.histogram_data = None  
-
-    #         # Create a PhotoImage object from the selected file
-    #         self.file_path = file_path
-    #         self.image_original = Image.open(self.file_path)
-    #         self.original_size = self.image_original.size
-
-            
-    #         # Resize the image to fit the canvas while maintaining aspect ratio
-    #         new_width = self.original_img_label.winfo_width()  
-    #         new_height = self.original_img_label.winfo_height() 
-        
-    #         new_width_edited =  self.edited_img_label.winfo_width() 
-    #         new_height_edited =  self.edited_img_label.winfo_height()
-
-    #         self.original_edited_width = new_width_edited
-    #         self.original_edited_height = new_height_edited
-
-
-    #         self.image_original = resize_image(self.image_original, ((new_width), (new_height)))
-    #         self.image_edited = resize_image(self.image_original, ((new_width_edited), (new_height_edited)))
-            
-    #         self.image_original_tk = self.image_original.copy()
-    #         self.image_edited_tk = self.image_edited.copy()
-            
-    #         # Resize image to fit canvas and convert to PhotoImage
-    #         self.image_original_tk = ImageTk.PhotoImage(self.image_original)
-    #         self.image_edited_tk = ImageTk.PhotoImage(self.image_edited)
-            
-    #         # Clear any existing canvas and create a new one
-    #         if hasattr(self, "original_canvas"):
-    #             self.original_canvas.destroy()
-    #             self.edited_canvas.destroy()  # Destroy the previous canvas
-            
-    #         # Calculate the coordinates to center the image in the canvas
-    #         x_center = (new_width - self.image_original_tk.width()) / 2
-    #         y_center = (new_height - self.image_original_tk.height()) / 2
-
-
-    #         x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-    #         y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
-
-    #         # Create a canvas widget to display the image
-    #         self.original_canvas = tk.Canvas(self.original_img_label)
-    #         self.original_canvas.config(borderwidth=0)
-    #         self.original_canvas.pack()
-    #         self.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-    #         self.original_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.image_original_tk)
-            
-    #         # Create a canvas widget to display the edited image
-    #         self.edited_canvas = tk.Canvas(self.edited_img_label)
-    #         self.edited_canvas.config(borderwidth=0)
-    #         self.edited_canvas.pack()  # Place canvas inside the label
-    #         self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-    #         self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
-    #         self.show_histogram(self.image_edited)
-    #         self.bar_contrast.set(1.0)
 
     def reset_project(self):
         """!
