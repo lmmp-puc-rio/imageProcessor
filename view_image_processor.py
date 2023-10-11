@@ -790,7 +790,7 @@ class FullScreenApp(tk.Tk):
         self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
     
     def create_object_image(self):
-        self.image_original = CustomImage(app = self, label = self.original_img_label)
+        self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram= self.histogram_inner_frame)
         
     # def upload_image(self):
     #     """!
