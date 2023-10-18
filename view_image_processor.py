@@ -15,7 +15,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 import cv2
 
-from utils.Image import CustomImage
+from utils.CustomImage import CustomImage
+
 
 class FullScreenApp(tk.Tk):
 
@@ -434,7 +435,7 @@ class FullScreenApp(tk.Tk):
         @return self.update_contrast(self,photo, value)
         """
         self.contrast_value = self.value_scale.get()
-        self.update_contrast(self.image_original, self.contrast_value)
+        self.image_original.update_contrast(self.contrast_value)
     
     #validate user input in blur value
     def validate_blur_value(self, event):
@@ -564,7 +565,7 @@ class FullScreenApp(tk.Tk):
         # Convert the NumPy array back to a PIL image
         blurred_image = Image.fromarray(blurred_image)
         self.image_edited = blurred_image
-        self.update_image(self.image_edited)
+        self.update_image_edited(self.image_edited)
 
         plt.clf()
         plt.hist(self.image_edited.histogram(), bins=self.num_of_bins, range=(0, 256))
@@ -637,7 +638,7 @@ class FullScreenApp(tk.Tk):
 
         # Update image display
         self.image_edited = photo_binary
-        self.update_image(self.image_edited)
+        self.update_image_edited(self.image_edited)
         self.draw_red_line_in_hist()
 
     def triangle_threshold(self, photo):
@@ -673,7 +674,7 @@ class FullScreenApp(tk.Tk):
 
         # Update image display
         self.image_edited = photo_binary
-        self.update_image(self.image_edited)
+        self.update_image_edited(self.image_edited)
         self.draw_red_line_in_hist()
 
     def draw_red_line_in_hist(self):
@@ -692,83 +693,89 @@ class FullScreenApp(tk.Tk):
         self.hist.axvline(self.threshold_value, color='r', ls='--')
         self.histogram_canvas.draw()
 
-    def update_contrast(self,photo, value): 
-        """!
-        @brief Update the edited image and the histogram.
 
-        This function updates the edited image and its associated histogram based on the original photo and contrast value.
+    # def update_contrast(self,photo, value): 
+    #     """!
+    #     @brief Update the edited image and the histogram.
 
-        @param 'self.image_original'(PIL image), 'self.contrast_value'(float)
+    #     This function updates the edited image and its associated histogram based on the original photo and contrast value.
 
-        @note the function applies the contrast value to the edited image based on the original image,
-          so the contrast will always have the right value, without applying contrast on top of contrast
+    #     @param 'self.image_original'(PIL image), 'self.contrast_value'(float)
 
-        @return: None
-        """
-        # Update image display
-        new_width_edited =  self.edited_img_label.winfo_width()
-        new_height_edited =  self.edited_img_label.winfo_height()
+    #     @note the function applies the contrast value to the edited image based on the original image,
+    #       so the contrast will always have the right value, without applying contrast on top of contrast
+
+    #     @return: None
+    #     """
+    #     # Update image display
+    #     new_width_edited =  self.edited_img_label.winfo_width()
+    #     new_height_edited =  self.edited_img_label.winfo_height()
         
-        photo = resize_image(photo, ((new_width_edited), (new_height_edited)))
+    #     photo = resize_image(photo, ((new_width_edited), (new_height_edited)))
 
-        enhancer = ImageEnhance.Contrast(photo)
-        photo_contrast = enhancer.enhance(float(value))
-        self.image_edited = enhancer.enhance(float(value))      
-        self.image_without_blur = self.image_edited
+    #     enhancer = ImageEnhance.Contrast(photo)
+    #     photo_contrast = enhancer.enhance(float(value))
+    #     self.image_edited = enhancer.enhance(float(value))      
+    #     self.image_without_blur = self.image_edited
 
-        self.update_image(photo_contrast)
+    #     self.update_image_edited(photo_contrast)
 
-        plt.clf()
-        plt.hist(photo_contrast.histogram(), bins=self.num_of_bins, range=(0, 256))
+    #     plt.clf()
+    #     plt.hist(photo_contrast.histogram(), bins=self.num_of_bins, range=(0, 256))
 
-        self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo_contrast.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))        
-        self.hist = self.histogram_container.gca()
-        self.hist.hist(photo_contrast.histogram(), bins=self.num_of_bins,weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
-        self.hist.set_xlabel('Pixel Value', fontsize = 12)
-        self.hist.set_title('Pixel Histogram', fontsize = 12)
+    #     self.histogram_canvas.figure.clear()
+    #     self.histogram_data, _ = np.histogram(photo_contrast.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))        
+    #     self.hist = self.histogram_container.gca()
+    #     self.hist.hist(photo_contrast.histogram(), bins=self.num_of_bins,weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
+    #     self.hist.set_xlabel('Pixel Value', fontsize = 12)
+    #     self.hist.set_title('Pixel Histogram', fontsize = 12)
             
-        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+    #     self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
 
-        self.histogram_canvas.draw()
-   
-    def update_image(self, photo):
-        """!
-        @brief Update the edited image.
+    #     self.histogram_canvas.draw()
+    
+    def update_image_edited(self, value):
+        #self.image_original.update_image(image)
+        self.image_original.update_image(value)
 
-        @param photo_image_edited (PIL.Image.Image)
+    # def update_image(self, photo):
+    #     """!
+    #     @brief Update the edited image.
 
-        @note This function destoy the original canvas and creates a new to display the edited image with all the changes the image receives.
+    #     @param photo_image_edited (PIL.Image.Image)
 
-        @return: None
-        """  
+    #     @note This function destoy the original canvas and creates a new to display the edited image with all the changes the image receives.
 
-        # Clear any existing canvas and create a new one
-        if hasattr(photo, "edited_canvas"):
-            self.edited_canvas.destroy()  # Destroy the previous canvas
+    #     @return: None
+    #     """  
 
-        #new_width_edited =  self.edited_img_label.winfo_width() 
-        #new_height_edited =  self.edited_img_label.winfo_height()
+    #     # Clear any existing canvas and create a new one
+    #     if hasattr(photo, "edited_canvas"):
+    #         self.edited_canvas.destroy()  # Destroy the previous canvas
+
+    #     #new_width_edited =  self.edited_img_label.winfo_width() 
+    #     #new_height_edited =  self.edited_img_label.winfo_height()
         
-        new_width_edited = self.original_edited_width
-        new_height_edited = self.original_edited_height
+    #     new_width_edited = self.original_edited_width
+    #     new_height_edited = self.original_edited_height
 
-        # Calculate the coordinates to center the image in the canvas
-        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
+    #     # Calculate the coordinates to center the image in the canvas
+    #     x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
+    #     y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
 
 
-        self.image_edited = photo
-        self.image_edited_tk = ImageTk.PhotoImage(photo)
+    #     self.image_edited = photo
+    #     self.image_edited_tk = ImageTk.PhotoImage(photo)
 
-        # Create a canvas widget to display the edited image
-        self.edited_canvas = tk.Canvas(self.edited_img_label)
-        self.edited_canvas.config(borderwidth=0)
-        self.edited_canvas.pack()  # Place canvas inside the label
-        self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-        self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
+    #     # Create a canvas widget to display the edited image
+    #     self.edited_canvas = tk.Canvas(self.edited_img_label)
+    #     self.edited_canvas.config(borderwidth=0)
+    #     self.edited_canvas.pack()  # Place canvas inside the label
+    #     self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
+    #     self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
     
     def create_object_image(self):
+        self.bar_contrast.set(1.0)
         self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram = self.histogram_container, canvas_histogram = self.histogram_canvas)
         
 
@@ -785,7 +792,7 @@ class FullScreenApp(tk.Tk):
         #reseting the edited image for the original
         self.image_edited = self.image_original
         self.image_edited = resize_image(self.image_original, ((self.original_edited_width),(self.original_edited_height)))
-        self.update_image(self.image_edited)
+        self.update_image_edited(self.image_edited)
 
         #reset contrast
         self.bar_contrast.set(1.0)
