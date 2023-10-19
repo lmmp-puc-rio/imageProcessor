@@ -435,7 +435,17 @@ class FullScreenApp(tk.Tk):
         @return self.update_contrast(self,photo, value)
         """
         self.contrast_value = self.value_scale.get()
-        self.image_original.update_contrast(self.contrast_value)
+        print('Vou falara o contraste:')
+        print(f"\n{self.contrast_value}")
+        print(f'\nPassei por aqui: 1')
+        # 
+        if type(self.image_original) is not type(None):
+            print(type(self.image_original))
+            # if self.contrast_value != 1.0:
+            self.image_original.update_contrast(self.contrast_value)
+                # print('Entrei onde não devia')
+            # else:
+                # pass
     
     #validate user input in blur value
     def validate_blur_value(self, event):
@@ -736,6 +746,7 @@ class FullScreenApp(tk.Tk):
     
     def update_image_edited(self, value):
         #self.image_original.update_image(image)
+        print('Passei por aqui: 2')
         self.image_original.update_image(value)
 
     # def update_image(self, photo):

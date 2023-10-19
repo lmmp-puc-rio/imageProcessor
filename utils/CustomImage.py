@@ -77,44 +77,41 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
     def show_image(self, app, label, image):
         #Receives the tk PhotoImage and destroy to plot the new image in the correct canvas
+        print(type(image))
         self.image_w = image.width()
         self.image_h = image.height()
         #Calculate the coordinates to center the image in the canvas
         self.x_center = (self.new_width- self.image_w) / 2
         self.y_center = (self.new_height - self.image_h) / 2
-        print(f"\n\n\nESSE É A WID{self.image_w}\nÉSSA É A {self.image_h}")
-        print(f"\n\n\nESSE É A WID{int(self.image_w)}\nÉSSA É A {type(self.image_h)}")
 
         # # Clear any existing canvas and create a new one
         if label == self.label_original:
             if hasattr(app, "original_canvas"):
                 # Destroy the previous canvas
                 app.original_canvas.destroy()
-            else:
-                app.original_canvas = tk.Canvas(label)
-                app.original_canvas.config(borderwidth=0)
-                app.original_canvas.pack()
-                app.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place original_canvas inside the label
-                print("passei pelo OG")
-                app.original_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=image)
+                print("Destrui o OG")
+                
+        
+            print("Construi o OG")
+            app.original_canvas = tk.Canvas(label)
+            app.original_canvas.config(borderwidth=0)
+            app.original_canvas.pack()
+            app.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place original_canvas inside the label
+            app.original_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=image)
                 
         else:
             if hasattr(app, "edited_canvas"):
                 # Destroy the previous canvas
                 app.edited_canvas.destroy()
-            else:
-                app.edited_canvas = tk.Canvas(label)
-                app.edited_canvas.config(borderwidth=0)
-                app.edited_canvas.pack()
-                app.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-                app.edited_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=image)
-                print("passei pelo ED")
+                print("Destrui o editado")
+        
+            print("Contrui o editado")
+            app.edited_canvas = tk.Canvas(label)
+            app.edited_canvas.config(borderwidth=0)
+            app.edited_canvas.pack()
+            app.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
+            app.edited_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=image)
 
-        # app.canvas = tk.Canvas(label)
-        # app.canvas.config(borderwidth=0)
-        # app.canvas.pack()
-        # app.canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-        # app.canvas.create_image(x_center, y_center, anchor=tk.NW, image=image)
 
     def transform_in_tkimage(self, image):
         image = image.copy()
@@ -135,12 +132,8 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         canvas.draw()
 
-    def update_image(self, image):
-        if hasattr(self.app, "edited_canvas"):
-            self.app.edited_canvas.destroy()
-            # Destroy the previous canvas
+    def update_image(self,label, image):
 
-        label = self.app.edited_canvas
         self.show_image(self.app, label, image)
     
     def reset_images_and_histogram(self):
@@ -148,7 +141,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         #reseting the edited image for the original
         self.image_edited = self.image
         self.image_edited = resize_image(self.image, ((self.original_size[0]),(self.original_size[1])))
-        self.update_image(self.image_edited)
+        self.show_image(self.app, self.label_edited, self.image_edited)
 
         #reset contrast
         self.bar_contrast.set(1.0)
@@ -173,9 +166,16 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
         #Apply the constrast value in the edited image
         enhancer = ImageEnhance.Contrast(self.image)
-        photo_contrast = enhancer.enhance(float(value))
+        self.image_edited = enhancer.enhance(float(value))
         self.image_edited_tk = enhancer.enhance(float(value))
         
-        # Update image displaed and histogram
-        self.update_image(photo_contrast)
+        #retun the edited_image_tk to Tk format the edited_image stays in PIL.Image format
+        
+        self.image_edited_tk = self.transform_in_tkimage(self.image_edited_tk)
+        
+        # Update image displayed and histogram
+        print("parei antes do show image")
+        self.show_image(self.app, self.label_edited, self.image_edited_tk )
+        print("Passei do show image.")
         self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
+        print("Passei do histograma.")
