@@ -8,6 +8,7 @@ import matplotlib.ticker as mtick
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import rcParams
+import cv2
 
 #for create and edited the images
 from PIL import ImageTk
@@ -30,10 +31,10 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.new_height  = None
         self.contrast_value = 1.0
         self.threshold_value = None
-        self.histogram_data = None  
+        self.histogram_data = None 
         self.blur_value = None
         self.image_edited = None
-        self.image_without_blur = self.image_edited
+        self.image_without_blur = None
         self.label_histogram = label_histogram
         self.canvas_histogram = canvas_histogram
         self.num_of_bins = int(256/2)
@@ -77,7 +78,6 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
     def show_image(self, app, label, image):
         #Receives the tk PhotoImage and destroy to plot the new image in the correct canvas
-        print(type(image))
         self.image_w = image.width()
         self.image_h = image.height()
         #Calculate the coordinates to center the image in the canvas
@@ -89,10 +89,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
             if hasattr(app, "original_canvas"):
                 # Destroy the previous canvas
                 app.original_canvas.destroy()
-                print("Destrui o OG")
                 
-        
-            print("Construi o OG")
             app.original_canvas = tk.Canvas(label)
             app.original_canvas.config(borderwidth=0)
             app.original_canvas.pack()
@@ -103,15 +100,15 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
             if hasattr(app, "edited_canvas"):
                 # Destroy the previous canvas
                 app.edited_canvas.destroy()
-                print("Destrui o editado")
         
-            print("Contrui o editado")
             app.edited_canvas = tk.Canvas(label)
             app.edited_canvas.config(borderwidth=0)
             app.edited_canvas.pack()
             app.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
             app.edited_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=image)
-
+            
+            # Create the image without the blur. that way the program not will put blur on blur in the edited img.
+            self.image_without_blur = self.image_edited
 
     def transform_in_tkimage(self, image):
         image = image.copy()
@@ -132,10 +129,6 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         canvas.draw()
 
-    def update_image(self,label, image):
-
-        self.show_image(self.app, label, image)
-    
     def reset_images_and_histogram(self):
 
         #reseting the edited image for the original
@@ -168,14 +161,33 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         enhancer = ImageEnhance.Contrast(self.image)
         self.image_edited = enhancer.enhance(float(value))
         self.image_edited_tk = enhancer.enhance(float(value))
-        
+  
         #retun the edited_image_tk to Tk format the edited_image stays in PIL.Image format
-        
         self.image_edited_tk = self.transform_in_tkimage(self.image_edited_tk)
-        
+
+        # the image without the blur. that way the program not will put blur on blur in the edited img.
+        self.image_without_blur = self.image_edited
+
         # Update image displayed and histogram
-        print("parei antes do show image")
-        self.show_image(self.app, self.label_edited, self.image_edited_tk )
-        print("Passei do show image.")
+        self.show_image(self.app, self.label_edited, self.image_edited_tk)
         self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
-        print("Passei do histograma.")
+
+    def apply_blur(self, blur_value):        
+        #Convert the PIL image to a NUMPY array
+        
+        # Convert the PIL image to a NUMPY array
+        image_array = np.array(self.image_without_blur)   
+        image_array = image_array.astype(np.uint8)
+
+
+        # Apply Gaussian blur using OpenCV
+        blurred_image = cv2.GaussianBlur(image_array, (0, 0), blur_value)
+
+        # Convert the NUMPY array back to a PIL image
+        blurred_image = Image.fromarray(blurred_image)
+
+        self.image_edited = blurred_image
+        self.image_edited_tk = self.transform_in_tkimage(blurred_image)
+        self.show_image(self.app, self.label_edited, self.image_edited_tk)
+        self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
+        

@@ -435,18 +435,10 @@ class FullScreenApp(tk.Tk):
         @return self.update_contrast(self,photo, value)
         """
         self.contrast_value = self.value_scale.get()
-        print('Vou falara o contraste:')
-        print(f"\n{self.contrast_value}")
-        print(f'\nPassei por aqui: 1')
         # 
         if type(self.image_original) is not type(None):
-            print(type(self.image_original))
-            # if self.contrast_value != 1.0:
             self.image_original.update_contrast(self.contrast_value)
-                # print('Entrei onde não devia')
-            # else:
-                # pass
-    
+            
     #validate user input in blur value
     def validate_blur_value(self, event):
         """!
@@ -548,48 +540,54 @@ class FullScreenApp(tk.Tk):
         else:
             self.blur_value_textbox.config(state='disabled')
     
+
     def apply_blur(self):
-        """!
-        @brief Apply Gaussian blur to the image.
-
-        @param The function uses attributes: `self.image_without_blur`, `self.blur_value_textbox`,
-        `self.blur_value`, `self.num_of_bins`, `self.image_edited`, `self.histogram_canvas`.
-
-        @note This function applies Gaussian blur to the edited image using the specified blur value.
-        It also updates the edited image, displays the updated image, and generates the new pixel histogram for the updated edited image.
-
-
-        @return: None
-        """
-
-        #create a copy of the photo so you don't apply blur on top of blur, that way you always apply it to the image without blur
-        image = self.image_without_blur
         self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
+        self.image_original.apply_blur(self.blur_value)
 
-        # Convert the PIL image to a NumPy array
-        image_array = np.array(image)
+    # def apply_blur(self):
+    #     """!
+    #     @brief Apply Gaussian blur to the image.
 
-        # Apply Gaussian blur using OpenCV
-        blurred_image = cv2.GaussianBlur(image_array, (0, 0), self.blur_value)
+    #     @param The function uses attributes: `self.image_without_blur`, `self.blur_value_textbox`,
+    #     `self.blur_value`, `self.num_of_bins`, `self.image_edited`, `self.histogram_canvas`.
 
-        # Convert the NumPy array back to a PIL image
-        blurred_image = Image.fromarray(blurred_image)
-        self.image_edited = blurred_image
-        self.update_image_edited(self.image_edited)
+    #     @note This function applies Gaussian blur to the edited image using the specified blur value.
+    #     It also updates the edited image, displays the updated image, and generates the new pixel histogram for the updated edited image.
 
-        plt.clf()
-        plt.hist(self.image_edited.histogram(), bins=self.num_of_bins, range=(0, 256))
 
-        self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(self.image_edited.histogram(), bins=self.num_of_bins, weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))        
-        self.hist = self.histogram_container.gca()
-        self.hist.hist(self.image_edited.histogram(), bins=self.num_of_bins,weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
-        self.hist.set_xlabel('Pixel Value', fontsize = 12)
-        self.hist.set_title('Pixel Histogram', fontsize = 12)
+    #     @return: None
+    #     """
+
+    #     #create a copy of the photo so you don't apply blur on top of blur, that way you always apply it to the image without blur
+    #     image = self.image_without_blur
+    #     self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
+    #     print(f"aqui ta o tipo da imageSEM OBAGULHO{type(self.image_without_blur)}")
+
+    #     # Convert the PIL image to a NumPy array
+    #     image_array = np.array(image)
+
+    #     # Apply Gaussian blur using OpenCV
+    #     blurred_image = cv2.GaussianBlur(image_array, (0, 0), self.blur_value)
+
+    #     # Convert the NumPy array back to a PIL image
+    #     blurred_image = Image.fromarray(blurred_image)
+    #     self.image_edited = blurred_image
+    #     self.update_image_edited(self.image_edited)
+
+    #     plt.clf()
+    #     plt.hist(self.image_edited.histogram(), bins=self.num_of_bins, range=(0, 256))
+
+    #     self.histogram_canvas.figure.clear()
+    #     self.histogram_data, _ = np.histogram(self.image_edited.histogram(), bins=self.num_of_bins, weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))        
+    #     self.hist = self.histogram_container.gca()
+    #     self.hist.hist(self.image_edited.histogram(), bins=self.num_of_bins,weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
+    #     self.hist.set_xlabel('Pixel Value', fontsize = 12)
+    #     self.hist.set_title('Pixel Histogram', fontsize = 12)
             
-        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
+    #     self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
 
-        self.histogram_canvas.draw()
+    #     self.histogram_canvas.draw()
     
     def on_treshold_btn_click(self):
         """!
@@ -703,50 +701,8 @@ class FullScreenApp(tk.Tk):
         self.hist.axvline(self.threshold_value, color='r', ls='--')
         self.histogram_canvas.draw()
 
-
-    # def update_contrast(self,photo, value): 
-    #     """!
-    #     @brief Update the edited image and the histogram.
-
-    #     This function updates the edited image and its associated histogram based on the original photo and contrast value.
-
-    #     @param 'self.image_original'(PIL image), 'self.contrast_value'(float)
-
-    #     @note the function applies the contrast value to the edited image based on the original image,
-    #       so the contrast will always have the right value, without applying contrast on top of contrast
-
-    #     @return: None
-    #     """
-    #     # Update image display
-    #     new_width_edited =  self.edited_img_label.winfo_width()
-    #     new_height_edited =  self.edited_img_label.winfo_height()
-        
-    #     photo = resize_image(photo, ((new_width_edited), (new_height_edited)))
-
-    #     enhancer = ImageEnhance.Contrast(photo)
-    #     photo_contrast = enhancer.enhance(float(value))
-    #     self.image_edited = enhancer.enhance(float(value))      
-    #     self.image_without_blur = self.image_edited
-
-    #     self.update_image_edited(photo_contrast)
-
-    #     plt.clf()
-    #     plt.hist(photo_contrast.histogram(), bins=self.num_of_bins, range=(0, 256))
-
-    #     self.histogram_canvas.figure.clear()
-    #     self.histogram_data, _ = np.histogram(photo_contrast.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))        
-    #     self.hist = self.histogram_container.gca()
-    #     self.hist.hist(photo_contrast.histogram(), bins=self.num_of_bins,weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
-    #     self.hist.set_xlabel('Pixel Value', fontsize = 12)
-    #     self.hist.set_title('Pixel Histogram', fontsize = 12)
-            
-    #     self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-
-    #     self.histogram_canvas.draw()
-    
     def update_image_edited(self, value):
         #self.image_original.update_image(image)
-        print('Passei por aqui: 2')
         self.image_original.update_image(value)
 
     # def update_image(self, photo):
