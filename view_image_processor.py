@@ -565,42 +565,6 @@ class FullScreenApp(tk.Tk):
 
     def update_image_edited(self, value):
         self.image_original.update_image(value)
-
-    # def update_image(self, photo):
-    #     """!
-    #     @brief Update the edited image.
-
-    #     @param photo_image_edited (PIL.Image.Image)
-
-    #     @note This function destoy the original canvas and creates a new to display the edited image with all the changes the image receives.
-
-    #     @return: None
-    #     """  
-
-    #     # Clear any existing canvas and create a new one
-    #     if hasattr(photo, "edited_canvas"):
-    #         self.edited_canvas.destroy()  # Destroy the previous canvas
-
-    #     #new_width_edited =  self.edited_img_label.winfo_width() 
-    #     #new_height_edited =  self.edited_img_label.winfo_height()
-        
-    #     new_width_edited = self.original_edited_width
-    #     new_height_edited = self.original_edited_height
-
-    #     # Calculate the coordinates to center the image in the canvas
-    #     x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-    #     y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
-
-
-    #     self.image_edited = photo
-    #     self.image_edited_tk = ImageTk.PhotoImage(photo)
-
-    #     # Create a canvas widget to display the edited image
-    #     self.edited_canvas = tk.Canvas(self.edited_img_label)
-    #     self.edited_canvas.config(borderwidth=0)
-    #     self.edited_canvas.pack()  # Place canvas inside the label
-    #     self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-    #     self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
     
     def create_object_image(self):
         self.bar_contrast.set(1.0)
@@ -650,6 +614,7 @@ class FullScreenApp(tk.Tk):
 
             #user insert the name than will be used in the folder
             name_folder =  simpledialog.askstring(title="Save files", prompt="Insert the name of the folder.")
+            print(name_folder)
             #Calls the function to generate a not duplicated folder
             name_folder = create_unique_folder_name(name_folder)
 
@@ -664,112 +629,34 @@ class FullScreenApp(tk.Tk):
                 name_folder = "Binary_project"
             
             if (self.img_save_value.get()==1) and (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_image_edited(save_folder)
-                self.save_history(save_folder)
-                self.save_histogram(save_folder)
+                self.image_original.save_image_edited(save_folder)
+                self.image_original.save_history(save_folder)
+                self.image_original.save_histogram(save_folder)
 
             elif (self.img_save_value.get()==1) and (self.history_save_value.get()==1):
-                self.save_image_edited(save_folder)
-                self.save_history(save_folder)
+                self.image_original.save_image_edited(save_folder)
+                self.image_original.save_history(save_folder)
 
             elif (self.img_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_image_edited(save_folder)
-                self.save_histogram(save_folder)
+                self.image_original.save_image_edited(save_folder)
+                self.image_original.save_histogram(save_folder)
 
             elif (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_history(save_folder)
-                self.save_histogram(save_folder)
+                self.image_original.save_history(save_folder)
+                self.image_original.save_histogram(save_folder)
 
             elif (self.img_save_value.get()==1):
-                self.save_image_edited(save_folder)
+                self.image_original.save_image_edited(save_folder)
 
             elif (self.history_save_value.get()==1):
-                self.save_history(save_folder) 
+                self.image_original.save_history(save_folder) 
 
             elif (self.histogram_save_value.get()==1):
-                self.save_histogram(save_folder)
+                self.image_original.save_histogram(save_folder)
 
             else:
                 return
 
-    #save edited Image
-    def save_image_edited(self, save_folder):
-        """!
-        @brief save the images
-
-        @param 'self.image_edited', 'self.original_size'
-
-        @note this function resizes the original and the edited image to the original size and save this 2 images.
-
-        @return: None
-        """
-        self.binary_photo_for_save = self.image_edited.resize(self.original_size)
-
-        self.image_original_for_save = self.image_original.resize(self.original_size)
-
-        # #Ensure the folder exists; create it if it doesn't
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
-            
-        # Save the image with a new name in the folder
-        output_path = os.path.join(save_folder, 'image_edited')
-        self.binary_photo_for_save.save(output_path, 'PNG')
-        output_path_original = os.path.join(save_folder, 'image_original')
-        self.image_original_for_save.save(output_path_original, 'PNG')
-       
-    #save histogram
-    def save_histogram(self, save_folder):
-        """!
-        @brief save the histogram
-
-        @param 'self.hist'
-
-        @note this function save the histogram in PNG format
-
-        @return: None
-        """
-        # #Ensure the folder exists; create it if it doesn't
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
-            
-        output_path = os.path.join(save_folder, 'histogram')
-        self.hist.figure.savefig(output_path)
-
-    #save history
-    def save_history(self, save_folder):    
-        """!
-        @brief save the history and the bins o the histogram
-
-        @param 'self.blur_value, 'self.contrast_value', 'self.threshold_value', 'blur_value'
-
-        @note this function save some of the variables aboute the edited image and save the histogram data in a TXT file
-
-        @return: None
-        """  
-        # #Ensure the folder exists; create it if it doesn't
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
-
-        # Create string with processing history data
-        history_data = f"Image file path: {self.file_path}\nContrast value: {self.contrast_value}\n"
-
-        if self.threshold_value is not None:
-            history_data += f"Otsu threshold value: {self.threshold_value}\n"
-
-        if self.blur_value is not None:
-            history_data += f"Blur value: {self.blur_value}\n"
-
-        if self.histogram_data is not None:
-            history_data += "Histogram data:\n"
-            for i, value in enumerate(self.histogram_data):
-                history_data += f"{i}: {value}\n"
-
-        # Write string to text file
-        filepath = os.path.join(save_folder, 'contrast history')
-        with open(filepath, "w") as f:
-            f.write(history_data)
-
-            
 
 if __name__ == '__main__':
     app = FullScreenApp()

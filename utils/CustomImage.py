@@ -21,6 +21,9 @@ from PIL import ImageEnhance
 #for treshold models
 from skimage.filters import threshold_otsu,threshold_triangle
 
+#for save files
+import os
+
 class CustomImage(Image.Image, ImageTk.PhotoImage):
     def __init__(self, app, label_original, label_edited, canvas_histogram ,label_histogram):
         self.app = app
@@ -149,7 +152,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
     def apply_blur(self, blur_value):        
         #Convert the PIL image to a NUMPY array
-        
+        self.blur_value = blur_value
         # Convert the PIL image to a NUMPY array
         image_array = np.array(self.image_without_blur)   
         image_array = image_array.astype(np.uint8)
@@ -224,6 +227,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.canvas.draw()
 
     def reset_project(self):
+
         #reseting the edited image for the original
         self.image_edited = self.image
         self.image_edited = resize_image(self.image, ((self.original_size[0]),(self.original_size[1])))
@@ -238,3 +242,49 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
         #reset histogram
         self.create_histogram(self.image_edited, self.canvas_histogram, self.label_histogram)
+
+    def save_image_edited(self, folder):
+        self.binary_photo_for_save = self.image_edited.resize(self.original_size)
+
+        self.image_original_for_save = self.image_original.resize(self.original_size)
+
+        # Ensure the folder exists; create it if it doesn't
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            
+        # Save the image with a new name in the folder
+        output_path = os.path.join(folder, 'image_edited')
+        self.binary_photo_for_save.save(output_path, 'PNG')
+        output_path_original = os.path.join(folder, 'image_original')
+        self.image_original_for_save.save(output_path_original, 'PNG')
+    
+    def save_histogram(self, folder):
+        
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            
+        output_path = os.path.join(folder, 'histogram')
+        self.hist.figure.savefig(output_path)
+
+    def save_history(self, folder):    
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        # Create string with processing history data
+        history_data = f"Image file path: {self.file_path}\nContrast value: {self.contrast_value}\n"
+
+        if self.threshold_value is not None:
+            history_data += f"Otsu threshold value: {self.threshold_value}\n"
+
+        if self.blur_value is not None:
+            history_data += f"Blur value: {self.blur_value}\n"
+
+        if self.histogram_data is not None:
+            history_data += "Histogram data:\n"
+            for i, value in enumerate(self.histogram_data):
+                history_data += f"{i}: {value}\n"
+
+        # Write string to text file
+        filepath = os.path.join(folder, 'contrast history')
+        with open(filepath, "w") as f:
+            f.write(history_data)
