@@ -18,6 +18,8 @@ from utils.resize_image import resize_image
 #for change the edited Image
 from PIL import ImageEnhance
 
+#for treshold models
+from skimage.filters import threshold_otsu,threshold_triangle
 
 class CustomImage(Image.Image, ImageTk.PhotoImage):
     def __init__(self, app, label_original, label_edited, canvas_histogram ,label_histogram):
@@ -186,8 +188,31 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         # Convert the NUMPY array back to a PIL image
         blurred_image = Image.fromarray(blurred_image)
 
+        #change the edited image and show the tk one
         self.image_edited = blurred_image
         self.image_edited_tk = self.transform_in_tkimage(blurred_image)
         self.show_image(self.app, self.label_edited, self.image_edited_tk)
         self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
         
+    def apply_model_otsu_treashold(self, manual_value = None):
+        manual_value = manual_value
+
+        #Convert image to grayscale and get pixel values
+        image_gray = self.image_edited.convert("L")
+        pixels = np.array(image_gray.getdata()) #gray#
+        pixels = pixels.astype(np.uint8)
+        
+        #Check if the manual value was used and set it
+        # to the model's value if it wasn't used. The automatic value will be used otherwise.
+        if manual_value != None:
+            treshold_value = int(manual_value)
+        else:
+            treshold_value = threshold_otsu(pixels)
+
+        #apply the model
+        photo_binary = image_gray.point(lambda x: 0 if x < treshold_value else 255)
+        
+        #change the edited image and show the tk one
+        self.image_edited = photo_binary
+        self.image_edited_tk = self.transform_in_tkimage(self.image_edited)
+        self.show_image(self.app, self.label_edited, self.image_edited_tk)

@@ -13,7 +13,6 @@ from utils.nav_utils import *
 from utils.name_folder import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
-import cv2
 
 from utils.CustomImage import CustomImage
 
@@ -545,50 +544,6 @@ class FullScreenApp(tk.Tk):
         self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
         self.image_original.apply_blur(self.blur_value)
 
-    # def apply_blur(self):
-    #     """!
-    #     @brief Apply Gaussian blur to the image.
-
-    #     @param The function uses attributes: `self.image_without_blur`, `self.blur_value_textbox`,
-    #     `self.blur_value`, `self.num_of_bins`, `self.image_edited`, `self.histogram_canvas`.
-
-    #     @note This function applies Gaussian blur to the edited image using the specified blur value.
-    #     It also updates the edited image, displays the updated image, and generates the new pixel histogram for the updated edited image.
-
-
-    #     @return: None
-    #     """
-
-    #     #create a copy of the photo so you don't apply blur on top of blur, that way you always apply it to the image without blur
-    #     image = self.image_without_blur
-    #     self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
-    #     print(f"aqui ta o tipo da imageSEM OBAGULHO{type(self.image_without_blur)}")
-
-    #     # Convert the PIL image to a NumPy array
-    #     image_array = np.array(image)
-
-    #     # Apply Gaussian blur using OpenCV
-    #     blurred_image = cv2.GaussianBlur(image_array, (0, 0), self.blur_value)
-
-    #     # Convert the NumPy array back to a PIL image
-    #     blurred_image = Image.fromarray(blurred_image)
-    #     self.image_edited = blurred_image
-    #     self.update_image_edited(self.image_edited)
-
-    #     plt.clf()
-    #     plt.hist(self.image_edited.histogram(), bins=self.num_of_bins, range=(0, 256))
-
-    #     self.histogram_canvas.figure.clear()
-    #     self.histogram_data, _ = np.histogram(self.image_edited.histogram(), bins=self.num_of_bins, weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))        
-    #     self.hist = self.histogram_container.gca()
-    #     self.hist.hist(self.image_edited.histogram(), bins=self.num_of_bins,weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
-    #     self.hist.set_xlabel('Pixel Value', fontsize = 12)
-    #     self.hist.set_title('Pixel Histogram', fontsize = 12)
-            
-    #     self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-
-    #     self.histogram_canvas.draw()
-    
     def on_treshold_btn_click(self):
         """!
         @brief Apply Gaussian blur to the image.
@@ -606,48 +561,52 @@ class FullScreenApp(tk.Tk):
         self.blur_text_box_alert_hidden.grid()
 
         if selected_item == self.list_treshold_model[0]:
-            self.otsu_threshold(self.image_edited)
+            if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
+                manual_threshold_value = int(self.text_box_treshold.get("1.0", "end"))
+                self.image_original.apply_model_otsu_treashold(manual_threshold_value)
+            else: 
+                self.image_original.apply_model_otsu_treashold()
 
         elif selected_item == self.list_treshold_model[1]:
             self.triangle_threshold(self.image_edited)
 
 
-    def otsu_threshold(self, photo):
-        """!
-        @brief transform the edited image in gray scale image, based on the chosen model
+    # def otsu_threshold(self, photo):
+    #     """!
+    #     @brief transform the edited image in gray scale image, based on the chosen model
 
-        @param self.image_edited(PIL Image)
+    #     @param self.image_edited(PIL Image)
         
-        @note This function take the PIL image, transform in a numpy array and pass to the threshold_otsu of the Skimage filters.
-          Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
+    #     @note This function take the PIL image, transform in a numpy array and pass to the threshold_otsu of the Skimage filters.
+    #       Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
     
-        @return: None
-        """
-        # Convert image to grayscale and get pixel values
-        photo_gray = photo.convert("L")
-        pixels = np.array(photo_gray.getdata()) #gray# 
+    #     @return: None
+    #     """
+    #     # Convert image to grayscale and get pixel values
+    #     photo_gray = photo.convert("L")
+    #     pixels = np.array(photo_gray.getdata()) #gray# 
         
-        pixels = pixels.astype(np.uint8)
+    #     pixels = pixels.astype(np.uint8)
 
-        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
+    #     if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
 
-            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
-        else: 
-            self.threshold_value = threshold_otsu(pixels)
+    #         self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
+    #     else: 
+    #         self.threshold_value = threshold_otsu(pixels)
             
 
-        photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
+    #     photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
 
-        #set the otsu value in the valuebox
-        self.text_box_treshold.config(state='normal')
-        self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
-        self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
+    #     #set the otsu value in the valuebox
+    #     self.text_box_treshold.config(state='normal')
+    #     self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
+    #     self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
         
 
-        # Update image display
-        self.image_edited = photo_binary
-        self.update_image_edited(self.image_edited)
-        self.draw_red_line_in_hist()
+    #     # Update image display
+    #     self.image_edited = photo_binary
+    #     self.update_image_edited(self.image_edited)
+    #     self.draw_red_line_in_hist()
 
     def triangle_threshold(self, photo):
         """!
