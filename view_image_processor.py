@@ -387,17 +387,7 @@ class FullScreenApp(tk.Tk):
         self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=(90,0), pady=3)
         self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=(90,0), pady=3)
         self.save_btn.grid(row=2, column=1, sticky='e', padx=(2,20), pady=3)
-      
-    #estrutura certa para comentarios com Doxygen
-    #"""!
-    # @brief (Aqui entra uma breve explicação do motodo/função)
-    #
-    # @param (Aqui você explica os parametros a serem recebidos, como o tipo do dado e o que pode receber)
-    #
-    # @note (Explicação de como funciona a função, qual dado retorna falando o nome da variavel e o tipo da mesma)
-    #
-    # @throws ()
-    #"""
+    
     def quit_application(self):
         """!
         @brief ends the application
@@ -495,7 +485,7 @@ class FullScreenApp(tk.Tk):
         #current_position = self.text_box_treshold.index(tk.INSERT)
         current_char = event.char
         new_value = self.text_box_treshold.get("1.0", "end-1c") + current_char
-    
+
         if not on_validate_input(new_value):
             self.text_box_alert_hidden.grid_remove()#row=0, column=2,sticky='S',columnspan=2, padx=(135,0), pady=(16,0))
             return "break"  
@@ -539,7 +529,6 @@ class FullScreenApp(tk.Tk):
         else:
             self.blur_value_textbox.config(state='disabled')
     
-
     def apply_blur(self):
         self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
         self.image_original.apply_blur(self.blur_value)
@@ -574,13 +563,7 @@ class FullScreenApp(tk.Tk):
             else: 
                 self.image_original.apply_model_triangle_treashold()
 
-    #     # Update image display
-    #     self.image_edited = photo_binary
-    #     self.update_image_edited(self.image_edited)
-    #     self.draw_red_line_in_hist()
-
     def update_image_edited(self, value):
-        #self.image_original.update_image(image)
         self.image_original.update_image(value)
 
     # def update_image(self, photo):
@@ -623,7 +606,6 @@ class FullScreenApp(tk.Tk):
         self.bar_contrast.set(1.0)
         self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram = self.histogram_container, canvas_histogram = self.histogram_canvas)
         
-
     def reset_project(self):
         """!
         @brief Resets all variables , photos and histogram
@@ -634,31 +616,24 @@ class FullScreenApp(tk.Tk):
 
         @return: None
         """
-        #reseting the edited image for the original
-        self.image_edited = self.image_original
-        self.image_edited = resize_image(self.image_original, ((self.original_edited_width),(self.original_edited_height)))
-        self.update_image_edited(self.image_edited)
 
-        #reset contrast
-        self.bar_contrast.set(1.0)
-        self.contrast_value = 0
-        #self.update_contrast(self.image_edited, self.contrast_value)
+        #hidden alert msg
+        self.text_box_alert_hidden.grid()
+        self.blur_text_box_alert_hidden.grid()
         
+        #reset contrast
+        self.bar_contrast.set(1.0)      
 
         #reset Blur
         self.blur_value_textbox.delete("1.0","2.0")
-        self.blur_value = 0
 
         #reset MODEL
-        #self.show_histogram(self.image_edited)
         self.text_box_treshold.delete("1.0", "end")
         self.radio_selected.set('automatic')
-        self.text_box_treshold.config(state='disable')
+        self.text_box_treshold.config(state='disable')        
 
-        #reset histogram
-        self.show_histogram(self.image_edited)
-
-        
+        #reset the image and the values
+        self.image_original.reset_project()
 
     def save_files(self):
         """!

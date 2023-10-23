@@ -27,8 +27,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
         self.label_original = label_original
         self.label_edited = label_edited
-        self.image = self.upload_image()
-        self.original_image = None        
+        self.image = self.upload_image()    
         self.original_size = self.image.size
         self.new_width = None
         self.new_height  = None
@@ -63,9 +62,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         if self.file_path:
             self.file_path = self.file_path
             image = Image.open(self.file_path)
-            self.image = image
-            self.original_image = image
-            
+            self.image = image           
         
         return self.image
     
@@ -132,32 +129,6 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
         self.canvas.draw()
-
-    def reset_images_and_histogram(self):
-
-        #reseting the edited image for the original
-        self.image_edited = self.image
-        self.image_edited = resize_image(self.image, ((self.original_size[0]),(self.original_size[1])))
-        self.show_image(self.app, self.label_edited, self.image_edited)
-
-        #reset contrast
-        self.bar_contrast.set(1.0)
-        self.contrast_value = 0
-        #self.update_contrast(self.image_edited, self.contrast_value)
-        
-
-        #reset Blur
-        self.blur_value_textbox.delete("1.0","2.0")
-        self.blur_value = 0
-
-        #reset MODEL
-        #self.show_histogram(self.image_edited)
-        self.text_box_treshold.delete("1.0", "end")
-        self.radio_selected.set('automatic')
-        self.text_box_treshold.config(state='disable')
-
-        #reset histogram
-        self.show_histogram(self.image_edited)
 
     def update_contrast(self, value):
 
@@ -252,3 +223,18 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.hist.axvline(self.threshold_value, color='r', ls='--')
         self.canvas.draw()
 
+    def reset_project(self):
+        #reseting the edited image for the original
+        self.image_edited = self.image
+        self.image_edited = resize_image(self.image, ((self.original_size[0]),(self.original_size[1])))
+        self.image_edited_tk = self.transform_in_tkimage(self.image_edited)
+        self.show_image(self.app, self.label_edited, self.image_edited_tk)
+
+        #reset contrast
+        self.contrast_value = 0
+
+        #reset Blur
+        self.blur_value = 0
+
+        #reset histogram
+        self.create_histogram(self.image_edited, self.canvas_histogram, self.label_histogram)
