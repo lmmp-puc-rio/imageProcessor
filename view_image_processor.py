@@ -568,97 +568,16 @@ class FullScreenApp(tk.Tk):
                 self.image_original.apply_model_otsu_treashold()
 
         elif selected_item == self.list_treshold_model[1]:
-            self.triangle_threshold(self.image_edited)
-
-
-    # def otsu_threshold(self, photo):
-    #     """!
-    #     @brief transform the edited image in gray scale image, based on the chosen model
-
-    #     @param self.image_edited(PIL Image)
-        
-    #     @note This function take the PIL image, transform in a numpy array and pass to the threshold_otsu of the Skimage filters.
-    #       Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
-    
-    #     @return: None
-    #     """
-    #     # Convert image to grayscale and get pixel values
-    #     photo_gray = photo.convert("L")
-    #     pixels = np.array(photo_gray.getdata()) #gray# 
-        
-    #     pixels = pixels.astype(np.uint8)
-
-    #     if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
-
-    #         self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
-    #     else: 
-    #         self.threshold_value = threshold_otsu(pixels)
-            
-
-    #     photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
-
-    #     #set the otsu value in the valuebox
-    #     self.text_box_treshold.config(state='normal')
-    #     self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
-    #     self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
-        
+            if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
+                manual_threshold_value = int(self.text_box_treshold.get("1.0", "end"))
+                self.image_original.apply_model_triangle_treashold(manual_threshold_value)
+            else: 
+                self.image_original.apply_model_triangle_treashold()
 
     #     # Update image display
     #     self.image_edited = photo_binary
     #     self.update_image_edited(self.image_edited)
     #     self.draw_red_line_in_hist()
-
-    def triangle_threshold(self, photo):
-        """!
-        @brief transform the edited image in gray scale image, based on the chosen model
-
-        @param self.image_edited(PIL Image)
-        
-        @note This function take the PIL image, transform in a numpy array and pass to the threshold_triangle of the Skimage filters.
-          Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
-    
-        @return: None
-        """
-        # Convert image to grayscale and get pixel values
-        photo_gray = photo.convert("L")
-        pixels = np.array(photo_gray.getdata()) 
-        pixels = pixels.astype(np.uint8)
-
-        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
-            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
-        else: 
-            self.threshold_value = threshold_triangle(pixels)
-
-        photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
-
-        #set the otsu value in the valuebox
-
-        self.text_box_treshold.config(state='normal')
-        self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
-        self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
-
-        
-
-        # Update image display
-        self.image_edited = photo_binary
-        self.update_image_edited(self.image_edited)
-        self.draw_red_line_in_hist()
-
-    def draw_red_line_in_hist(self):
-        """!
-        @brief Draw a red line in the histogram
-
-        @param self.threshold_value(int)
-        
-        @note This function take self.threshold_value, after activated the model and draw a red line in the histogram showing the value model
-    
-        @return: None
-        """
-        rcParams['font.weight'] = 'bold' 
-        #apply the red line in the histogram
-          
-        self.hist.axvline(self.threshold_value, color='r', ls='--')
-        self.histogram_canvas.draw()
 
     def update_image_edited(self, value):
         #self.image_original.update_image(image)

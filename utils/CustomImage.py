@@ -27,7 +27,8 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
         self.label_original = label_original
         self.label_edited = label_edited
-        self.image = self.upload_image()        
+        self.image = self.upload_image()
+        self.original_image = None        
         self.original_size = self.image.size
         self.new_width = None
         self.new_height  = None
@@ -63,6 +64,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
             self.file_path = self.file_path
             image = Image.open(self.file_path)
             self.image = image
+            self.original_image = image
             
         
         return self.image
@@ -119,17 +121,17 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         return image_tk
 
     def create_histogram(self, image, canvas, container):
-    
+        self.canvas = canvas
         rcParams['font.weight'] = 'bold'       
         plt.clf()
         plt.hist(image.histogram(), weights=np.ones(len(image.histogram()))/len(image.histogram()), range=(0, 256))
-        canvas.figure.clear()
+        self.canvas.figure.clear()
         self.histogram_data, _ = np.histogram(image.histogram(), bins=self.num_of_bins, weights=np.ones(len(image.histogram()))/len(image.histogram()), range=(0, 256))       
         self.hist = container.gca()
         self.hist.hist(image.histogram(), bins=self.num_of_bins, weights=np.ones(len(image.histogram()))/len(image.histogram()), range=(0, 256))
         self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-        canvas.draw()
+        self.canvas.draw()
 
     def reset_images_and_histogram(self):
 
@@ -205,14 +207,48 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         #Check if the manual value was used and set it
         # to the model's value if it wasn't used. The automatic value will be used otherwise.
         if manual_value != None:
-            treshold_value = int(manual_value)
+            self.threshold_value = int(manual_value)
         else:
-            treshold_value = threshold_otsu(pixels)
+            self.threshold_value = threshold_otsu(pixels)
 
         #apply the model
-        photo_binary = image_gray.point(lambda x: 0 if x < treshold_value else 255)
+        photo_binary = image_gray.point(lambda x: 0 if x < self.threshold_value else 255)
         
         #change the edited image and show the tk one
         self.image_edited = photo_binary
         self.image_edited_tk = self.transform_in_tkimage(self.image_edited)
         self.show_image(self.app, self.label_edited, self.image_edited_tk)
+        self.draw_red_line_in_histogram()
+
+    def apply_model_triangle_treashold(self, manual_value = None):
+        manual_value = manual_value
+
+        #Convert image to grayscale and get pixel values
+        image_gray = self.image_edited.convert("L")
+        pixels = np.array(image_gray.getdata()) #gray#
+        pixels = pixels.astype(np.uint8)
+        
+        #Check if the manual value was used and set it
+        # to the model's value if it wasn't used. The automatic value will be used otherwise.
+        if manual_value != None:
+            self.threshold_value  = int(manual_value)
+
+        else:
+           self.threshold_value = threshold_triangle(pixels)
+
+        #apply the model
+        photo_binary = image_gray.point(lambda x: 0 if x < self.threshold_value  else 255)
+        
+        #change the edited image and show the tk one
+        self.image_edited = photo_binary
+        self.image_edited_tk = self.transform_in_tkimage(self.image_edited)
+        self.show_image(self.app, self.label_edited, self.image_edited_tk)
+        self.draw_red_line_in_histogram()
+
+    def draw_red_line_in_histogram(self):
+        rcParams['font.weight'] = 'bold' 
+        #apply the red line in the histogram
+        
+        self.hist.axvline(self.threshold_value, color='r', ls='--')
+        self.canvas.draw()
+
