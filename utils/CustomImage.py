@@ -78,7 +78,6 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         image_tk = self.transform_in_tkimage(image)
 
         return  image, image_tk
-        #self.show_image(app, label, self.image_original_tk)
 
     def show_image(self, app, label, image):
         #Receives the tk PhotoImage and destroy to plot the new image in the correct canvas
@@ -112,7 +111,10 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
             app.edited_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=image)
             
             # Create the image without the blur. that way the program not will put blur on blur in the edited img.
-            self.image_without_blur = self.image_edited
+            if self.image_without_blur == None:
+                self.image_without_blur = self.image_edited
+            else:
+                pass
 
     def transform_in_tkimage(self, image):
         image = image.copy()
@@ -159,7 +161,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
 
         # Apply Gaussian blur using OpenCV
-        blurred_image = cv2.GaussianBlur(image_array, (0, 0), blur_value)
+        blurred_image = cv2.GaussianBlur(image_array, (0, 0), self.blur_value)
 
         # Convert the NUMPY array back to a PIL image
         blurred_image = Image.fromarray(blurred_image)
@@ -218,6 +220,10 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.image_edited_tk = self.transform_in_tkimage(self.image_edited)
         self.show_image(self.app, self.label_edited, self.image_edited_tk)
         self.draw_red_line_in_histogram()
+
+    def get_model_value(self):
+        model_value =  self.threshold_value
+        return model_value
 
     def draw_red_line_in_histogram(self):
         rcParams['font.weight'] = 'bold' 

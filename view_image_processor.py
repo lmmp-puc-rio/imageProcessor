@@ -98,15 +98,13 @@ class FullScreenApp(tk.Tk):
         self.btn_home_img = resize_image(self.img_home,(240,100))
         self.btn_home_model = ImageTk.PhotoImage(self.btn_home_img)
         self.home_btn = tk.Button(self.header_frame, image= self.btn_home_model, background= self.pry_color, borderwidth=0, highlightthickness = 0 , activebackground= self.btn_color,relief='sunken', command=home_page)
-        self.home_btn.bind("<Button-1>", lambda x: self.webbrowser.open_new("http://tmp-lmmp.mec.puc-rio.br/"))
+        self.home_btn.bind("<Button-1>", lambda x: self.webbrowser.open_new("http://tmp-lmmp.mec.puc-rio.br/"))      
         
         #upload button
         self.img_upload= (Image.open(r'src/images/upld_btn.png'))
         self.btn_img_upload_img = resize_image(self.img_upload,(200,100))
         self.btn_img_upload_model = ImageTk.PhotoImage(self.btn_img_upload_img)
-        #self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.upload_image)
-        
-        #BOTÃO QUE CHAMA A CLASSE IMAGEM
+        #This Button calls the Class CustomImage
         self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.create_object_image)
 
         #help button
@@ -255,7 +253,7 @@ class FullScreenApp(tk.Tk):
         self.blur_btn_img= (Image.open(r'src/images/blur_btn.png'))
         self.btn_blur_btn_img = resize_image(self.blur_btn_img,(120,30))
         self.btn_blur_btn = ImageTk.PhotoImage(self.btn_blur_btn_img)
-        self.btn_run_blur = tk.Button(self.contrast_frame, image=self.btn_blur_btn,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command = self.apply_blur)
+        self.btn_run_blur = tk.Button(self.contrast_frame, image=self.btn_blur_btn,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command = self.apply_blur,state = "disable")
 
         self.blur_value_label.grid(row= 0, column=0, padx=6)
         self.blur_value_textbox.grid(row= 0, column=1, padx=6)
@@ -526,12 +524,18 @@ class FullScreenApp(tk.Tk):
 
         if selected_item == "activated":
             self.blur_value_textbox.config(state='normal')
+            self.btn_run_blur['state'] = "normal"
         else:
             self.blur_value_textbox.config(state='disabled')
-    
+            self.btn_run_blur['state'] = "disable"
+
     def apply_blur(self):
-        self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
-        self.image_original.apply_blur(self.blur_value)
+        if self.blur_value_textbox:
+            #self.apply_blur()
+            self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
+            self.image_original.apply_blur(self.blur_value)
+        else:
+            pass
 
     def on_treshold_btn_click(self):
         """!
@@ -555,6 +559,8 @@ class FullScreenApp(tk.Tk):
                 self.image_original.apply_model_otsu_treashold(manual_threshold_value)
             else: 
                 self.image_original.apply_model_otsu_treashold()
+                model_value = self.image_original.get_model_value()
+                self.insert_model_value_in_box(model_value)
 
         elif selected_item == self.list_treshold_model[1]:
             if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
@@ -562,10 +568,17 @@ class FullScreenApp(tk.Tk):
                 self.image_original.apply_model_triangle_treashold(manual_threshold_value)
             else: 
                 self.image_original.apply_model_triangle_treashold()
+                model_value = self.image_original.get_model_value()
+                self.insert_model_value_in_box(model_value)
 
     def update_image_edited(self, value):
         self.image_original.update_image(value)
-    
+
+    def insert_model_value_in_box(self, value):
+        self.text_box_treshold.config(state='normal')
+        self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
+        self.text_box_treshold.insert("1.0", value)
+
     def create_object_image(self):
         self.bar_contrast.set(1.0)
         self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram = self.histogram_container, canvas_histogram = self.histogram_canvas)
@@ -614,7 +627,6 @@ class FullScreenApp(tk.Tk):
 
             #user insert the name than will be used in the folder
             name_folder =  simpledialog.askstring(title="Save files", prompt="Insert the name of the folder.")
-            print(name_folder)
             #Calls the function to generate a not duplicated folder
             name_folder = create_unique_folder_name(name_folder)
 
