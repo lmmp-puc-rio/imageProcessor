@@ -1,4 +1,4 @@
-#for create widget in app
+#to create widget in app
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 
@@ -6,22 +6,22 @@ from tkinter.filedialog import askopenfilename
 import numpy as np
 import matplotlib.ticker as mtick
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+#from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import rcParams
 import cv2
 
-#for create and edited the images
+#to create and edited the images
 from PIL import ImageTk
 from PIL import Image
 from utils.resize_image import resize_image
 
-#for change the edited Image
+#to change the edited Image
 from PIL import ImageEnhance
 
 #for treshold models
 from skimage.filters import threshold_otsu,threshold_triangle
 
-#for save files
+#to save files
 import os
 
 class CustomImage(Image.Image, ImageTk.PhotoImage):
@@ -59,7 +59,14 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
     
 
     def upload_image(self):
-        
+        """!
+        @brief Open a window to pick the image file for editing.
+
+        @note This method simply selects the desired file and creates the image in the 'PIL.Image'
+          format to start editing. This method is used to create the 'CustomImage' class in the Main.
+
+        @return: self.image
+        """
         self.file_path = askopenfilename(title="Select Image File", filetypes=self.filetypes)
 
         if self.file_path:
@@ -70,6 +77,17 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         return self.image
     
     def display_image_in_label(self, image, label):
+        """!
+        @brief Display the image passed as a parameter in the label.
+
+        @param The function uses attributes: `image = PIL.Image`, `label = Tkinter.Widget.Label`.
+
+        @note This method is used to create the original and edited image for each 'label'
+          First, there's a resizing of the image to fit into each selected label. After that, there's a transformation of the original image,
+            in the 'PIL.Image' format, into another image in the 'tk.Image' format, returning both images.
+
+        @return: image, image_tk
+        """
         
         self.new_width = label.winfo_width()  
         self.new_height = label.winfo_height()   
@@ -80,6 +98,16 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         return  image, image_tk
 
     def show_image(self, app, label, image):
+        """!
+        @brief In this method, we create a "Canvas widget" to display the image on the screen..
+
+        @param The function uses attributes: `app = tk.Tk`, `label = Tkinter.Widget.Label`, `image = Tk.Image`.
+
+        @note First, we need to define the center of the image and the canvas to position the image in the center.
+          After that, we check if there is an existing canvas, if there is,
+              we destroy the canvas and create a new one in its place, replacing the image in editing
+
+        """
         #Receives the tk PhotoImage and destroy to plot the new image in the correct canvas
         self.image_w = image.width()
         self.image_h = image.height()
@@ -117,12 +145,30 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
                 pass
 
     def transform_in_tkimage(self, image):
+        """!
+        @brief This method converts the image from PIL.Image to Tk.Image
+
+        @param The function uses attributes: `image = PIL.Image`.
+
+        @note This method converts the image from PIL.Image to Tk.Image to have the image in a format that is accepted by the tk.Canvas.
+
+        @return: image_tk
+        """
         image = image.copy()
         image_tk = ImageTk.PhotoImage(image)
 
         return image_tk
 
     def create_histogram(self, image, canvas, container):
+        """!
+        @brief Create a histogram based on the edited photo.
+
+        @param The function uses attributes: `image = PIL.Image`, `canvas = Tk.Canvas`, `container = FigureCanvasTkAgg`.
+
+        @note n this method, a histogram is created for the edited image and also serves to update the already plotted histogram.
+          It refreshes the chart with each image edit.
+
+        """
         self.canvas = canvas
         rcParams['font.weight'] = 'bold'       
         plt.clf()
@@ -136,7 +182,17 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.canvas.draw()
 
     def update_contrast(self, value):
+        """!
+        @brief Modify the image based on the contrast value.
 
+        @param The function uses attributes: `value = string`.
+
+        @note In this method, the edited image is modified with each interaction with the contrast slider.
+          So, the method takes the contrast value as a parameter and applies the edit to the image.
+           After that, both the image and the histogram are updated.
+
+        @return: 
+        """
         #Apply the constrast value in the edited image
         enhancer = ImageEnhance.Contrast(self.image)
         self.image_edited = enhancer.enhance(float(value))
