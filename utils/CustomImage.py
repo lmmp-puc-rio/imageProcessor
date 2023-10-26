@@ -6,7 +6,6 @@ from tkinter.filedialog import askopenfilename
 import numpy as np
 import matplotlib.ticker as mtick
 import matplotlib.pyplot as plt
-#from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import rcParams
 import cv2
 
@@ -106,7 +105,8 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         @note First, we need to define the center of the image and the canvas to position the image in the center.
           After that, we check if there is an existing canvas, if there is,
               we destroy the canvas and create a new one in its place, replacing the image in editing
-
+        
+        @return: None
         """
         #Receives the tk PhotoImage and destroy to plot the new image in the correct canvas
         self.image_w = image.width()
@@ -168,6 +168,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         @note n this method, a histogram is created for the edited image and also serves to update the already plotted histogram.
           It refreshes the chart with each image edit.
 
+        @return: None
         """
         self.canvas = canvas
         rcParams['font.weight'] = 'bold'       
@@ -191,7 +192,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
           So, the method takes the contrast value as a parameter and applies the edit to the image.
            After that, both the image and the histogram are updated.
 
-        @return: 
+        @return: None
         """
         #Apply the constrast value in the edited image
         enhancer = ImageEnhance.Contrast(self.image)
@@ -208,8 +209,18 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.show_image(self.app, self.label_edited, self.image_edited_tk)
         self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
 
-    def apply_blur(self, blur_value):        
-        #Convert the PIL image to a NUMPY array
+    def apply_blur(self, blur_value):
+        """!
+        @brief Apply the blur to the edited image.
+
+        @param The function uses attributes: `blur_value = Int`.
+
+        @note In this method, the blur is applied to a temporary variable, 'self.image_without_blur',
+          which is created during image upload and updated during the contrast update. 
+          This image is used to avoid applying blur on top of blur. At the end of the method, 'image_edited' is assigned this blurred image
+        
+        @return: None
+        """        
         self.blur_value = blur_value
         # Convert the PIL image to a NUMPY array
         image_array = np.array(self.image_without_blur)   
@@ -229,6 +240,16 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
         
     def apply_model_otsu_treashold(self, manual_value = None):
+        """!
+        @brief Apply the Otsu Treashold model.
+
+        @param The function uses attributes: `manual_value = Int`.
+
+        @note This function take the PIL image, transform in a numpy array and pass to the threshold_otsu of the Skimage filters.
+          Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
+        
+        @return: None
+        """  
         manual_value = manual_value
 
         #Convert image to grayscale and get pixel values
@@ -253,6 +274,16 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.draw_red_line_in_histogram()
 
     def apply_model_triangle_treashold(self, manual_value = None):
+        """!
+        @brief Apply the Triangle Treashold model.
+
+        @param The function uses attributes: `manual_value = Int`.
+
+        @note This function take the PIL image, transform in a numpy array and pass to the threshold_triangle of the Skimage filters.
+          Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
+        
+        @return: None
+        """  
         manual_value = manual_value
 
         #Convert image to grayscale and get pixel values
@@ -278,10 +309,28 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.draw_red_line_in_histogram()
 
     def get_model_value(self):
+        """!
+        @brief Return the model value for show in the screen
+
+        @param The function uses attributes: None.
+
+        @note This method returns the threshold model value to the main app for display on the screen.
+        
+        @return: model_value
+        """  
         model_value =  self.threshold_value
         return model_value
 
     def draw_red_line_in_histogram(self):
+        """!
+        @brief Draw a red line in the histogram
+
+        @param The function uses attributes: None.
+        
+        @note This method is used to draw a red line on the histogram representing the model's value
+    
+        @return: None
+        """
         rcParams['font.weight'] = 'bold' 
         #apply the red line in the histogram
         
@@ -289,6 +338,15 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.canvas.draw()
 
     def reset_project(self):
+        """!
+        @brief Resets all variables, photos and histogram
+
+        @param The function uses attributes: None.
+
+        @note This function updates the edited image, the original image, the histogram and updates all variables relating to photo editing and the histogram.
+
+        @return: None
+        """
 
         #reseting the edited image for the original
         self.image_edited = self.image
@@ -306,6 +364,15 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.create_histogram(self.image_edited, self.canvas_histogram, self.label_histogram)
 
     def save_image_edited(self, folder):
+        """!
+        @brief save the images
+
+        @param The function uses attributes: `"folder" = mkdir`.
+
+        @note this function resizes the original and the edited image to the original size and save this 2 images.
+
+        @return: None
+        """
         self.binary_photo_for_save = self.image_edited.resize(self.original_size)
 
         self.image_original_for_save = self.image_original.resize(self.original_size)
@@ -321,6 +388,15 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.image_original_for_save.save(output_path_original, 'PNG')
     
     def save_histogram(self, folder):
+        """!
+        @brief save the histogram
+
+        @param The function uses attributes: `"folder" = mkdir`.
+
+        @note this function save the histogram in PNG format
+
+        @return: None
+        """
         
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -328,7 +404,16 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         output_path = os.path.join(folder, 'histogram')
         self.hist.figure.savefig(output_path)
 
-    def save_history(self, folder):    
+    def save_history(self, folder):
+        """!
+        @brief save the history and the bins o the histogram
+
+        @param The function uses attributes: `"folder" = mkdir`.
+
+        @note this function save some of the variables about the edited image and save the histogram data in a TXT file
+
+        @return: None
+        """     
         if not os.path.exists(folder):
             os.makedirs(folder)
 
