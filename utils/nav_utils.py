@@ -1,6 +1,4 @@
 from tkinter.messagebox import askyesno
-from tkinter.filedialog import askopenfilename
-from PIL import Image, ImageTk
 from utils.resize_image import resize_image
 
 import webbrowser
@@ -25,17 +23,3 @@ def close_app(app):
 
 def minimize_app(app):
     app.iconify()
-
-#def upload_img():
- #   filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp, *.tif, *.jtif")]
-  #  filename = askopenfilename(initialdir="/images", text="Select Image", filetypes= filetypes)
-   # if filename:
-    #        image = Image.open(filename)
-     #       resized_image = resize_image(image, (400, 300))
-      #      self.displayed_image = ImageTk.PhotoImage(resized_image)
-
-       #     if hasattr(self, "image_label"):
-        #        self.image_label.config(image=self.displayed_image)
-         #   else:
-          #      self.image_label = tk.Label(self.display_frame, image=self.displayed_image)
-           #     self.image_label.pack()
