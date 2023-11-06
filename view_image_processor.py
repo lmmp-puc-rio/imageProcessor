@@ -1,13 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, simpledialog
-from tkinter.filedialog import askopenfilename #TIRAR 
 import tkinter.font as TkFont
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
-import numpy as np
-import matplotlib.ticker as mtick
-from PIL import Image, ImageTk, ImageEnhance
-from skimage.filters import threshold_otsu,threshold_triangle
+from PIL import Image, ImageTk
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
 from utils.name_folder import *
