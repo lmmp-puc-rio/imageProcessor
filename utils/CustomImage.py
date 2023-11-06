@@ -24,7 +24,29 @@ from skimage.filters import threshold_otsu,threshold_triangle
 import os
 
 class CustomImage(Image.Image, ImageTk.PhotoImage):
+
+    """
+    This class works on creating two "widgets" in tkinter, one of them being an image in the format of Pil.Image 
+    and the other in the format of tk.Image. The class also works on binarizing the editable image and displaying
+    a histogram that represents the pixels of the image.  
+    """
+
     def __init__(self, app, label_original, label_edited, canvas_histogram ,label_histogram):
+        """!
+        @brief It creates two images and edits one. This editing is for future analysis of capsules contained in the image.
+
+        @param The Class uses attributes: `app = tk.Tk`, `label_original = Tkinter.Widget.Label`, `label_edited = Tkinter.Widget.Label`,
+        `canvas_histogram = FigureCanvasTkAgg`, `canvas_histogram = plt.Figure`.
+
+        @note This class is used to create two images, the original Image and the edited Image. 
+            Both are created in two formats: one in the format of "PIL.Image" and the other in the format of "tk.Image".
+            "image" is the original image that receives all the edits and methods of the class.
+            "image_tk" is the image that receives the format transformation method and is displayed on the screen by the "Tk.Canvas" widget.
+
+            In addition to image creation, the class has methods for editing, binarizing, and creating a histogram of the chosen image.
+
+        @return: self.image_original, self.image_original, self.image_edited, self.image_edited_tk
+        """
         self.app = app
         self.filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
         self.label_original = label_original
@@ -66,6 +88,13 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
         @return: self.image
         """
+
+        #Remove existing canvas in the screen
+        if hasattr(self.app, "original_canvas") and (self.app, "edited_canvas"):
+                # Destroy the previous canvas
+                self.app.original_canvas.destroy()
+                self.app.edited_canvas.destroy()
+    
         self.file_path = askopenfilename(title="Select Image File", filetypes=self.filetypes)
 
         if self.file_path:
