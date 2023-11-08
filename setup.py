@@ -21,7 +21,6 @@ executables = [Executable(
     icon=icon_file,
     shortcut_name="Image Processor",
     shortcut_dir= "image_processor",
-    target_name = "Image Processor",
     ),
     ]
 
