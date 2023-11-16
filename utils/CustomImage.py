@@ -209,7 +209,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.hist.hist(image.histogram(), bins=self.num_of_bins, weights=np.ones(len(image.histogram()))/len(image.histogram()), range=(0, 256))
         self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-        self.hist.legend(['TESTE'], fontsize = 8, frameon=False)
+
         self.canvas.draw()
 
     def update_contrast(self, value):
@@ -365,6 +365,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         #apply the red line in the histogram
         
         self.hist.axvline(self.threshold_value, color='r', ls='--')
+        self.hist.legend(['Threshold value'], fontsize = 8, frameon=False)
         self.canvas.draw()
 
     def reset_project(self):
