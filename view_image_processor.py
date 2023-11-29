@@ -1,20 +1,16 @@
-
-
 import tkinter as tk
-from tkinter import ttk, filedialog, simpledialog
+from tkinter import ttk, simpledialog
 import tkinter.font as TkFont
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
-import numpy as np
-import matplotlib.ticker as mtick
-from PIL import Image, ImageTk, ImageEnhance, ImageFilter
-from skimage.filters import threshold_otsu,threshold_triangle,gaussian
+from PIL import Image, ImageTk
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
 from utils.name_folder import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
-import cv2
+
+from utils.CustomImage import CustomImage
+
 
 class FullScreenApp(tk.Tk):
 
@@ -97,13 +93,14 @@ class FullScreenApp(tk.Tk):
         self.btn_home_img = resize_image(self.img_home,(240,100))
         self.btn_home_model = ImageTk.PhotoImage(self.btn_home_img)
         self.home_btn = tk.Button(self.header_frame, image= self.btn_home_model, background= self.pry_color, borderwidth=0, highlightthickness = 0 , activebackground= self.btn_color,relief='sunken', command=home_page)
-        self.home_btn.bind("<Button-1>", lambda x: self.webbrowser.open_new("http://tmp-lmmp.mec.puc-rio.br/"))
+        self.home_btn.bind("<Button-1>", lambda x: self.webbrowser.open_new("http://tmp-lmmp.mec.puc-rio.br/"))      
         
         #upload button
         self.img_upload= (Image.open(r'src/images/upld_btn.png'))
         self.btn_img_upload_img = resize_image(self.img_upload,(200,100))
         self.btn_img_upload_model = ImageTk.PhotoImage(self.btn_img_upload_img)
-        self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.upload_image)
+        #This Button calls the Class CustomImage
+        self.upload_btn = tk.Button(self.header_frame, image=self.btn_img_upload_model,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command=self.create_object_image)
 
         #help button
         self.img_help= (Image.open(r'src/images/help_img.png'))
@@ -251,7 +248,7 @@ class FullScreenApp(tk.Tk):
         self.blur_btn_img= (Image.open(r'src/images/blur_btn.png'))
         self.btn_blur_btn_img = resize_image(self.blur_btn_img,(120,30))
         self.btn_blur_btn = ImageTk.PhotoImage(self.btn_blur_btn_img)
-        self.btn_run_blur = tk.Button(self.contrast_frame, image=self.btn_blur_btn,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command = self.apply_blur)
+        self.btn_run_blur = tk.Button(self.contrast_frame, image=self.btn_blur_btn,bg= self.pry_color, borderwidth=0,highlightthickness = 0, activebackground=self.pry_color, command = self.apply_blur,state = "disable")
 
         self.blur_value_label.grid(row= 0, column=0, padx=6)
         self.blur_value_textbox.grid(row= 0, column=1, padx=6)
@@ -383,17 +380,7 @@ class FullScreenApp(tk.Tk):
         self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=(90,0), pady=3)
         self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=(90,0), pady=3)
         self.save_btn.grid(row=2, column=1, sticky='e', padx=(2,20), pady=3)
-      
-    #estrutura certa para comentarios com Doxygen
-    #"""!
-    # @brief (Aqui entra uma breve explicação do motodo/função)
-    #
-    # @param (Aqui você explica os parametros a serem recebidos, como o tipo do dado e o que pode receber)
-    #
-    # @note (Explicação de como funciona a função, qual dado retorna falando o nome da variavel e o tipo da mesma)
-    #
-    # @throws ()
-    #"""
+    
     def quit_application(self):
         """!
         @brief ends the application
@@ -430,8 +417,10 @@ class FullScreenApp(tk.Tk):
         @return self.update_contrast(self,photo, value)
         """
         self.contrast_value = self.value_scale.get()
-        self.update_contrast(self.image_original, self.contrast_value)
-    
+        # 
+        if type(self.image_original) is not type(None):
+            self.image_original.update_contrast(self.contrast_value)
+            
     #validate user input in blur value
     def validate_blur_value(self, event):
         """!
@@ -489,7 +478,7 @@ class FullScreenApp(tk.Tk):
         #current_position = self.text_box_treshold.index(tk.INSERT)
         current_char = event.char
         new_value = self.text_box_treshold.get("1.0", "end-1c") + current_char
-    
+
         if not on_validate_input(new_value):
             self.text_box_alert_hidden.grid_remove()#row=0, column=2,sticky='S',columnspan=2, padx=(135,0), pady=(16,0))
             return "break"  
@@ -530,52 +519,19 @@ class FullScreenApp(tk.Tk):
 
         if selected_item == "activated":
             self.blur_value_textbox.config(state='normal')
+            self.btn_run_blur['state'] = "normal"
         else:
             self.blur_value_textbox.config(state='disabled')
-    
+            self.btn_run_blur['state'] = "disable"
+
     def apply_blur(self):
-        """!
-        @brief Apply Gaussian blur to the image.
+        if self.blur_value_textbox:
+            #self.apply_blur()
+            self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
+            self.image_original.apply_blur(self.blur_value)
+        else:
+            pass
 
-        @param The function uses attributes: `self.image_without_blur`, `self.blur_value_textbox`,
-        `self.blur_value`, `self.num_of_bins`, `self.image_edited`, `self.histogram_canvas`.
-
-        @note This function applies Gaussian blur to the edited image using the specified blur value.
-        It also updates the edited image, displays the updated image, and generates the new pixel histogram for the updated edited image.
-
-
-        @return: None
-        """
-
-        #create a copy of the photo so you don't apply blur on top of blur, that way you always apply it to the image without blur
-        image = self.image_without_blur
-        self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
-
-        # Convert the PIL image to a NumPy array
-        image_array = np.array(image)
-
-        # Apply Gaussian blur using OpenCV
-        blurred_image = cv2.GaussianBlur(image_array, (0, 0), self.blur_value)
-
-        # Convert the NumPy array back to a PIL image
-        blurred_image = Image.fromarray(blurred_image)
-        self.image_edited = blurred_image
-        self.update_image(self.image_edited)
-
-        plt.clf()
-        plt.hist(self.image_edited.histogram(), bins=self.num_of_bins, range=(0, 256))
-
-        self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(self.image_edited.histogram(), bins=self.num_of_bins, weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))        
-        self.hist = self.histogram_container.gca()
-        self.hist.hist(self.image_edited.histogram(), bins=self.num_of_bins,weights=np.ones(len(self.image_edited.histogram()))/len(self.image_edited.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
-        self.hist.set_xlabel('Pixel Value', fontsize = 12)
-        self.hist.set_title('Pixel Histogram', fontsize = 12)
-            
-        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-
-        self.histogram_canvas.draw()
-    
     def on_treshold_btn_click(self):
         """!
         @brief Apply Gaussian blur to the image.
@@ -593,274 +549,35 @@ class FullScreenApp(tk.Tk):
         self.blur_text_box_alert_hidden.grid()
 
         if selected_item == self.list_treshold_model[0]:
-            self.otsu_threshold(self.image_edited)
+            if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
+                manual_threshold_value = int(self.text_box_treshold.get("1.0", "end"))
+                self.image_original.apply_model_otsu_treashold(manual_threshold_value)
+            else: 
+                self.image_original.apply_model_otsu_treashold()
+                model_value = self.image_original.get_model_value()
+                self.insert_model_value_in_box(model_value)
 
         elif selected_item == self.list_treshold_model[1]:
-            self.triangle_threshold(self.image_edited)
+            if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
+                manual_threshold_value = int(self.text_box_treshold.get("1.0", "end"))
+                self.image_original.apply_model_triangle_treashold(manual_threshold_value)
+            else: 
+                self.image_original.apply_model_triangle_treashold()
+                model_value = self.image_original.get_model_value()
+                self.insert_model_value_in_box(model_value)
 
-    def show_histogram(self, photo):
-        """!
-        @brief plot the frist histogram of the original image and reset the histogram
+    def update_image_edited(self, value):
+        self.image_original.update_image(value)
 
-        @param self.image_edited(PIL Image)
-        
-        @note This function plots the histogram on the screen of the given photo and updates the histogram
-    
-        @return: None
-        """
-        
-        rcParams['font.weight'] = 'bold'       
-        plt.clf()
-        plt.hist(photo.histogram(), weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
-        self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))       
-        self.hist = self.histogram_container.gca()
-        self.hist.hist(photo.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo.histogram()))/len(photo.histogram()), range=(0, 256))
-        self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
-        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-        self.histogram_canvas.draw()
-      
-    def otsu_threshold(self, photo):
-        """!
-        @brief transform the edited image in gray scale image, based on the chosen model
-
-        @param self.image_edited(PIL Image)
-        
-        @note This function take the PIL image, transform in a numpy array and pass to the threshold_otsu of the Skimage filters.
-          Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
-    
-        @return: None
-        """
-        # Convert image to grayscale and get pixel values
-        photo_gray = photo.convert("L")
-        pixels = np.array(photo_gray.getdata()) #gray# 
-        
-        pixels = pixels.astype(np.uint8)
-
-        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
-
-            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
-        else: 
-            self.threshold_value = threshold_otsu(pixels)
-            
-
-        photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
-
-        #set the otsu value in the valuebox
+    def insert_model_value_in_box(self, value):
         self.text_box_treshold.config(state='normal')
         self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
-        self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
+        self.text_box_treshold.insert("1.0", value)
+
+    def create_object_image(self):
+        self.bar_contrast.set(1.0)
+        self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram = self.histogram_container, canvas_histogram = self.histogram_canvas)
         
-
-        # Update image display
-        self.image_edited = photo_binary
-        self.update_image(self.image_edited)
-        self.draw_red_line_in_hist()
-
-    def triangle_threshold(self, photo):
-        """!
-        @brief transform the edited image in gray scale image, based on the chosen model
-
-        @param self.image_edited(PIL Image)
-        
-        @note This function take the PIL image, transform in a numpy array and pass to the threshold_triangle of the Skimage filters.
-          Show an edited image in a gray scale of the treshold model, take the value of the model and plot a red line in the histogram.
-    
-        @return: None
-        """
-        # Convert image to grayscale and get pixel values
-        photo_gray = photo.convert("L")
-        pixels = np.array(photo_gray.getdata()) 
-        pixels = pixels.astype(np.uint8)
-
-        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
-            self.threshold_value = int(self.text_box_treshold.get("1.0", "end"))
-        else: 
-            self.threshold_value = threshold_triangle(pixels)
-
-        photo_binary = photo_gray.point(lambda x: 0 if x < self.threshold_value else 255)
-
-        #set the otsu value in the valuebox
-
-        self.text_box_treshold.config(state='normal')
-        self.text_box_treshold.delete("1.0", "end")  # Clear the existing text
-        self.text_box_treshold.insert("1.0", self.threshold_value ) # insert the threshold value in the text box
-
-        
-
-        # Update image display
-        self.image_edited = photo_binary
-        self.update_image(self.image_edited)
-        self.draw_red_line_in_hist()
-
-    def draw_red_line_in_hist(self):
-        """!
-        @brief Draw a red line in the histogram
-
-        @param self.threshold_value(int)
-        
-        @note This function take self.threshold_value, after activated the model and draw a red line in the histogram showing the value model
-    
-        @return: None
-        """
-        rcParams['font.weight'] = 'bold' 
-        #apply the red line in the histogram
-          
-        self.hist.axvline(self.threshold_value, color='r', ls='--')
-        self.histogram_canvas.draw()
-
-    def update_contrast(self,photo, value): 
-        """!
-        @brief Update the edited image and the histogram.
-
-        This function updates the edited image and its associated histogram based on the original photo and contrast value.
-
-        @param 'self.image_original'(PIL image), 'self.contrast_value'(float)
-
-        @note the function applies the contrast value to the edited image based on the original image,
-          so the contrast will always have the right value, without applying contrast on top of contrast
-
-        @return: None
-        """
-        # Update image display
-        new_width_edited =  self.edited_img_label.winfo_width()
-        new_height_edited =  self.edited_img_label.winfo_height()
-        
-        photo = resize_image(photo, ((new_width_edited), (new_height_edited)))
-
-        enhancer = ImageEnhance.Contrast(photo)
-        photo_contrast = enhancer.enhance(float(value))
-        self.image_edited = enhancer.enhance(float(value))      
-        self.image_without_blur = self.image_edited
-
-        self.update_image(photo_contrast)
-
-        plt.clf()
-        plt.hist(photo_contrast.histogram(), bins=self.num_of_bins, range=(0, 256))
-
-        self.histogram_canvas.figure.clear()
-        self.histogram_data, _ = np.histogram(photo_contrast.histogram(), bins=self.num_of_bins, weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))        
-        self.hist = self.histogram_container.gca()
-        self.hist.hist(photo_contrast.histogram(), bins=self.num_of_bins,weights=np.ones(len(photo_contrast.histogram()))/len(photo_contrast.histogram()), range=(0, 256))#(photo.histogram(), bins=256, range=(0, 256))
-        self.hist.set_xlabel('Pixel Value', fontsize = 12)
-        self.hist.set_title('Pixel Histogram', fontsize = 12)
-            
-        self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-
-        self.histogram_canvas.draw()
-   
-    def update_image(self, photo):
-        """!
-        @brief Update the edited image.
-
-        @param photo_image_edited (PIL.Image.Image)
-
-        @note This function destoy the original canvas and creates a new to display the edited image with all the changes the image receives.
-
-        @return: None
-        """  
-
-        # Clear any existing canvas and create a new one
-        if hasattr(photo, "edited_canvas"):
-            self.edited_canvas.destroy()  # Destroy the previous canvas
-
-        #new_width_edited =  self.edited_img_label.winfo_width() 
-        #new_height_edited =  self.edited_img_label.winfo_height()
-        
-        new_width_edited = self.original_edited_width
-        new_height_edited = self.original_edited_height
-
-        # Calculate the coordinates to center the image in the canvas
-        x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-        y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
-
-
-        self.image_edited = photo
-        self.image_edited_tk = ImageTk.PhotoImage(photo)
-
-        # Create a canvas widget to display the edited image
-        self.edited_canvas = tk.Canvas(self.edited_img_label)
-        self.edited_canvas.config(borderwidth=0)
-        self.edited_canvas.pack()  # Place canvas inside the label
-        self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-        self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk )
-  
-    def upload_image(self):
-        """!
-        @brief Upload the chosen image and show on the screen
-
-        @param photo_image_edited (PIL.Image.Image)
-
-        @note This function creates a canvas to display the original image, the edited image and centers the images in the canvas. And plot the histogram of the original image
-
-        @return: None
-        """  
-        # Open a file dialog and get the path of the selected file
-        filetypes = [("Image Files", "*.png *.jpg *.jpeg *.bmp *.tif *.tiff")]
-        file_path = filedialog.askopenfilename(title="Select Image File", filetypes=filetypes)
-        
-        if file_path:
-            #reset all the variables
-            self.contrast_value = 1.0
-            self.threshold_value = None
-            self.histogram_data = None  
-
-            # Create a PhotoImage object from the selected file
-            self.file_path = file_path
-            self.image_original = Image.open(self.file_path)
-            self.original_size = self.image_original.size
-
-            
-            # Resize the image to fit the canvas while maintaining aspect ratio
-            new_width = self.original_img_label.winfo_width()  
-            new_height = self.original_img_label.winfo_height() 
-        
-            new_width_edited =  self.edited_img_label.winfo_width() 
-            new_height_edited =  self.edited_img_label.winfo_height()
-
-            self.original_edited_width = new_width_edited
-            self.original_edited_height = new_height_edited
-
-
-            self.image_original = resize_image(self.image_original, ((new_width), (new_height)))
-            self.image_edited = resize_image(self.image_original, ((new_width_edited), (new_height_edited)))
-            
-            self.image_original_tk = self.image_original.copy()
-            self.image_edited_tk = self.image_edited.copy()
-            
-            # Resize image to fit canvas and convert to PhotoImage
-            self.image_original_tk = ImageTk.PhotoImage(self.image_original)
-            self.image_edited_tk = ImageTk.PhotoImage(self.image_edited)
-            
-            # Clear any existing canvas and create a new one
-            if hasattr(self, "original_canvas"):
-                self.original_canvas.destroy()
-                self.edited_canvas.destroy()  # Destroy the previous canvas
-            
-            # Calculate the coordinates to center the image in the canvas
-            x_center = (new_width - self.image_original_tk.width()) / 2
-            y_center = (new_height - self.image_original_tk.height()) / 2
-
-
-            x_center_edited = (new_width_edited - self.image_edited_tk.width()) / 2
-            y_center_edited = (new_height_edited - self.image_edited_tk.height()) / 2
-
-            # Create a canvas widget to display the image
-            self.original_canvas = tk.Canvas(self.original_img_label)
-            self.original_canvas.config(borderwidth=0)
-            self.original_canvas.pack()
-            self.original_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-            self.original_canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.image_original_tk)
-            
-            # Create a canvas widget to display the edited image
-            self.edited_canvas = tk.Canvas(self.edited_img_label)
-            self.edited_canvas.config(borderwidth=0)
-            self.edited_canvas.pack()  # Place canvas inside the label
-            self.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place canvas inside the label
-            self.edited_canvas.create_image(x_center_edited, y_center_edited, anchor=tk.NW, image=self.image_edited_tk)
-            self.show_histogram(self.image_edited)
-            self.bar_contrast.set(1.0)
-
     def reset_project(self):
         """!
         @brief Resets all variables , photos and histogram
@@ -871,31 +588,24 @@ class FullScreenApp(tk.Tk):
 
         @return: None
         """
-        #reseting the edited image for the original
-        self.image_edited = self.image_original
-        self.image_edited = resize_image(self.image_original, ((self.original_edited_width),(self.original_edited_height)))
-        self.update_image(self.image_edited)
 
-        #reset contrast
-        self.bar_contrast.set(1.0)
-        self.contrast_value = 0
-        #self.update_contrast(self.image_edited, self.contrast_value)
+        #hidden alert msg
+        self.text_box_alert_hidden.grid()
+        self.blur_text_box_alert_hidden.grid()
         
+        #reset contrast
+        self.bar_contrast.set(1.0)      
 
         #reset Blur
         self.blur_value_textbox.delete("1.0","2.0")
-        self.blur_value = 0
 
         #reset MODEL
-        #self.show_histogram(self.image_edited)
         self.text_box_treshold.delete("1.0", "end")
         self.radio_selected.set('automatic')
-        self.text_box_treshold.config(state='disable')
+        self.text_box_treshold.config(state='disable')        
 
-        #reset histogram
-        self.show_histogram(self.image_edited)
-
-        
+        #reset the image and the values
+        self.image_original.reset_project()
 
     def save_files(self):
         """!
@@ -923,115 +633,37 @@ class FullScreenApp(tk.Tk):
                 os.makedirs(save_folder)
 
             if not name_folder:
-                name_folder = "Binary_project" #  VER SE ESSE NOME FAZ SENTIDO PARA TODOS OS ARQUIVOS
+                name_folder = "Binary_project"
             
             if (self.img_save_value.get()==1) and (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_image_edited(save_folder)
-                self.save_history(save_folder)
-                self.save_histogram(save_folder)
+                self.image_original.save_image_edited(save_folder)
+                self.image_original.save_history(save_folder)
+                self.image_original.save_histogram(save_folder)
 
             elif (self.img_save_value.get()==1) and (self.history_save_value.get()==1):
-                self.save_image_edited(save_folder)
-                self.save_history(save_folder)
+                self.image_original.save_image_edited(save_folder)
+                self.image_original.save_history(save_folder)
 
             elif (self.img_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_image_edited(save_folder)
-                self.save_histogram(save_folder)
+                self.image_original.save_image_edited(save_folder)
+                self.image_original.save_histogram(save_folder)
 
             elif (self.history_save_value.get()==1) and (self.histogram_save_value.get()==1):
-                self.save_history(save_folder)
-                self.save_histogram(save_folder)
+                self.image_original.save_history(save_folder)
+                self.image_original.save_histogram(save_folder)
 
             elif (self.img_save_value.get()==1):
-                self.save_image_edited(save_folder)
+                self.image_original.save_image_edited(save_folder)
 
             elif (self.history_save_value.get()==1):
-                self.save_history(save_folder) 
+                self.image_original.save_history(save_folder) 
 
             elif (self.histogram_save_value.get()==1):
-                self.save_histogram(save_folder)
+                self.image_original.save_histogram(save_folder)
 
             else:
                 return
 
-    #save edited Image
-    def save_image_edited(self, save_folder):
-        """!
-        @brief save the images
-
-        @param 'self.image_edited', 'self.original_size'
-
-        @note this function resizes the original and the edited image to the original size and save this 2 images.
-
-        @return: None
-        """
-        self.binary_photo_for_save = self.image_edited.resize(self.original_size)
-
-        self.image_original_for_save = self.image_original.resize(self.original_size)
-
-        # #Ensure the folder exists; create it if it doesn't
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
-            
-        # Save the image with a new name in the folder
-        output_path = os.path.join(save_folder, 'image_edited')
-        self.binary_photo_for_save.save(output_path, 'PNG')
-        output_path_original = os.path.join(save_folder, 'orinal_image')
-        self.image_original_for_save.save(output_path_original, 'PNG')
-       
-    #save histogram
-    def save_histogram(self, save_folder):
-        """!
-        @brief save the histogram
-
-        @param 'self.hist'
-
-        @note this function save the histogram in PNG format
-
-        @return: None
-        """
-        # #Ensure the folder exists; create it if it doesn't
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
-            
-        output_path = os.path.join(save_folder, 'histogram')
-        self.hist.figure.savefig(output_path)
-
-    #save history
-    def save_history(self, save_folder):    
-        """!
-        @brief save the history and the bins o the histogram
-
-        @param 'self.blur_value, 'self.contrast_value', 'self.threshold_value', 'blur_value'
-
-        @note this function save some of the variables aboute the edited image and save the histogram data in a TXT file
-
-        @return: None
-        """  
-        # #Ensure the folder exists; create it if it doesn't
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
-
-        # Create string with processing history data
-        history_data = f"Image file path: {self.file_path}\nContrast value: {self.contrast_value}\n"
-
-        if self.threshold_value is not None:
-            history_data += f"Otsu threshold value: {self.threshold_value}\n"
-
-        if self.blur_value is not None:
-            history_data += f"Blur value: {self.blur_value}\n"
-
-        if self.histogram_data is not None:
-            history_data += "Histogram data:\n"
-            for i, value in enumerate(self.histogram_data):
-                history_data += f"{i}: {value}\n"
-
-        # Write string to text file
-        filepath = os.path.join(save_folder, 'contrast history')
-        with open(filepath, "w") as f:
-            f.write(history_data)
-
-            
 
 if __name__ == '__main__':
     app = FullScreenApp()
