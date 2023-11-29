@@ -12,17 +12,17 @@ After the choose of the correct image you can make the automatic binzaritaion pr
 
 
 ## Authors:
-Frederico Gomes
+[Frederico Gomes](https://www.linkedin.com/in/frederico-gomes-63b3328/)
 
-Márcio Carvalho
+[Márcio Carvalho](https://www.linkedin.com/in/marcio-carvalho-ba00b81/)
 
-Renan Horta
+[Renan Horta](https://www.linkedin.com/in/renanhorta/)
 
-Rodrigo Lipparelli
+[Rodrigo Lipparelli](https://www.linkedin.com/in/rodrigo-lipparelli-fernandez/)
 
-Sergio Ribeiro
+[Sergio Ribeiro](https://www.linkedin.com/in/ssribeiro82/)
 
-Vinicius Mattoso 
+[Vinicius Mattoso ](https://www.linkedin.com/in/vinicius-mattoso/)
 
 
 ## Versions:
@@ -50,25 +50,51 @@ Language Structure: Python
 
 ### Install process on Windows:
 
-1) Create the virtual enviroment;
+1) Check if the virtualenv packages is already installed in your system
 
-run:
+**run**:
+    
+    pip show virtualenv
+
+If not, please install:
+
+**run**:
+
+    pip install virtualenv
+
+
+2) Create the virtual enviroment;
+
+**run**:
 
     python -m virtualenv env
 
-OBS: Make sure that you have the virtualenv model
 
-2) Activate the virtual env;
+3) Activate the virtual env;
 
-run:
+**run**:
 
     env/Scripts/activate
 
-3) Install the requirements models;
+**OBS**: If the env is not being activated, it may be a problem with Execution Policy Settings. To fix it, you should try executing the following command as admin in Windows PowerShell:
 
-run:
+**run**:
+
+    Set-ExecutionPolicy Unrestricted -Scope Process
+
+
+
+4) Install the requirements models;
+
+**run**:
 
     pip install -r requirements.txt
+
+5) Run the Image Processor Tool:
+
+**run**:
+
+    python .\view_image_processor.py
 
 ### To build the App on Windows and Linux
 
@@ -76,22 +102,11 @@ run:
 
     python .\setup.py build
 
-### Setup Guidelines ###
+### Application purpose 
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+* Help with the image binarization process
+* Image pretreatments to highlight contours
 
-### Contribution guidelines ###
+### Who do I talk to?
 
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+fell free to contact any **authors** in order to contribute with issues, new challenges, ideas, or comments.
