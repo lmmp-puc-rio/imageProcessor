@@ -91,9 +91,9 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
         #Remove existing canvas in the screen
         if hasattr(self.app, "original_canvas") and (self.app, "edited_canvas"):
-                # Destroy the previous canvas
-                self.app.original_canvas.destroy()
-                self.app.edited_canvas.destroy()
+            # Destroy the previous canvas
+            self.app.original_canvas.destroy()
+            self.app.edited_canvas.destroy()
     
         self.file_path = askopenfilename(title="Select Image File", filetypes=self.filetypes)
 
