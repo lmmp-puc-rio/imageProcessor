@@ -8,3 +8,8 @@ def resize_image(image, maxsize):
     newsize = (int(image.size[0]/ratio), int(image.size[1]/ratio))
     image = image.resize(newsize, Image.LANCZOS)
     return image
+
+def resize_image_predifined(image, size):
+    newsize = (int(size[0]), int(size[1]))
+    image = image.resize(newsize, Image.LANCZOS)
+    return image
