@@ -389,7 +389,6 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         image_copy = self.image.copy()
         image_copy = resize_image(image_copy, ((self.new_width), (self.new_height)))
         self.image_edited = image_copy
-        self.image_edited = resize_image(self.image, ((self.original_size[0]),(self.original_size[1])))
         self.image_edited_tk = self.transform_in_tkimage(self.image_edited)
         self.show_image(self.app, self.label_edited, self.image_edited_tk)
 
