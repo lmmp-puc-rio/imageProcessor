@@ -181,9 +181,9 @@ class FullScreenApp(tk.Tk):
         self.footer_frame = tk.Frame(self, background=self.pry_color, height=50)
         self.footer_frame.grid(row=2, column=0, sticky='WENS')
         self.footer_frame.rowconfigure(0, weight=1)
-        self.footer_frame.columnconfigure(0, weight=1, uniform="equal_weight")
-        self.footer_frame.columnconfigure(1, weight=1, uniform="equal_weight")
-        self.footer_frame.columnconfigure(2, weight=1, uniform="equal_weight")
+        self.footer_frame.columnconfigure(0, weight=0)
+        self.footer_frame.columnconfigure(1, weight=0)
+        self.footer_frame.columnconfigure(2, weight=1)
 
         #footer widgets
         self.contrast_frame = tk.Frame(self.footer_frame, background=self.pry_color)
@@ -376,9 +376,9 @@ class FullScreenApp(tk.Tk):
         self.save_btn = tk.Button(self.save_frame, image=self.img_save,bg= self.pry_color, borderwidth=0,highlightthickness = 0,
                                   activebackground=self.pry_color, command= self.save_files, anchor='e')
 
-        self.checkbox1_frame.grid(row=1, column=0, sticky='w', pady=3)
-        self.checkbox2_frame.grid(row=2, column=0, sticky='w', pady=3)
-        self.checkbox3_frame.grid(row=3, column=0, sticky='w', pady=3)
+        self.checkbox1_frame.grid(row=1, column=0, sticky='w', padx=(90,0), pady=3)
+        self.checkbox2_frame.grid(row=2, column=0, sticky='w', padx=(90,0), pady=3)
+        self.checkbox3_frame.grid(row=3, column=0, sticky='w', padx=(90,0), pady=3)
         self.save_btn.grid(row=2, column=1, sticky='e', padx=(2,20), pady=3)
     
     def quit_application(self):
