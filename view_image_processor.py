@@ -56,7 +56,7 @@ class FullScreenApp(tk.Tk):
 
         #root config
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=0)
+        self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=9)
         self.rowconfigure(2, weight=1)
 
@@ -134,11 +134,12 @@ class FullScreenApp(tk.Tk):
 
         #Grid config
         self.main_frame = tk.Frame(self, background= self.bg_container_color)
-        self.main_frame.rowconfigure(0, weight=0)
-        self.main_frame.rowconfigure(1, weight=1)
-        self.main_frame.columnconfigure(0, weight=1)
-        self.main_frame.columnconfigure(1, weight=1)
-        self.main_frame.columnconfigure(2, weight=0)
+        self.main_frame.grid(row=1, column=0, sticky='WENS')
+        self.main_frame.rowconfigure(0, weight=1)
+        self.main_frame.rowconfigure(1, weight=2)
+        self.main_frame.columnconfigure(0, weight=1, uniform="equal_weight")
+        self.main_frame.columnconfigure(1, weight=1, uniform="equal_weight")
+        self.main_frame.columnconfigure(2, weight=1, uniform="equal_weight")
 
         #main titles texts
         self.original_txt = tk.Label(self.main_frame, text='ORIGINAL IMAGE',font= (self.font_lg_bold), background= self.bg_container_color )
@@ -165,13 +166,12 @@ class FullScreenApp(tk.Tk):
         self.histogram_canvas.get_tk_widget().pack( fill='both')
     
         #Placing widget in main frame
-        self.main_frame.grid(row=1, column=0, sticky='WENS')
-        self.original_txt.grid(row=0, column=0, sticky='N', pady=(6,2))
-        self.edited_txt.grid(row=0, column=1, sticky='N', pady=(6,2))
-        self.histogram_txt.grid(row=0, column=2, sticky='N', pady=(6,2))
-        self.original_img_label.grid(row=1, column=0, sticky='WENS',padx=1.5, pady=3)
-        self.edited_img_label.grid(row=1, column=1, sticky='WENS',padx=1.5, pady=3)
-        self.histogram_img_label.grid(row=1, column=2, sticky='WENS',padx=1.5,pady=3)
+        self.original_txt.grid(row=0, column=0, sticky='WENS')
+        self.edited_txt.grid(row=0, column=1, sticky='WENS')
+        self.histogram_txt.grid(row=0, column=2, sticky='WENS')
+        self.original_img_label.grid(row=1, column=0, sticky='WENS', padx = 2)
+        self.edited_img_label.grid(row=1, column=1, sticky='WENS', padx = 2)
+        self.histogram_img_label.grid(row=1, column=2, sticky='WENS', padx = 2)
 
         ##################
         ## footer frame ##

@@ -91,9 +91,9 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
         #Remove existing canvas in the screen
         if hasattr(self.app, "original_canvas") and (self.app, "edited_canvas"):
-                # Destroy the previous canvas
-                self.app.original_canvas.destroy()
-                self.app.edited_canvas.destroy()
+            # Destroy the previous canvas
+            self.app.original_canvas.destroy()
+            self.app.edited_canvas.destroy()
     
         self.file_path = askopenfilename(title="Select Image File", filetypes=self.filetypes)
 
@@ -144,7 +144,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.x_center = (self.new_width- self.image_w) / 2
         self.y_center = (self.new_height - self.image_h) / 2
 
-        # # Clear any existing canvas and create a new one
+        # Clear any existing canvas and create a new one
         if label == self.label_original:
             if hasattr(app, "original_canvas"):
                 # Destroy the previous canvas
@@ -224,8 +224,13 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
 
         @return: None
         """
-        #Apply the constrast value in the edited image
-        enhancer = ImageEnhance.Contrast(self.image)
+        # Apply the constrast value in the edited image
+        # This method needs to create a copy of the original image and resize it once again.
+        # If this doesn't happen, the image will be resized to its original size 
+        
+        image_copy = self.image.copy()
+        image_copy = resize_image(image_copy, ((self.new_width), (self.new_height)))
+        enhancer = ImageEnhance.Contrast(image_copy)
         self.image_edited = enhancer.enhance(float(value))
         self.image_edited_tk = enhancer.enhance(float(value))
   
@@ -380,8 +385,10 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         """
 
         #reseting the edited image for the original
-        self.image_edited = self.image
-        self.image_edited = resize_image(self.image, ((self.original_size[0]),(self.original_size[1])))
+
+        image_copy = self.image.copy()
+        image_copy = resize_image(image_copy, ((self.new_width), (self.new_height)))
+        self.image_edited = image_copy
         self.image_edited_tk = self.transform_in_tkimage(self.image_edited)
         self.show_image(self.app, self.label_edited, self.image_edited_tk)
 
