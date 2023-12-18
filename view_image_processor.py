@@ -181,9 +181,9 @@ class FullScreenApp(tk.Tk):
         self.footer_frame = tk.Frame(self, background=self.pry_color, height=50)
         self.footer_frame.grid(row=2, column=0, sticky='WENS')
         self.footer_frame.rowconfigure(0, weight=1)
-        self.footer_frame.columnconfigure(0, weight=0)
-        self.footer_frame.columnconfigure(1, weight=0)
-        self.footer_frame.columnconfigure(2, weight=1)
+        self.footer_frame.columnconfigure(0, weight=0, uniform="equal_weight")
+        self.footer_frame.columnconfigure(1, weight=0, uniform="equal_weight")
+        self.footer_frame.columnconfigure(2, weight=1, uniform="equal_weight")
 
         #footer widgets
         self.contrast_frame = tk.Frame(self.footer_frame, background=self.pry_color)

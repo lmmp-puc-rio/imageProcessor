@@ -419,11 +419,14 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         if not os.path.exists(folder):
             os.makedirs(folder)
             
+
         # Save the image with a new name in the folder
-        output_path = os.path.join(folder, 'image_edited')
-        self.binary_photo_for_save.save(output_path, 'PNG')
+        output_path_edited = os.path.join(folder, 'image_edited')
         output_path_original = os.path.join(folder, 'image_original')
-        self.image_original_for_save.save(output_path_original, 'PNG')
+        self.binary_photo_for_save.save(output_path_edited + '.png', 'PNG')
+        self.image_original_for_save.save(output_path_original + '.png', 'PNG')
+
+        
     
     def save_histogram(self, folder):
         """!
