@@ -23,9 +23,6 @@ from skimage.filters import threshold_otsu,threshold_triangle
 #to save files
 import os
 
-#to save in linux or windows format
-import platform
-
 class CustomImage(Image.Image, ImageTk.PhotoImage):
 
     """
@@ -422,23 +419,13 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         if not os.path.exists(folder):
             os.makedirs(folder)
             
-        # Save the image with a new name in the folder
-        # output_path = os.path.join(folder, 'image_edited')
-        # self.binary_photo_for_save.save(output_path, 'PNG')
-        # output_path_original = os.path.join(folder, 'image_original')
-        # self.image_original_for_save.save(output_path_original, 'PNG')
-            
+
         # Save the image with a new name in the folder
         output_path_edited = os.path.join(folder, 'image_edited')
         output_path_original = os.path.join(folder, 'image_original')
+        self.binary_photo_for_save.save(output_path_edited + '.png', 'PNG')
+        self.image_original_for_save.save(output_path_original + '.png', 'PNG')
 
-        # Determine the operating system
-        if platform.system() == 'Windows':
-            self.binary_photo_for_save.save(output_path_edited + '.png', 'PNG')
-            self.image_original_for_save.save(output_path_original + '.png', 'PNG')
-        else:
-            self.binary_photo_for_save.save(output_path_edited + '.png')
-            self.image_original_for_save.save(output_path_original + '.png')
         
     
     def save_histogram(self, folder):
