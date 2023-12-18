@@ -16,7 +16,8 @@ def close_app(app):
     proceed = bool(proceed) # So it is a bool
 
     if proceed:
-        app.destroy()
+        # if you don't put the after the window close, it takes too long time to let the terminal for a new command
+        app.after(1, app.destroy())
     else:
         # You don't really need to do this
         pass
