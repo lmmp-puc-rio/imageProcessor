@@ -1,15 +1,18 @@
-# README #
-
 # Image Processor Tool
 
-This project consists on a tkinter tool to help in the process of image binarization:
+This project consists of a tkinter tool designed to assist in the image binarization process:
 
 ![App Image](src/images/image.png)
 
-After the choose of the correct image you can make the automatic binzaritaion process, like in the following image
+Once the correct image is selected, you can initiate the automatic binarization process, as depicted in the following image:
 
-![App Image in the binarization process](src/images/image-1.png)
+![App Image in the binarization process](src/example/readme_images/binarization_example_capsules_2.png)
 
+Additionally, users can enhance the contrast of the original image to improve the binarization process by using the slide bar:
+
+![App Image in the contrast process](src/example/readme_images/contrast_example_capsules_2.png)
+
+Users have the flexibility to choose between automatic (**OTSU**, **TRIANGLE**) or manual threshold settings for image binarization.
 
 ## Authors:
 [Frederico Gomes](https://www.linkedin.com/in/frederico-gomes-63b3328/)
@@ -106,6 +109,32 @@ run:
 
 * Help with the image binarization process
 * Image pretreatments to highlight contours
+
+
+### Example Images
+
+* **Emulsion example**:
+
+    ![App Image](src/example/example_emulsion_1.jpg)
+
+    Photo credit: Evgeniy Bobkov/Getty Images
+
+<br>
+
+* **Capsules example 1**:
+
+    ![App Image](src/example/example_capsules_1.png)
+
+    Photo credit: [Laboratory of Microhydrodynamics and Flow in Porous Media (LMMP)](http://lmmp.mec.puc-rio.br/)
+
+<br>
+
+* **Capsules example 2**:  
+    ![App Image](src/example/example_capsules_2.png)
+
+    Photo credit: [Laboratory of Microhydrodynamics and Flow in Porous Media (LMMP)](http://lmmp.mec.puc-rio.br/)
+
+
 
 ### Who do I talk to?
 

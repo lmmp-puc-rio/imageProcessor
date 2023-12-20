@@ -208,6 +208,7 @@ class CustomImage(Image.Image, ImageTk.PhotoImage):
         self.hist = container.gca()
         self.hist.hist(image.histogram(), bins=self.num_of_bins, weights=np.ones(len(image.histogram()))/len(image.histogram()), range=(0, 256))
         self.hist.set_xlabel('Pixel Value', fontdict=dict(weight='bold',fontsize = 12))
+        self.hist.set_yscale('log')  # Setting y-axis to log scale
         self.hist.yaxis.set_major_formatter(mtick.PercentFormatter(1))
 
         self.canvas.draw()
