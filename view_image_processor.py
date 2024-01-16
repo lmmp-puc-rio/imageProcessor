@@ -10,6 +10,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 
 from utils.CustomImage import CustomImage
+from utils.ImageOriginal import ImageOriginal
 
 
 class FullScreenApp(tk.Tk):
@@ -576,8 +577,9 @@ class FullScreenApp(tk.Tk):
 
     def create_object_image(self):
         self.bar_contrast.set(1.0)
-        self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram = self.histogram_container, canvas_histogram = self.histogram_canvas)
-        
+        #self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram = self.histogram_container, canvas_histogram = self.histogram_canvas)
+        self.image_original = ImageOriginal(app = self, label_original = self.original_img_label)
+    
     def reset_project(self):
         """!
         @brief Resets all variables , photos and histogram
