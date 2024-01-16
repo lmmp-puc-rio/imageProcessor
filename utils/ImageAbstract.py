@@ -1,9 +1,5 @@
 from abc import ABC, abstractmethod
 
-#to create widget in app
-import tkinter as tk
-from tkinter.filedialog import askopenfilename
-
 class ImageAbstract(ABC):
     def __init__(self, app, filetypes, image, original_size, histogram_data, new_width, new_heigth):
         self.app = app
