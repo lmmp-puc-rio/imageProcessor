@@ -1,20 +1,66 @@
 from utils.imageOriginal import ImageOriginal
-from utils import resize_image
+from utils.resize_image import resize_image
 from PIL import Image
+from PIL import ImageTk
+import tkinter as tk
 
 #to change the edited Image
 from PIL import ImageEnhance
 
 class ImageEdited(ImageOriginal):
 
-    def __init__(self, app, label):
+    def __init__(self, app, label, image):
         super().__init__(app, label)
-        #self.app = app
-        #self.label_edited = label
         self.contrast_value = None
         self.threshold_value = None
         self.blur_value = None
-        self.image_edited = None
+        self.image = image
+        self.image_tk = None
+        self.new_width = None
+        self.new_height = None
+
+
+    def upload_show_image(self):
+        self.display_image_in_label(self.image, self.label)
+        self.show_image_in_label(self.image_tk)
+    
+    def display_image_in_label(self, image, label):
+        
+        #Remove existing canvas in the screen
+        if hasattr(self.app, "edited_canvas"):
+            # Destroy the previous canvas
+            self.app.edited_canvas.destroy()
+
+        self.new_width = label.winfo_width()  
+        self.new_height = label.winfo_height()   
+
+        try:
+            img = resize_image(image, ((self.new_width), (self.new_height)))
+            self.image_tk = self.transform_in_tkimage(img)
+    
+        except Exception as e:
+            print(f"Edited Image does not resize correcly: \n{e}")
+
+    def show_image_in_label(self, image):
+
+        #Receives the tk PhotoImage and destroy to plot the new image in the correct canvas
+        self.image_w = image.width()
+        self.image_h = image.height()
+        #Calculate the coordinates to center the image in the canvas
+        self.x_center = (self.new_width - self.image_w) / 2
+        self.y_center = (self.new_height - self.image_h) / 2
+
+        # Clear any existing canvas and create a new one
+        if self.label :
+            if hasattr(self.app, "edited_canvas"):
+                # Destroy the previous canvas
+                self.app.edited_canvas.destroy()
+                
+            self.app.edited_canvas = tk.Canvas(self.label)
+            self.app.edited_canvas.config(borderwidth=0)
+            self.app.edited_canvas.pack()
+            self.app.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place edited_canvas inside the label
+            self.app.edited_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=image)
 
     def update_contrast(self, value):
         """!
@@ -28,22 +74,20 @@ class ImageEdited(ImageOriginal):
 
         @return: None
         """
-        # Apply the constrast value in the edited image
-        # This method needs to create a copy of the original image and resize it once again.
-        # If this doesn't happen, the image will be resized to its original size 
-        
-        image_copy = self.image.copy()
-        image_copy = resize_image(image_copy, ((self.new_width), (self.new_height)))
+
+        image_copy = resize_image(self.image, ((self.new_width), (self.new_height)))
         enhancer = ImageEnhance.Contrast(image_copy)
-        self.image_edited = enhancer.enhance(float(value))
-        self.image_edited_tk = enhancer.enhance(float(value))
+        self.image = enhancer.enhance(float(value))
+        self.image_tk = enhancer.enhance(float(value))
   
         #retun the edited_image_tk to Tk format the edited_image stays in PIL.Image format
-        self.image_edited_tk = self.transform_in_tkimage(self.image_edited_tk)
+        self.image_tk = self.transform_in_tkimage(self.image_tk)
 
         # the image without the blur. that way the program not will put blur on blur in the edited img.
-        self.image_without_blur = self.image_edited
+        self.image_without_blur = self.image
 
         # Update image displayed and histogram
-        self.show_image(self.app, self.label_edited, self.image_edited_tk)
-        self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
+        self.show_image(self.image_tk)
+        
+        #self.create_histogram(self.image, self.canvas_histogram ,self.label_histogram)
+    
