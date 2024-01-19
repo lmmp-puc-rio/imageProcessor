@@ -3,14 +3,16 @@ from tkinter import ttk, simpledialog
 import tkinter.font as TkFont
 import matplotlib.pyplot as plt
 from PIL import Image, ImageTk
+from utils import imageEdited
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
 from utils.name_folder import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 
-from utils.CustomImage import CustomImage
-from utils.ImageOriginal import ImageOriginal
+#from utils.CustomImage import CustomImage
+from utils.imageOriginal import ImageOriginal
+from utils.imageEdited import ImageEdited
 
 
 class FullScreenApp(tk.Tk):
@@ -418,9 +420,8 @@ class FullScreenApp(tk.Tk):
         @return self.update_contrast(self,photo, value)
         """
         self.contrast_value = self.value_scale.get()
-        # 
-        if type(self.image_original) is not type(None):
-            self.image_original.update_contrast(self.contrast_value)
+        if type(self.image_edited) is not type(None):
+            self.image_edited.update_contrast(self.contrast_value)
             
     #validate user input in blur value
     def validate_blur_value(self, event):
@@ -576,10 +577,12 @@ class FullScreenApp(tk.Tk):
         self.text_box_treshold.insert("1.0", value)
 
     def create_object_image(self):
-        self.bar_contrast.set(1.0)
-        #self.image_original = CustomImage(app = self, label_original = self.original_img_label,  label_edited =self.edited_img_label, label_histogram = self.histogram_container, canvas_histogram = self.histogram_canvas)
-        self.image_original = ImageOriginal(app = self, label_original = self.original_img_label)
-    
+        self.image_original = ImageOriginal(app= FullScreenApp, label=self.original_img_label)
+        self.image_original.upload_show_image()
+        self.image_edited = ImageEdited(app= FullScreenApp, label=self.edited_img_label, image=self.image_original.get_image())
+        self.image_edited.upload_show_image()
+        #self.bar_contrast.set(1.0)
+
     def reset_project(self):
         """!
         @brief Resets all variables , photos and histogram
