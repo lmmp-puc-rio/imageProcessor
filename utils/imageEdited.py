@@ -77,17 +77,16 @@ class ImageEdited(ImageOriginal):
 
         image_copy = resize_image(self.image, ((self.new_width), (self.new_height)))
         enhancer = ImageEnhance.Contrast(image_copy)
-        self.image = enhancer.enhance(float(value))
-        self.image_tk = enhancer.enhance(float(value))
+        image_copy = enhancer.enhance(float(value))
+        image_tk = enhancer.enhance(float(value))
   
         #retun the edited_image_tk to Tk format the edited_image stays in PIL.Image format
-        self.image_tk = self.transform_in_tkimage(self.image_tk)
+        self.image_tk = self.transform_in_tkimage(image_tk)
 
         # the image without the blur. that way the program not will put blur on blur in the edited img.
-        self.image_without_blur = self.image
+        self.image_without_blur = image_copy
 
         # Update image displayed and histogram
-        self.show_image(self.image_tk)
-        
+        self.show_image_in_label(self.image_tk)
         #self.create_histogram(self.image, self.canvas_histogram ,self.label_histogram)
     

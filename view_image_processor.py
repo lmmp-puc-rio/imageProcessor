@@ -420,8 +420,7 @@ class FullScreenApp(tk.Tk):
         @return self.update_contrast(self,photo, value)
         """
         self.contrast_value = self.value_scale.get()
-        if type(self.image_edited) is not type(None):
-            self.image_edited.update_contrast(self.contrast_value)
+        self.image_edited.update_contrast(self.contrast_value)
             
     #validate user input in blur value
     def validate_blur_value(self, event):
@@ -581,7 +580,7 @@ class FullScreenApp(tk.Tk):
         self.image_original.upload_show_image()
         self.image_edited = ImageEdited(app= FullScreenApp, label=self.edited_img_label, image=self.image_original.get_image())
         self.image_edited.upload_show_image()
-        #self.bar_contrast.set(1.0)
+        self.bar_contrast.set(1.0)
 
     def reset_project(self):
         """!
