@@ -1,8 +1,10 @@
 from utils.imageOriginal import ImageOriginal
 from utils.resize_image import resize_image
 from PIL import Image
-from PIL import ImageTk
 import tkinter as tk
+
+#plot histogram
+import matplotlib.pyplot as plt
 
 #to change the edited Image
 from PIL import ImageEnhance
@@ -62,14 +64,14 @@ class ImageEdited(ImageOriginal):
             self.app.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place edited_canvas inside the label
             self.app.edited_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=image)
 
-    def update_contrast(self, value):
+    def update_contrast(self, contrast_value):
         """!
-        @brief Modify the image based on the contrast value.
+        @brief Modify the image based on the contrast contrast_value.
 
-        @param The function uses attributes: `value = string`.
+        @param The function uses attributes: `contrast_value = string`.
 
         @note In this method, the edited image is modified with each interaction with the contrast slider.
-          So, the method takes the contrast value as a parameter and applies the edit to the image.
+          So, the method takes the contrast contrast_value as a parameter and applies the edit to the image.
            After that, both the image and the histogram are updated.
 
         @return: None
@@ -77,9 +79,9 @@ class ImageEdited(ImageOriginal):
 
         image_copy = resize_image(self.image, ((self.new_width), (self.new_height)))
         enhancer = ImageEnhance.Contrast(image_copy)
-        image_copy = enhancer.enhance(float(value))
-        image_tk = enhancer.enhance(float(value))
-  
+        self.image = enhancer.enhance(float(contrast_value))
+        image_tk = enhancer.enhance(float(contrast_value))
+        
         #retun the edited_image_tk to Tk format the edited_image stays in PIL.Image format
         self.image_tk = self.transform_in_tkimage(image_tk)
 
@@ -88,5 +90,4 @@ class ImageEdited(ImageOriginal):
 
         # Update image displayed and histogram
         self.show_image_in_label(self.image_tk)
-        #self.create_histogram(self.image, self.canvas_histogram ,self.label_histogram)
     

@@ -32,7 +32,6 @@ class ImageOriginal ():
 
         if not self.file_path:
             self.file_path = askopenfilename(title="Select Image File", filetypes=self.filetypes)
-            print(f"OG image has been uploaded.")
 
         try:
             image = Image.open(self.file_path)
