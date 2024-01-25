@@ -14,6 +14,7 @@ import os
 from utils.imageOriginal import ImageOriginal
 from utils.imageEdited import ImageEdited
 
+from utils.histogram import Histogram
 
 class FullScreenApp(tk.Tk):
 
@@ -167,6 +168,8 @@ class FullScreenApp(tk.Tk):
         self.histogram_container.patch.set_facecolor(self.sec_color)
         self.histogram_canvas = FigureCanvasTkAgg(self.histogram_container, master=self.histogram_inner_frame)
         self.histogram_canvas.get_tk_widget().pack( fill='both')
+        self.histogram = Histogram(self.histogram_canvas, self.histogram_container)
+
     
         #Placing widget in main frame
         self.original_txt.grid(row=0, column=0, sticky='WENS')
@@ -421,6 +424,7 @@ class FullScreenApp(tk.Tk):
         """
         self.contrast_value = self.value_scale.get()
         self.image_edited.update_contrast(self.contrast_value)
+        self.draw_histogram_in_label(self.image_edited)
             
     #validate user input in blur value
     def validate_blur_value(self, event):
@@ -527,9 +531,8 @@ class FullScreenApp(tk.Tk):
 
     def apply_blur(self):
         if self.blur_value_textbox:
-            #self.apply_blur()
             self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
-            self.image_original.apply_blur(self.blur_value)
+            self.image_edited.apply_blur(self.blur_value)
         else:
             pass
 
@@ -580,7 +583,14 @@ class FullScreenApp(tk.Tk):
         self.image_original.upload_show_image()
         self.image_edited = ImageEdited(app= FullScreenApp, label=self.edited_img_label, image=self.image_original.get_image())
         self.image_edited.upload_show_image()
+        #self.histogram.set_image(self.image_edited.get_image())
+        #self.histogram.draw_histogram()
+        self.draw_histogram_in_label(self.image_edited)
         self.bar_contrast.set(1.0)
+    
+    def draw_histogram_in_label(self, image):
+        self.histogram.set_image(image)
+        self.histogram.draw_histogram()
 
     def reset_project(self):
         """!
