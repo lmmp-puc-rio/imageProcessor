@@ -7,6 +7,8 @@ import tkinter as tk
 import matplotlib.pyplot as plt
 
 #to change the edited Image
+import numpy as np
+import cv2
 from PIL import ImageEnhance
 
 class ImageEdited(ImageOriginal):
@@ -92,3 +94,33 @@ class ImageEdited(ImageOriginal):
     
     def get_image(self):
         return self.image_edited
+    
+    def apply_blur(self, blur_value):
+        """!
+        @brief Apply the blur to the edited image.
+
+        @param The function uses attributes: `blur_value = Int`.
+
+        @note In this method, the blur is applied to a temporary variable, 'self.image_without_blur',
+          which is created during image upload and updated during the contrast update. 
+          This image is used to avoid applying blur on top of blur. At the end of the method, 'image_edited' is assigned this blurred image
+        
+        @return: None
+        """        
+        self.blur_value = blur_value
+        # Convert the PIL image to a NUMPY array
+        image_array = np.array(self.image_without_blur)   
+        image_array = image_array.astype(np.uint8)
+
+
+        # Apply Gaussian blur using OpenCV
+        blurred_image = cv2.GaussianBlur(image_array, (0, 0), self.blur_value)
+
+        # Convert the NUMPY array back to a PIL image
+        blurred_image = Image.fromarray(blurred_image)
+
+        #change the edited image and show the tk one
+        self.image_edited = blurred_image
+        self.image_edited_tk = self.transform_in_tkimage(blurred_image)
+        self.show_image_in_label(self.image_edited_tk)
+        #self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)

@@ -528,13 +528,24 @@ class FullScreenApp(tk.Tk):
         else:
             self.blur_value_textbox.config(state='disabled')
             self.btn_run_blur['state'] = "disable"
+            self.deactivate_blur()
 
     def apply_blur(self):
         if self.blur_value_textbox:
             self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
-            self.image_edited.apply_blur(self.blur_value)
+            try:
+                self.image_edited.apply_blur(self.blur_value)                    
+                self.draw_histogram_in_label(self.image_edited)
+            except Exception as e:
+                print(f"Blur application error. \n {e}")
         else:
             pass
+
+    def deactivate_blur(self):
+        replace_image = self.image_edited.image_without_blur
+        self.image_edited.image = replace_image
+        self.image_edited.blur_value = 0
+        self.image_edited.upload_show_image()
 
     def on_treshold_btn_click(self):
         """!
