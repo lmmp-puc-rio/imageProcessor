@@ -17,9 +17,7 @@ class ImageEdited(ImageOriginal):
         self.threshold_value = None
         self.blur_value = None
         self.image = image
-        self.image_tk = None
-        self.new_width = None
-        self.new_height = None
+        self.image_edited = None
 
 
     def upload_show_image(self):
@@ -77,9 +75,10 @@ class ImageEdited(ImageOriginal):
         @return: None
         """
 
+        image_copy = self.image.copy()
         image_copy = resize_image(self.image, ((self.new_width), (self.new_height)))
         enhancer = ImageEnhance.Contrast(image_copy)
-        self.image = enhancer.enhance(float(contrast_value))
+        self.image_edited = enhancer.enhance(float(contrast_value))
         image_tk = enhancer.enhance(float(contrast_value))
         
         #retun the edited_image_tk to Tk format the edited_image stays in PIL.Image format
@@ -91,3 +90,5 @@ class ImageEdited(ImageOriginal):
         # Update image displayed and histogram
         self.show_image_in_label(self.image_tk)
     
+    def get_image(self):
+        return self.image_edited
