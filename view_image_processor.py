@@ -3,7 +3,7 @@ from tkinter import ttk, simpledialog
 import tkinter.font as TkFont
 import matplotlib.pyplot as plt
 from PIL import Image, ImageTk
-from utils import imageEdited
+from utils.binarization import Binarization
 from utils.resize_image import resize_image, resize_image_predifined
 from utils.nav_utils import *
 from utils.name_folder import *
@@ -81,6 +81,7 @@ class FullScreenApp(tk.Tk):
         self.original_edited_height = None
         self.image_without_blur = None
         self.num_of_bins = int(256/2)
+        self.binarizer = None
 
         ###############
         ## top frame ##
@@ -562,15 +563,17 @@ class FullScreenApp(tk.Tk):
         selected_item = self.combobox_models.get()
         self.text_box_alert_hidden.grid()
         self.blur_text_box_alert_hidden.grid()
+        self.binarizer = Binarization()
+        image = self.image_edited.get_image()
 
         if selected_item == self.list_treshold_model[0]:
-            if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
-                manual_threshold_value = int(self.text_box_treshold.get("1.0", "end"))
-                self.image_original.apply_model_otsu_treashold(manual_threshold_value)
-            else: 
-                self.image_original.apply_model_otsu_treashold()
-                model_value = self.image_original.get_model_value()
-                self.insert_model_value_in_box(model_value)
+            try:
+                result_image = self.binarizer.otsu(image)
+            except Exception as e:
+                print(f"Error in process the model. \n{e}")
+            
+            self.image_edited.set_image_edited(result_image)  
+            self.image_edited.show_image_in_label()
 
         elif selected_item == self.list_treshold_model[1]:
             if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
@@ -581,6 +584,13 @@ class FullScreenApp(tk.Tk):
                 model_value = self.image_original.get_model_value()
                 self.insert_model_value_in_box(model_value)
 
+    def manual_value_verification(self):
+        if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
+            #manual_threshold_value = int(self.text_box_treshold.get("1.0", "end"))
+            manual_threshold_value = 250
+            self.binarizer.set_model_value(manual_threshold_value)
+            #self.image_original.apply_model_otsu_treashold(manual_threshold_value)
+    
     def update_image_edited(self, value):
         self.image_original.update_image(value)
 
