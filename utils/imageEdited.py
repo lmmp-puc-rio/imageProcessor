@@ -20,13 +20,14 @@ class ImageEdited(ImageOriginal):
         self.blur_value = None
         self.image = image
         self.image_edited = None
+        self.image_edited_tk = None
         self.photo_binary = None
 
 
     def upload_show_image(self):
         #calls the sequence of methods to upload and display the image on the screen
         self.display_image_in_label(self.label)
-        self.show_image_in_label()
+        self.show_image_in_label(self.image)
     
     def display_image_in_label(self, label):
         
@@ -39,18 +40,21 @@ class ImageEdited(ImageOriginal):
         self.new_height = label.winfo_height()   
 
         
-    def show_image_in_label(self):
+    def show_image_in_label(self, image):
         #Show the image in the referenced label
         try:
-            image = resize_image(self.image_edited, ((self.new_width), (self.new_height)))
-            self.image_tk = self.transform_in_tkimage(image)
-    
+            self.image_edited = resize_image(image, ((self.new_width), (self.new_height)))   
         except Exception as e:
             print(f"Edited Image does not resize correcly: \n{e}")
+        try:
+            self.image_edited_tk= self.transform_in_tkimage(image)
+        except Exception as e:
+            print(f"Error in the transformation to a tk Image. \n{e}")
+                         
 
         #Receives the tk PhotoImage and destroy to plot the new image in the correct canvas
-        self.image_w = self.image_tk.width()
-        self.image_h = self.image_tk.height()
+        self.image_w = self.image_edited_tk.width()
+        self.image_h = self.image_edited_tk.height()
         #Calculate the coordinates to center the image in the canvas
         self.x_center = (self.new_width - self.image_w) / 2
         self.y_center = (self.new_height - self.image_h) / 2
@@ -65,7 +69,7 @@ class ImageEdited(ImageOriginal):
             self.app.edited_canvas.config(borderwidth=0)
             self.app.edited_canvas.pack()
             self.app.edited_canvas.place(relwidth=1.0, relheight=1.0)  # Place edited_canvas inside the label
-            self.app.edited_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=self.image_tk)
+            self.app.edited_canvas.create_image(self.x_center, self.y_center, anchor=tk.NW, image=self.image_edited_tk)
 
     def update_contrast(self, contrast_value):
         """!
@@ -84,16 +88,12 @@ class ImageEdited(ImageOriginal):
         image_copy = resize_image(self.image, ((self.new_width), (self.new_height)))
         enhancer = ImageEnhance.Contrast(image_copy)
         self.image_edited = enhancer.enhance(float(contrast_value))
-        self.image_tk = enhancer.enhance(float(contrast_value))
-        
-        #retun the edited_image_tk to Tk format the edited_image stays in PIL.Image format
-        #self.image_tk = self.transform_in_tkimage(image_tk)
 
         # the image without the blur. that way the program not will put blur on blur in the edited img.
-        self.image_without_blur = image_copy
+        self.image_without_blur = enhancer.enhance(float(contrast_value))
 
         # Update image displayed and histogram
-        self.show_image_in_label()
+        self.show_image_in_label(self.image_edited)
     
     def get_image(self):
         return self.image_edited
@@ -129,5 +129,5 @@ class ImageEdited(ImageOriginal):
         #change the edited image and show the tk one
         self.image_edited = blurred_image
         self.image_edited_tk = self.transform_in_tkimage(blurred_image)
-        self.show_image_in_label()
+        self.show_image_in_label(self.image_edited_tk)
         #self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
