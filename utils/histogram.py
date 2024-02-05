@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.ticker as mtick
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+from PIL import Image
 
 class Histogram():
     def __init__(self, canvas, label):
@@ -39,4 +40,10 @@ class Histogram():
     
 
     def set_image(self, image):
-        self.image = image.get_image()
+        if not isinstance(image, Image.Image):
+            # If it is not an instance of PIL's Image, perform the search on the other object
+            print("Estou no if")
+            self.image = image.get_image()
+        else:
+            self.image = image
+            print("Estou no else")

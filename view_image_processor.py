@@ -567,13 +567,15 @@ class FullScreenApp(tk.Tk):
         image = self.image_edited.get_image()
 
         if selected_item == self.list_treshold_model[0]:
+            self.manual_value_verification()
             try:
                 result_image = self.binarizer.otsu(image)
             except Exception as e:
                 print(f"Error in process the model. \n{e}")
             
             self.image_edited.set_image_edited(result_image)  
-            self.image_edited.show_image_in_label()
+            self.image_edited.show_image_in_label(result_image)
+            self.draw_histogram_in_label(result_image)
 
         elif selected_item == self.list_treshold_model[1]:
             if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
@@ -586,10 +588,11 @@ class FullScreenApp(tk.Tk):
 
     def manual_value_verification(self):
         if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
-            #manual_threshold_value = int(self.text_box_treshold.get("1.0", "end"))
-            manual_threshold_value = 250
+            manual_threshold_value = int(self.text_box_treshold.get("1.0", "end"))
             self.binarizer.set_model_value(manual_threshold_value)
             #self.image_original.apply_model_otsu_treashold(manual_threshold_value)
+        else:
+            pass
     
     def update_image_edited(self, value):
         self.image_original.update_image(value)
@@ -604,8 +607,6 @@ class FullScreenApp(tk.Tk):
         self.image_original.upload_show_image()
         self.image_edited = ImageEdited(app= FullScreenApp, label=self.edited_img_label, image=self.image_original.get_image())
         self.image_edited.upload_show_image()
-        #self.histogram.set_image(self.image_edited.get_image())
-        #self.histogram.draw_histogram()
         self.draw_histogram_in_label(self.image_edited)
         self.bar_contrast.set(1.0)
     
