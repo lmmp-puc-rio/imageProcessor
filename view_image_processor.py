@@ -70,6 +70,7 @@ class FullScreenApp(tk.Tk):
         #Global variables
         self.contrast_value = 1.0
         self.threshold_value = None
+        self.histogram = None
         self.histogram_data = None  
         self.original_size = None 
         self.blur_value = 0
@@ -82,7 +83,7 @@ class FullScreenApp(tk.Tk):
         self.image_without_blur = None
         self.num_of_bins = int(256/2)
         self.binarizer = None
-
+        
         ###############
         ## top frame ##
         ###############
@@ -169,9 +170,9 @@ class FullScreenApp(tk.Tk):
         self.histogram_container.patch.set_facecolor(self.sec_color)
         self.histogram_canvas = FigureCanvasTkAgg(self.histogram_container, master=self.histogram_inner_frame)
         self.histogram_canvas.get_tk_widget().pack( fill='both')
-        self.histogram = Histogram(self.histogram_canvas, self.histogram_container)
+        #self.histogram = Histogram(self.histogram_canvas, self.histogram_container)
+        
 
-    
         #Placing widget in main frame
         self.original_txt.grid(row=0, column=0, sticky='WENS')
         self.edited_txt.grid(row=0, column=1, sticky='WENS')
@@ -425,7 +426,7 @@ class FullScreenApp(tk.Tk):
         """
         self.contrast_value = self.value_scale.get()
         self.image_edited.update_contrast(self.contrast_value)
-        self.draw_histogram_in_label(self.image_edited)
+        self.draw_histogram_in_label(self.image_edited, self.histogram_canvas, self.histogram_container)
             
     #validate user input in blur value
     def validate_blur_value(self, event):
@@ -536,7 +537,7 @@ class FullScreenApp(tk.Tk):
             self.blur_value = int(self.blur_value_textbox.get("1.0","2.0"))
             try:
                 self.image_edited.apply_blur(self.blur_value)                    
-                self.draw_histogram_in_label(self.image_edited)
+                self.draw_histogram_in_label(self.image_edited, self.histogram_canvas, self.histogram_container)
             except Exception as e:
                 print(f"Blur application error. \n {e}")
         else:
@@ -575,7 +576,8 @@ class FullScreenApp(tk.Tk):
             
             self.image_edited.set_image_edited(result_image)  
             self.image_edited.show_image_in_label(result_image)
-            self.draw_histogram_in_label(result_image)
+            self.draw_histogram_in_label(result_image, self.histogram_canvas, self.histogram_container)
+            self.histogram.draw_red_line_in_histogram(self.binarizer.get_model_value())
 
         elif selected_item == self.list_treshold_model[1]:
             if self.radio_selected.get() == "manual" and self.text_box_treshold.get("1.0", "end") != (f"\n"):
@@ -607,11 +609,20 @@ class FullScreenApp(tk.Tk):
         self.image_original.upload_show_image()
         self.image_edited = ImageEdited(app= FullScreenApp, label=self.edited_img_label, image=self.image_original.get_image())
         self.image_edited.upload_show_image()
-        self.draw_histogram_in_label(self.image_edited)
+
+        # create the histogram and ajust the contrast bar to the default
+        #self.histogram = self.image_edited.create_histogram(self.histogram_canvas, self.histogram_container)
+        self.draw_histogram_in_label(self.image_edited, self.histogram_canvas, self.histogram_container)
         self.bar_contrast.set(1.0)
     
-    def draw_histogram_in_label(self, image):
-        self.histogram.set_image(image)
+    def draw_histogram_in_label(self, image, histogram_canvas, histogram_container):
+        if self.histogram == None:
+            self.histogram = self.image_edited.create_histogram(histogram_canvas, histogram_container)
+        else:
+            self.histogram.set_image(image)   
+
+        #self.draw_histogram_in_label(self.image_edited)
+        #self.histogram.set_image(image)
         self.histogram.draw_histogram()
 
     def reset_project(self):
