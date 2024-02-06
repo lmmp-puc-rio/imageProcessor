@@ -42,8 +42,23 @@ class Histogram():
     def set_image(self, image):
         if not isinstance(image, Image.Image):
             # If it is not an instance of PIL's Image, perform the search on the other object
-            print("Estou no if")
             self.image = image.get_image()
         else:
             self.image = image
-            print("Estou no else")
+    
+    def draw_red_line_in_histogram(self, value):
+        """!
+        @brief Draw a red line in the histogram
+
+        @param The function uses attributes: None.
+        
+        @note This method is used to draw a red line on the histogram representing the model's value
+    
+        @return: None
+        """
+        rcParams['font.weight'] = 'bold' 
+        #apply the red line in the histogram
+        
+        self.hist.axvline(value, color='r', ls='--')
+        self.hist.legend(['Threshold value'], fontsize = 8, frameon=False)
+        self.canvas.draw()
