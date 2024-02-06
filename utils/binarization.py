@@ -9,6 +9,9 @@ class Binarization():
     def set_model_value(self, value):
         self.model_value = value
 
+    def get_model_value(self):
+        return self.model_value
+    
     def otsu(self,image):
         """!
         @brief Apply the Otsu Treashold model.
@@ -30,12 +33,12 @@ class Binarization():
         #Check if the manual value was used and set it
         # to the model's value if it wasn't used. The automatic value will be used otherwise.
         if manual_value != None:
-            self.threshold_value = manual_value
+            self.model_value = manual_value
         else:
-            self.threshold_value = threshold_otsu(pixels)
+            self.model_value = threshold_otsu(pixels)
 
         #apply the model
-        photo_binary = image_gray.point(lambda x: 0 if x < self.threshold_value else 255)
+        photo_binary = image_gray.point(lambda x: 0 if x < self.model_value else 255)
 
         #change the edited image and show the tk one
         return photo_binary

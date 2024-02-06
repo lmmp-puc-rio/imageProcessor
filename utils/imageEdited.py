@@ -5,6 +5,7 @@ import tkinter as tk
 
 #plot histogram
 import matplotlib.pyplot as plt
+from utils.histogram import Histogram
 
 #to change the edited Image
 import numpy as np
@@ -22,6 +23,7 @@ class ImageEdited(ImageOriginal):
         self.image_edited = None
         self.image_edited_tk = None
         self.photo_binary = None
+        self.histogram = None
 
 
     def upload_show_image(self):
@@ -38,8 +40,7 @@ class ImageEdited(ImageOriginal):
 
         self.new_width = label.winfo_width()  
         self.new_height = label.winfo_height()   
-
-        
+     
     def show_image_in_label(self, image):
         #Show the image in the referenced label
         try:
@@ -131,3 +132,9 @@ class ImageEdited(ImageOriginal):
         self.image_edited_tk = self.transform_in_tkimage(blurred_image)
         self.show_image_in_label(self.image_edited_tk)
         #self.create_histogram(self.image_edited, self.canvas_histogram ,self.label_histogram)
+
+    def create_histogram(self, histogram_canvas, histogram_label):
+        self.histogram = Histogram(histogram_canvas, histogram_label)
+        self.histogram.set_image(self.image)
+        return self.histogram
+        
